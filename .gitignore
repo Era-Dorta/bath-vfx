@@ -27,8 +27,18 @@
 *.out
 *.app
 
+# VS
 *.aps
 *.rc
 *.vcxproj
 *.filters
 x64/
+
+# Latex
+*.aux
+*.log
+*.blg
+*.dvi
+*.synctex.gz
+*.bbl
+*~
