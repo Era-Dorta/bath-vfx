@@ -128,13 +128,13 @@ for frame = 2:numImgs
 end
 
 %% Play movie
-figure(3); imshow(im1);
-movie(Mov,3,30);
+figure(2); imshow(im1);
+movie(Mov,1,30);
 
 %% Delaunay triangulation
-for frame = 1:numImgs
-    TRI = delaunay(fStore(1,:,frame),fStore(2,:,frame));
-    figure(4);
+TRI = delaunay(fStore(1,:,1),fStore(2,:,1));
+for frame = 2:numImgs
+    figure(3);
     triplot(TRI, fStore(1,:,frame), fStore(2,:,frame))
     axis([1 640 1 480]); set(gca,'YDir','reverse');
     title(['frame: ', num2str(frame)]);
@@ -142,13 +142,13 @@ for frame = 1:numImgs
 end
 
 %% Play movie
-figure(5);
+figure(4);
 axis([1 640 1 480]); set(gca,'YDir','reverse');
 movie(Mov2,3,60);
 
 %% Test
 for frame = 1:numImgs
-    figure(6);
+    figure(5);
     imshow(imArray{frame}); hold on;
     triplot(TRI, fStore(1,:,frame), fStore(2,:,frame))
     title(['frame: ', num2str(frame)]);
@@ -156,5 +156,5 @@ for frame = 1:numImgs
 end
 
 %% Play movie
-figure(7); imshow(im1);
+figure(6); imshow(im1);
 movie(Mov3,3,30);
