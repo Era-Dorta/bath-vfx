@@ -2,14 +2,18 @@
 clear; close all;
 
 %% Read in image sequence
-folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard1\images_BW';
+if isunix
+    folder = '~/workspaces/matlab/vfx/Data/Richard1/images_BW/';
+else
+    folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard1\images_BW';
+end
 imgType = '.png';
-numImgs = 500;
-imArray = ReadImgs(folder, imgType);
+numImgs = 50;
+imArray = ReadImgs(folder, imgType, numImgs);
 
 %% SIFT
-im1 = imArray{1}; 
-im1_sift = single(im1); 
+im1 = imArray{1};
+im1_sift = single(im1);
 
 % Select region of interest
 disp('Select region of interest');
@@ -18,9 +22,9 @@ im1_sift = im1_sift.*M;
 
 % Detect features
 im1 = imArray{1};
-[f,d] = vl_sift(im1_sift, 'Octaves', 3, 'Levels', 5, 'FirstOctave', -1,... 
-                'PeakThresh', 6, 'EdgeThresh', 6, 'NormThresh', 1, ...
-                'Magnif', 1, 'WindowSize', 10);
+[f,d] = vl_sift(im1_sift, 'Octaves', 3, 'Levels', 5, 'FirstOctave', -1,...
+    'PeakThresh', 6, 'EdgeThresh', 6, 'NormThresh', 1, ...
+    'Magnif', 1, 'WindowSize', 10);
 
 % Plot features
 figure(1); hold on;
@@ -34,46 +38,38 @@ fStore(:,:,1) = f(1:2,:);
 Mov(1) = getframe;
 
 %% Add points manually
-prompt = 'Do you want to add more points? y/n: ';
-str = input(prompt,'s');
-if str == 'y'
-    addPoint = true;
-    figure(1); hold on;
-    i = numFeatures + 1;
-    while(addPoint == true)
-        [fStore(1,i,1),fStore(2,i,1)] = ginput(1);  
-        plot(fStore(1,i,1),fStore(2,i,1),'r*');
-        i = i+1;
-        prompt = 'Do you want to add another point? y/n: ';
-        str = input(prompt,'s');
-        if str == 'n'
-            addPoint = false;
-        end
+disp('Adding points, right click to exit');
+addPoint = true;
+figure(1); hold on;
+i = numFeatures + 1;
+while(addPoint == true)
+    [fStore(1,i,1), fStore(2,i,1), button] = ginput(1);
+    plot(fStore(1,i,1),fStore(2,i,1),'r*');
+    i = i+1;
+    if button ~= 1
+        addPoint = false;
     end
 end
 numFeatures = length(fStore);
+disp('Finished adding points');
 
 %% Remove points manually
-prompt = 'Do you want to remove points? y/n: ';
-str = input(prompt,'s');
-if str == 'y'
-    removePoint = true;
-    figure(1); hold on;
-    i = numFeatures;
-    while(removePoint == true)
-        [px,py] = ginput(1);
-        p = [px,py];
-        k = dsearchn(fStore',p);
-        fStore(:,k) = [];
-        imshow(im1); plot(fStore(1,:),fStore(2,:),'r*');
-        prompt = 'Do you want to remove another point? y/n: ';
-        str = input(prompt,'s');
-        if str == 'n'
-            removePoint = false;
-        end
+disp('Removing points, right click to exit');
+removePoint = true;
+figure(1); hold on;
+i = numFeatures;
+while(removePoint == true)
+    [px, py, button] = ginput(1);
+    p = [px,py];
+    k = dsearchn(fStore',p);
+    fStore(:,k) = [];
+    imshow(im1); plot(fStore(1,:),fStore(2,:),'r*');
+    if button ~= 1
+        removePoint = false;
     end
 end
 numFeatures = length(fStore);
+disp('Finished removing points');
 
 %% Optical flow
 % C.Lui
@@ -90,13 +86,13 @@ numFeatures = length(fStore);
 % nSORIterations = 30;
 % para = [alpha,ratio,minWidth,nOuterFPIterations,...
 %         nInnerFPIterations,nSORIterations];
-% 
+%
 % vx = zeros(size(im1_sift));
 % vy = vx;
 % for i = 1:(numImgs-1)
 %     disp(i);
 %     [vx(:,:,i),vy(:,:,i)] = Coarse2FineTwoFrames(imArray{i},imArray{i+1},para);
-%     % flow(:,:,1) = vx; flow(:,:,2) = vy; 
+%     % flow(:,:,1) = vx; flow(:,:,2) = vy;
 % end
 
 %% Load optical flow
@@ -115,7 +111,7 @@ for frame = 2:numImgs
         fStore(2,j,frame) = fStore(2,j,frame-1) + vy(idy,idx,frame-1);
     end
     figure(2);
-    imshow(imArray{frame}); hold on; 
+    imshow(imArray{frame}); hold on;
     plot(fStore(1,:,frame),fStore(2,:,frame),'r*');
     title(['frame: ', num2str(frame)]);
     Mov(frame) = getframe;
@@ -136,7 +132,7 @@ for frame = 1:numImgs
 end
 
 %% Play movie
-figure(5); 
+figure(5);
 axis([1 640 1 480]); set(gca,'YDir','reverse');
 movie(Mov2,3,60);
 
