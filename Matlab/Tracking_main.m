@@ -1,5 +1,5 @@
 %% Tracking_main.m
-clear; close all;
+clearvars -except vx vy; close all;
 
 %% Read in image sequence
 if isunix
@@ -95,17 +95,19 @@ disp('Finished removing points');
 % end
 
 %% Load optical flow
-disp('Loading vx and vy');
-load('vx_500.mat');
-load('vy_500.mat');
-vx = vx_500;
-vy = vy_500;
-clear vx_500 vy_500;
+if ~(exist('vx', 'var') && exist('vy', 'var'))
+    disp('Loading vx and vy');
+    load('vx_500.mat');
+    load('vy_500.mat');
+    vx = vx_500;
+    vy = vy_500;
+    clear vx_500 vy_500;
+end
 
 %% Track features
 disp('Tracking features');
 newImg = imArray{1};
-for j = 1:numFeatures        
+for j = 1:numFeatures
     newImg(round(fStore(2,j,1)) - 2:2 + round(fStore(2,j,1)), ...
         round(fStore(1,j,1)) - 2:round(fStore(1,j,1)) + 2 ) = 255;
 end
