@@ -32,7 +32,7 @@ vl_plotframe(f(:,:));
 plot(f(1,:),f(2,:),'r*');
 
 % Store features
-numFeatures = length(f);
+numFeatures = size(f,2);
 clear fStore;
 fStore(:,:,1) = f(1:2,:);
 
@@ -49,7 +49,7 @@ while(true)
     plot(fStore(1,i,1),fStore(2,i,1),'r*');
     i = i+1;
 end
-numFeatures = length(fStore);
+numFeatures = size(fStore,2);
 disp('Finished adding points');
 
 %% Remove points manually
@@ -67,7 +67,7 @@ while(true)
     fStore(:,k) = [];
     imshow(im1); plot(fStore(1,:),fStore(2,:),'r*');
 end
-numFeatures = length(fStore);
+numFeatures = size(fStore,2);
 disp('Finished removing points');
 
 %% Optical flow
@@ -113,19 +113,19 @@ for j = 1:numFeatures
 end
 
 Mov(1) = im2frame(newImg, gray(256));
-for frame = 2:numImgs
-    newImg = imArray{frame};
-    for j = 1:numFeatures
-        idx = round(fStore(1,j,frame-1));
-        idy = round(fStore(2,j,frame-1));
-        fStore(1,j,frame) = fStore(1,j,frame-1) + vx(idy,idx,frame-1);
-        fStore(2,j,frame) = fStore(2,j,frame-1) + vy(idy,idx,frame-1);
-        
-        newImg(round(fStore(2,j,frame)) - 2:2 + round(fStore(2,j,frame)), ...
-            round(fStore(1,j,frame)) - 2:round(fStore(1,j,frame)) + 2 ) = 255;
-    end
-    Mov(frame) = im2frame(newImg, gray(256));
-end
+% for frame = 2:numImgs
+%     newImg = imArray{frame};
+%     for j = 1:numFeatures
+%         idx = round(fStore(1,j,frame-1));
+%         idy = round(fStore(2,j,frame-1));
+%         fStore(1,j,frame) = fStore(1,j,frame-1) + vx(idy,idx,frame-1);
+%         fStore(2,j,frame) = fStore(2,j,frame-1) + vy(idy,idx,frame-1);
+%         
+%         newImg(round(fStore(2,j,frame)) - 2:2 + round(fStore(2,j,frame)), ...
+%             round(fStore(1,j,frame)) - 2:round(fStore(1,j,frame)) + 2 ) = 255;
+%     end
+%     Mov(frame) = im2frame(newImg, gray(256));
+% end
 
 %% Play movie
 figure(2); imshow(im1);
@@ -133,28 +133,26 @@ movie(Mov,1,30);
 
 %% Delaunay triangulation
 TRI = delaunay(fStore(1,:,1),fStore(2,:,1));
-for frame = 2:numImgs
+for frame = 1:numImgs
     figure(3);
     triplot(TRI, fStore(1,:,frame), fStore(2,:,frame))
     axis([1 640 1 480]); set(gca,'YDir','reverse');
-    title(['frame: ', num2str(frame)]);
     Mov2(frame) = getframe;
 end
 
 %% Play movie
 figure(4);
 axis([1 640 1 480]); set(gca,'YDir','reverse');
-movie(Mov2,3,60);
+movie(Mov2,1,60);
 
 %% Test
 for frame = 1:numImgs
     figure(5);
     imshow(imArray{frame}); hold on;
     triplot(TRI, fStore(1,:,frame), fStore(2,:,frame))
-    title(['frame: ', num2str(frame)]);
     Mov3(frame) = getframe;
 end
 
 %% Play movie
 figure(6); imshow(im1);
-movie(Mov3,3,30);
+movie(Mov3,1,30);
