@@ -42,3 +42,12 @@ x64/
 *.synctex.gz
 *.bbl
 *~
+
+# Matlab
+optical_flow_cliu
+optical-flow_mblack
+rpca
+vlfeat-0.9.20
+*.mat
+*.asv
+PVA_main.m
