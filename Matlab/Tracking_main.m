@@ -8,7 +8,7 @@ else
     folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard1\images_BW';
 end
 imgType = '.png';
-numImgs = 50;
+numImgs = 500;
 imArray = ReadImgs(folder, imgType, numImgs);
 
 %% SIFT
@@ -35,20 +35,19 @@ plot(f(1,:),f(2,:),'r*');
 numFeatures = length(f);
 clear fStore;
 fStore(:,:,1) = f(1:2,:);
-Mov(1) = getframe;
 
 %% Add points manually
 disp('Adding points, right click to exit');
 addPoint = true;
 figure(1); hold on;
 i = numFeatures + 1;
-while(addPoint == true)
+while(true)
     [fStore(1,i,1), fStore(2,i,1), button] = ginput(1);
+    if button ~= 1
+        break;
+    end
     plot(fStore(1,i,1),fStore(2,i,1),'r*');
     i = i+1;
-    if button ~= 1
-        addPoint = false;
-    end
 end
 numFeatures = length(fStore);
 disp('Finished adding points');
@@ -58,15 +57,15 @@ disp('Removing points, right click to exit');
 removePoint = true;
 figure(1); hold on;
 i = numFeatures;
-while(removePoint == true)
+while(true)
     [px, py, button] = ginput(1);
+    if button ~= 1
+        break;
+    end
     p = [px,py];
     k = dsearchn(fStore',p);
     fStore(:,k) = [];
     imshow(im1); plot(fStore(1,:),fStore(2,:),'r*');
-    if button ~= 1
-        removePoint = false;
-    end
 end
 numFeatures = length(fStore);
 disp('Finished removing points');
@@ -96,6 +95,7 @@ disp('Finished removing points');
 % end
 
 %% Load optical flow
+disp('Loading vx and vy');
 load('vx_500.mat');
 load('vy_500.mat');
 vx = vx_500;
@@ -103,18 +103,26 @@ vy = vy_500;
 clear vx_500 vy_500;
 
 %% Track features
+disp('Tracking features');
+newImg = imArray{1};
+for j = 1:numFeatures        
+    newImg(round(fStore(2,j,1)) - 2:2 + round(fStore(2,j,1)), ...
+        round(fStore(1,j,1)) - 2:round(fStore(1,j,1)) + 2 ) = 255;
+end
+
+Mov(1) = im2frame(newImg, gray(256));
 for frame = 2:numImgs
+    newImg = imArray{frame};
     for j = 1:numFeatures
         idx = round(fStore(1,j,frame-1));
         idy = round(fStore(2,j,frame-1));
         fStore(1,j,frame) = fStore(1,j,frame-1) + vx(idy,idx,frame-1);
         fStore(2,j,frame) = fStore(2,j,frame-1) + vy(idy,idx,frame-1);
+        
+        newImg(round(fStore(2,j,frame)) - 2:2 + round(fStore(2,j,frame)), ...
+            round(fStore(1,j,frame)) - 2:round(fStore(1,j,frame)) + 2 ) = 255;
     end
-    figure(2);
-    imshow(imArray{frame}); hold on;
-    plot(fStore(1,:,frame),fStore(2,:,frame),'r*');
-    title(['frame: ', num2str(frame)]);
-    Mov(frame) = getframe;
+    Mov(frame) = im2frame(newImg, gray(256));
 end
 
 %% Play movie
