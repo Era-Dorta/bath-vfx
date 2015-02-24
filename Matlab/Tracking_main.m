@@ -160,33 +160,32 @@ movie(Mov2,1,60);
 
 
 %% Choose key poses
-
-
 key_frames = [1, 9, 42, 80, 100, 106, 137, 152, 191, 217, ...
     296, 339, 377, 388, 421];
-
-fStore_key = fStore(:,:,key_frames);
 
 neutral_pose = fStore(:,:,key_frames(1));
 neutral_pose = reshape(neutral_pose, 2*numFeatures, 1);
 
-%Display key frames.
+fStore_key = fStore(:,:,key_frames);
+B = reshape(fStore_key, 2*numFeatures, 15);
+fStore_key_disp =  bsxfun(@minus, B, neutral_pose);
+
+% Display key frames.
 % for i = key_frames
 %     figure;
 %     imshow(imArray{i});hold on;
 % end
-
-% Construct the basis.
-B = reshape(fStore_key, 2*numFeatures, 15);
 
 % CHOOSE new frame/pose.
 test_pose = 15;
 x = fStore(:,:,test_pose);
 x = reshape(x, 2*numFeatures, 1);
 
+displacement = bsxfun(@minus, x, neutral_pose);
+
 % Solve for weights.
 % w1 = B\x;
-E_0 =  x - neutral_pose;
+
 % w1 = lsqnonneg(B,x);
 % w1 = B\E_0;
 
@@ -194,12 +193,11 @@ Aeq = ones(1, size(key_frames,2));
 beq = 1;
 lb = 0*ones(2*numFeatures,1);
 ub = 1*ones(2*numFeatures,1);
-w1 = lsqlin(B, x,[], [], Aeq,beq,lb,ub);
+w1 = lsqlin(fStore_key_disp, displacement,[], [], Aeq,beq,lb,ub);
 
-
+% Show basis poses and weights.
 figure;
 imshow(imArray{test_pose});
-
 
 count_active_basis = numel( find ( w1 > 0.01 ) );
 index = 1;
@@ -213,7 +211,10 @@ for ii = 1:size(key_frames,2)
     end
 end
 
-x_mapped = reshape(B*w1, 2, numFeatures);
+x_mapped = bsxfun(@plus, fStore_key_disp*w1, neutral_pose);
+x = bsxfun(@plus, displacement, neutral_pose);
+
+x_mapped = reshape(x_mapped, 2, numFeatures);
 x = reshape(x, 2, numFeatures);
 
 
