@@ -71,11 +71,11 @@ numFeatures = size(fStore,2);
 disp('Finished removing points');
 
 %% Optical flow
-% C.Lui
+% M.Black
 % flow = estimate_flow_interface(im1, im2, 'classic+nl-fast');
 % figure(2); plotflow(flow);
 
-% M.Black
+% C.Lui
 % Set optical flow parameters
 % alpha = 0.012;
 % ratio = 0.75;
