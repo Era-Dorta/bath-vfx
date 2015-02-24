@@ -1,0 +1,14 @@
+* Turn cameras on before turning the computer on.
+* Open StreamPix6
+* Each camera has its own drive associated with it. A .seq file will be created for each camera in its drive after each recording session.
+* Select → In all workspaces, new sequence → the first option
+* Select → camera number tab → load → default option
+* On the sequence tab we can see the recorded data.
+* Cameras get unsynchronized  after a short while, we need to use a combination of the frame number and the time stamp to make sure we are using images of the same event.
+* On the home tab we can play/see through the recorded frames.
+* To export, select in all workspaces export to …, there we have different formats to export to.
+* Snap button takes a synchronized picture from each camera.
+* The focus of each camera can be changed physically.
+* To change the brightness go to the home tab, on the square sections on the right, click on adjustments and change exposure or any other parameter there.
+* Matlab should have a .seq reader.
+* DON'T FORGET TO TURN THE CAMERAS OFF 
