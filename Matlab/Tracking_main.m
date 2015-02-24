@@ -156,3 +156,38 @@ end
 %% Play movie
 figure(6); imshow(im1);
 movie(Mov3,1,30);
+
+
+%% Choose key poses
+close all;
+
+key_frames = [1, 9, 42, 80, 100, 106, 137, 152, 191, 217, ...
+    296, 339, 377, 388, 421];
+fStore_key = fStore(:,:,key_frames);
+% Display key frames.
+% for i = key_frames
+% figure;
+% imshow(imArray{i});hold on;
+% end
+% Construct the basis.
+B = reshape(fStore_key, 2*numFeatures, 15);
+% CHOOSE new frame/pose.
+test_pose = 30;
+x = fStore(:,:,test_pose);
+x = reshape(x, 2*numFeatures, 1);
+% Solve for weights.
+% w1 = B\x;
+w1 = lsqnonneg(B,x);
+figure;
+imshow(imArray{test_pose});
+count_active_basis = numel( find ( w1 > 0.01 ) );
+index = 1;
+figure
+for ii = 1:size(key_frames,2)
+    if (w1(ii) > 0.01)
+        subplot(1,count_active_basis,index)
+        imshow(imArray{key_frames(ii)})
+        title(gca,w1(ii))
+        index = index+1;
+    end
+end
