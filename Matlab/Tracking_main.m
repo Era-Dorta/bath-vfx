@@ -219,7 +219,7 @@ x = reshape(x, 2, numFeatures);
 
 
 %% Plot.
-figure(9); imshow(im1);
+figure(9); imshow(imArray{test_pose});
 hold on;
 vl_plotframe(x(:,:));
 plot(x(1,:),x(2,:),'r*');
