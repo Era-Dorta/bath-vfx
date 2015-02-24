@@ -32,7 +32,7 @@ vl_plotframe(f(:,:));
 plot(f(1,:),f(2,:),'r*');
 
 % Store features
-numFeatures = length(f);
+numFeatures = size(f,2);
 clear fStore;
 fStore(:,:,1) = f(1:2,:);
 
@@ -49,7 +49,7 @@ while(true)
     plot(fStore(1,i,1),fStore(2,i,1),'r*');
     i = i+1;
 end
-numFeatures = length(fStore);
+numFeatures = size(fStore,2);
 disp('Finished adding points');
 
 %% Remove points manually
@@ -67,7 +67,7 @@ while(true)
     fStore(:,k) = [];
     imshow(im1); plot(fStore(1,:),fStore(2,:),'r*');
 end
-numFeatures = length(fStore);
+numFeatures = size(fStore,2);
 disp('Finished removing points');
 
 %% Optical flow
@@ -97,8 +97,8 @@ disp('Finished removing points');
 %% Load optical flow
 if ~(exist('vx', 'var') && exist('vy', 'var'))
     disp('Loading vx and vy');
-    load('~/workspaces/matlab/vfx/Data/Richard1/images_BW/vx_500.mat');
-    load('~/workspaces/matlab/vfx/Data/Richard1/images_BW/vy_500.mat');
+    load('vx_500.mat');
+    load('vy_500.mat');
     vx = vx_500;
     vy = vy_500;
     clear vx_500 vy_500;
@@ -133,56 +133,31 @@ movie(Mov,1,30);
 
 %% Delaunay triangulation
 TRI = delaunay(fStore(1,:,1),fStore(2,:,1));
-for frame = 2:numImgs
+for frame = 1:numImgs
     figure(3);
     triplot(TRI, fStore(1,:,frame), fStore(2,:,frame))
     axis([1 640 1 480]); set(gca,'YDir','reverse');
-    title(['frame: ', num2str(frame)]);
     Mov2(frame) = getframe;
 end
 
 %% Play movie
 figure(4);
 axis([1 640 1 480]); set(gca,'YDir','reverse');
-movie(Mov2,3,60);
+movie(Mov2,1,60);
 
 %% Test
-for frame = 1:numImgs
-    figure(5);
-    imshow(imArray{frame}); hold on;
-    triplot(TRI, fStore(1,:,frame), fStore(2,:,frame))
-    title(['frame: ', num2str(frame)]);
-    Mov3(frame) = getframe;
-end
+% for frame = 1:numImgs
+%     figure(5);
+%     imshow(imArray{frame}); hold on;
+%     triplot(TRI, fStore(1,:,frame), fStore(2,:,frame))
+%     Mov3(frame) = getframe;
+% end
 
 %% Play movie
-figure(6); imshow(im1);
-movie(Mov3,1,30);
+% figure(6); imshow(im1);
+% movie(Mov3,1,30);
 
 
-%% Choose key poses
-close all;
-
-key_frames = [1, 9, 42, 80, 100, 106, 137, 152, 191, 217, ...
-    296, 339, 377, 388, 421];
-fStore_key = fStore(:,:,key_frames);
-% Display key frames.
-% for i = key_frames
-% figure;
-% imshow(imArray{i});hold on;
-% end
-% Construct the basis.
-B = reshape(fStore_key, 2*numFeatures, 15);
-% CHOOSE new frame/pose.
-test_pose = 30;
-x = fStore(:,:,test_pose);
-x = reshape(x, 2*numFeatures, 1);
-% Solve for weights.
-% w1 = B\x;
-w1 = lsqnonneg(B,x);
-figure;
-imshow(imArray{test_pose});
-movie(Mov3,3,30);
 
 %% Choose key poses
 
@@ -241,26 +216,11 @@ end
 x_mapped = reshape(B*w1, 2, numFeatures);
 x = reshape(x, 2, numFeatures);
 
-Mov4(1) = im2frame(newImg, gray(256));
 
-    newImg = imArray{test_pose};
-    for j = 1:numFeatures
-        idx = round(x_mapped(1,j));
-        idy = round(x_mapped(2,j));
-        
-        newImg(idy - 2:2 + idy, ...
-            idx - 2:idx + 2 ) = 255;
-        
-        idx2 = round(x(1,j));
-        idy2 = round(x(2,j));
-        
-        newImg(idy2 - 2:2 + idy2, ...
-            idx2 - 2:idx2 + 2 ) = 150;
-    end
-    Mov4(frame) = im2frame(newImg, gray(256));
-
-
+%% Plot.
 figure(9); imshow(im1);
-movie(Mov4,1,1);
-
-
+hold on;
+vl_plotframe(x(:,:));
+plot(x(1,:),x(2,:),'r*');
+plot(x_mapped(1,:),x_mapped(2,:),'g^');
+plot(x(1,:),x(2,:),'r*');
