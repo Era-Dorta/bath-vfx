@@ -113,19 +113,19 @@ for j = 1:numFeatures
 end
 
 Mov(1) = im2frame(newImg, gray(256));
-% for frame = 2:numImgs
-%     newImg = imArray{frame};
-%     for j = 1:numFeatures
-%         idx = round(fStore(1,j,frame-1));
-%         idy = round(fStore(2,j,frame-1));
-%         fStore(1,j,frame) = fStore(1,j,frame-1) + vx(idy,idx,frame-1);
-%         fStore(2,j,frame) = fStore(2,j,frame-1) + vy(idy,idx,frame-1);
-%         
-%         newImg(round(fStore(2,j,frame)) - 2:2 + round(fStore(2,j,frame)), ...
-%             round(fStore(1,j,frame)) - 2:round(fStore(1,j,frame)) + 2 ) = 255;
-%     end
-%     Mov(frame) = im2frame(newImg, gray(256));
-% end
+for frame = 2:numImgs
+    newImg = imArray{frame};
+    for j = 1:numFeatures
+        idx = round(fStore(1,j,frame-1));
+        idy = round(fStore(2,j,frame-1));
+        fStore(1,j,frame) = fStore(1,j,frame-1) + vx(idy,idx,frame-1);
+        fStore(2,j,frame) = fStore(2,j,frame-1) + vy(idy,idx,frame-1);
+        
+        newImg(round(fStore(2,j,frame)) - 2:2 + round(fStore(2,j,frame)), ...
+            round(fStore(1,j,frame)) - 2:round(fStore(1,j,frame)) + 2 ) = 255;
+    end
+    Mov(frame) = im2frame(newImg, gray(256));
+end
 
 %% Play movie
 figure(2); imshow(im1);
