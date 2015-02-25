@@ -21,7 +21,6 @@ public:
 	static MSyntax newSyntax();
 
 private:
-	static std::vector<std::string> attrNames;
 	std::vector<unsigned int> attrIndices;
 private:
 	MDGModifier dgMod;
