@@ -15,22 +15,15 @@ public:
 	virtual MStatus	doIt(const MArgList&);
 	virtual MStatus undoIt();
 	virtual MStatus redoIt();
-	virtual bool isUndoable() const { return true; }
+	virtual bool isUndoable() const { return false; }
 
 	static void *creator() { return new VfxCmd; }
 	static MSyntax newSyntax();
 
 private:
-	void duplicateMesh(MFnSet &shadingGroupFn, MDagPath &sourceShapePath,
-		MDagPath &targetShapePath);
 
 private:
 	MDGModifier dgMod;
-
-	MString newNodeName;
-
-	MObject newMesh;
-	bool doMeshUndo;
 };
 
 #endif
