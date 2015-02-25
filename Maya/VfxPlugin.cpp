@@ -8,7 +8,7 @@ MStatus initializePlugin(MObject obj)
 	MString errStr;
 	MFnPlugin plugin(obj);
 
-	stat = plugin.registerCommand("vfxDo", VfxCmd::creator);
+	stat = plugin.registerCommand("VfxDo", VfxCmd::creator);
 	if (!stat)
 	{
 		errStr = "registerCommand failed";
@@ -37,7 +37,7 @@ MStatus uninitializePlugin(MObject obj)
 	MString errStr;
 	MFnPlugin plugin(obj);
 
-	stat = plugin.deregisterCommand("vfxDo");
+	stat = plugin.deregisterCommand("VfxDo");
 	if (!stat)
 	{
 		errStr = "deregisterCommand failed";
