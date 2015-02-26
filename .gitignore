@@ -48,6 +48,7 @@ optical_flow_cliu
 optical-flow_mblack
 rpca
 vlfeat-0.9.20
+TOOLBOX_calib
 *.mat
 *.asv
 PVA_main.m
