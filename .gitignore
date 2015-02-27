@@ -43,6 +43,10 @@ x64/
 *.bbl
 *~
 
+# Maya
+*.swatch
+*.swatches
+
 # Matlab
 optical_flow_cliu
 optical-flow_mblack
