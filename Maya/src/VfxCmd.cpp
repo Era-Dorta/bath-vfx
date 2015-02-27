@@ -18,10 +18,9 @@
 #define TOSTRING(x) STRINGIFY(x)
 #define AT " " __FILE__ ": " TOSTRING(__LINE__) 
 
-typedef std::vector < unsigned int >::iterator vecUintIt;
+typedef std::vector<unsigned int>::iterator vecUintIt;
 
-MStatus VfxCmd::doIt(const MArgList &args)
-{
+MStatus VfxCmd::doIt(const MArgList &args) {
 	// This command takes the selected mesh node, and conects its output to
 	// a new shape interpolation node, then creates a new mesh node whose 
 	// input is the output of the interpolation node
@@ -38,14 +37,14 @@ MStatus VfxCmd::doIt(const MArgList &args)
 	// TODO Change pup:allBlends for name given by parameter
 	// Add blenshapes to the selection list
 	stat = MGlobal::getSelectionListByName("pup:allBlends", selection);
-	if (checkStat(stat, AT)){
+	if (checkStat(stat, AT)) {
 		return MS::kFailure;
 	}
 
 	// Get the DagPath of the blendshapes
 	MDagPath blendShapePath;
 	stat = selection.getDagPath(0, blendShapePath);
-	if (checkStat(stat, AT)){
+	if (checkStat(stat, AT)) {
 		return MS::kFailure;
 	}
 
@@ -62,7 +61,7 @@ MStatus VfxCmd::doIt(const MArgList &args)
 		MPlug plug = blendShapeFn.findPlug(referencedAttributes[i], true);
 		MFnAttribute mfnAttr(plug);
 
-		if (mfnAttr.isReadable() && !plug.isNull()){
+		if (mfnAttr.isReadable() && !plug.isNull()) {
 			attrIndices.push_back(i);
 			// Testing: set them to 0.5
 			dgMod.newPlugValueFloat(plug, 0.5);
@@ -72,12 +71,10 @@ MStatus VfxCmd::doIt(const MArgList &args)
 	return redoIt();
 }
 
-MStatus VfxCmd::undoIt()
-{
+MStatus VfxCmd::undoIt() {
 	return dgMod.undoIt();
 }
 
-MStatus VfxCmd::redoIt()
-{
+MStatus VfxCmd::redoIt() {
 	return dgMod.doIt();
 }

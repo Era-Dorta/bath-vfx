@@ -5,13 +5,12 @@
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MTypeId.h> 
 
-class VfxNode : public MPxNode
-{
+class VfxNode: public MPxNode {
 public:
 	virtual MStatus compute(const MPlug& plug, MDataBlock& data);
 
-	static  void *creator();
-	static  MStatus initialize();
+	static void *creator();
+	static MStatus initialize();
 
 	static const MTypeId id;
 

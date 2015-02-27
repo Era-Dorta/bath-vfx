@@ -13,7 +13,7 @@ inline void displayError(const char* msg) {
 }
 
 inline bool checkBool(bool result) {
-	if (!result)  {
+	if (!result) {
 		displayError("bool");
 		return true;
 	}

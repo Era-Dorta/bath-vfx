@@ -21,13 +21,11 @@ MObject VfxNode::targetSurface;
 MObject VfxNode::interpolateValue;
 MObject VfxNode::outputSurface;
 
-MStatus VfxNode::compute(const MPlug& plug, MDataBlock& data)
-{
+MStatus VfxNode::compute(const MPlug& plug, MDataBlock& data) {
 	MStatus stat;
 
 	// If asked for the outputSurface then compute it
-	if (plug == outputSurface)
-	{
+	if (plug == outputSurface) {
 		// Get handlers for the two meshes
 		MDataHandle sourceSurfaceHnd = data.inputValue(sourceSurface);
 		MDataHandle targetSurfaceHnd = data.inputValue(targetSurface);
@@ -47,13 +45,13 @@ MStatus VfxNode::compute(const MPlug& plug, MDataBlock& data)
 		MItGeometry targetIt(targetSurfaceHnd, false);
 		MItGeometry sourceIt(sourceSurfaceHnd, false);
 
-		for (; !outputIt.isDone(); outputIt.next())
-		{
+		for (; !outputIt.isDone(); outputIt.next()) {
 			sourcePoint = sourceIt.position();
 			targetPoint = targetIt.position();
 
-			outputIt.setPosition((1 - interpolateVal) * sourcePoint +
-				interpolateVal * targetPoint);
+			outputIt.setPosition(
+					(1 - interpolateVal) * sourcePoint
+							+ interpolateVal * targetPoint);
 
 			targetIt.next();
 			sourceIt.next();
@@ -61,20 +59,17 @@ MStatus VfxNode::compute(const MPlug& plug, MDataBlock& data)
 
 		// Tell de DG that we have updated the outputSurface
 		data.setClean(plug);
-	}
-	else
+	} else
 		stat = MS::kUnknownParameter;
 
 	return stat;
 }
 
-void *VfxNode::creator()
-{
+void *VfxNode::creator() {
 	return new VfxNode();
 }
 
-MStatus VfxNode::initialize()
-{
+MStatus VfxNode::initialize() {
 	MFnNumericAttribute nAttr;
 	MFnTypedAttribute tAttr;
 
@@ -84,7 +79,8 @@ MStatus VfxNode::initialize()
 	targetSurface = tAttr.create("targetSurface", "ts", MFnData::kMesh);
 	tAttr.setHidden(true);
 
-	interpolateValue = nAttr.create("interpolateValue", "iv", MFnNumericData::kDouble, 0.0);
+	interpolateValue = nAttr.create("interpolateValue", "iv",
+			MFnNumericData::kDouble, 0.0);
 	nAttr.setKeyable(true);
 
 	outputSurface = tAttr.create("outputSurface", "os", MFnData::kMesh);
