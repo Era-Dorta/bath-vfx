@@ -78,3 +78,11 @@ MStatus VfxCmd::undoIt() {
 MStatus VfxCmd::redoIt() {
 	return dgMod.doIt();
 }
+
+bool VfxCmd::isUndoable() const {
+	return true;
+}
+
+void *VfxCmd::creator() {
+	return new VfxCmd;
+}
