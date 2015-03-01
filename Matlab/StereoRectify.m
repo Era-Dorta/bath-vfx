@@ -3,7 +3,7 @@ clear; close all;
 
 % Requires camera calibration toolbox 
 % http://www.vision.caltech.edu/bouguetj/calib_doc/
-addpath('TOOLBOX_calib'); 
+addpath(genpath('TOOLBOX_calib'))
 
 %% Load stereo calibration results
 folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\';
