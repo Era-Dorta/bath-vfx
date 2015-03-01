@@ -146,7 +146,7 @@ im_left = im2double(im_left);
 im_right = im2double(im_right);
 fStore_right = fStore;
 
-w = 5; % Image patch size = (2*w + 1) x (2*w + 1) pixels
+w = 4; % Image patch size = (2*w + 1) x (2*w + 1) pixels
 NC = NaN(1,640);
 for i = 1:numFeatures % For each feature point in left image...
     col = round(fStore(1,i)); % x-coordinate
@@ -156,7 +156,7 @@ for i = 1:numFeatures % For each feature point in left image...
     std_left = std(window_left(:)); % Std dev. of image patch
     window_left_shift = window_left - mean_left; % Patch shifted by mean
         
-    for j = 1+w:640-w % For points in right image on same row...
+    for j = 250+w:500-w % For points in right image on same row...
         window_right = im_right(row-w:row+w, j-w:j+w); % Right image patch
         mean_right = mean(window_right(:)); % Mean of image patch
         std_right = std(window_right(:)); % Std dev. of image patch
@@ -199,5 +199,9 @@ x = X(1,:);
 y = X(3,:);
 z = -X(2,:);
 tri = delaunay(x, z);
-trimesh(tri, x, y, z);
+trisurf(tri, x, y, z, 'LineWidth', 2);
+% trimesh(tri, x, y, z, 'LineWidth', 2); 
 axis equal
+shading interp
+colormap(cool)
+camlight right
