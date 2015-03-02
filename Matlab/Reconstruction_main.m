@@ -325,6 +325,7 @@ for frame = 1:500
     trisurf(tri, x, y, z, 'LineWidth', 1.5);
     axis equal
     axis([-50 50 0 80 -60 80])
+    axis off
     colormap(cool)
     camlight right
     light % create a light
