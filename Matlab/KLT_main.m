@@ -4,7 +4,7 @@ clear all; close all; clc;
 %% Read in stereo image sequence
 disp('Reading stereo image sequence...');
 imgType = '.jpg';
-numImgs = 500;
+numImgs = 1000;
 
 % Left images
 if isunix
@@ -154,7 +154,7 @@ for frame = 2:numImgs
     % If points are lost, break loop
     if size(visiblePoints_left,1)<numFeatures || size(visiblePoints_right,1)<numFeatures
         numImgs = frame-1;
-        disp('Points lost! Please re-estimate points');
+        disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
         break;
     end
     fStore(:,:,frame) = visiblePoints_left';
@@ -181,31 +181,60 @@ t = T_new;
 P_left = K_left * eye(3,4);
 P_right = K_right * [R, t];
 
+%% Apply epipolar constraint
+fStore(2,:) = (fStore(2,:) + fStore_right(2,:))./2; % Set y-coordinate to average
+fStore_right(2,:) = fStore(2,:);
+
 %% 3D reconstruction
 X = Reconstruct(P_left, P_right, fStore(:,:,1), fStore_right(:,:,1));
+VisualiseScene(P_left, P_right, X); % Visualise
 
-%% Visualise
-VisualiseScene(P_left, P_right, X);
-
-%% Delaunay triangulation
+%% Reconstruct first frame
 figure('units','normalized','outerposition',[0 0 1 1]);
-x = X(1,:);
-y = X(3,:);
-z = -X(2,:);
-tri = delaunay(x, z);
-trisurf(tri, x, y, z, 'LineWidth', 2);
-axis equal
-shading interp
-colormap(cool)
-% camlight right
-light % create a light
+
+x_offset = X(1,54); % Keep nose position at x = 0
+y_offset = X(3,54); % Keep nose position at y = 0
+z_offset = -X(2,54); % Keep nose position at z = 0
+    
+x = X(1,:)-x_offset;
+y = X(3,:)-y_offset;
+z = -X(2,:)-z_offset;
+
+% Display 3D points
+tri = delaunay(x, z); % Delaunay triangulation
+trisurf(tri, x, y, z, 'LineWidth', 1.5);
+axis equal; 
+
+% Shading properties
+shading interp;
+colormap(cool);
+light; % create a light
 lighting gouraud
 material dull
 % alpha(0.8) 
 
-%% Apply epipolar constraint
-fStore(2,:) = (fStore(2,:) + fStore_right(2,:))./2; % Set y-coordinate to average
-fStore_right(2,:) = fStore(2,:);
+%% Normalise face
+% So nose is always vertical
+figure('units','normalized','outerposition',[0 0 1 1]);
+
+% Angle correction
+sintheta = x(48)/z(48); 
+costheta = sqrt(1 - sintheta^2);
+Ry = [costheta, 0, sintheta; 0, 1, 0; -sintheta, 0, costheta];
+X = [x;y;z];
+Xnew = Ry' * X; % Rotate points
+
+% Display 3D points
+trisurf(tri, Xnew(1,:), Xnew(2,:), X(3,:), 'LineWidth', 1.5);
+axis equal
+
+% Shading properties
+shading interp;
+colormap(cool);
+light; % create a light
+lighting gouraud
+material dull
+% alpha(0.8) 
 
 %% Reconstruct all frames
 X = NaN(4,numFeatures,numImgs);
@@ -213,8 +242,9 @@ for frame = 1:numImgs
     X(:,:,frame) = Reconstruct(P_left, P_right, fStore(:,:,frame), fStore_right(:,:,frame));
 end
 
-%% Show 4D plot
+%% Display 4D plot
 for frame = 1:numImgs
+    % Keep tip of nose at [0,0,0]'
     x_offset = X(1,54,frame); % Keep nose position at x = 0
     y_offset = X(3,54,frame); % Keep nose position at y = 0
     z_offset = -X(2,54,frame); % Keep nose position at z = 0
@@ -223,16 +253,49 @@ for frame = 1:numImgs
     y = X(3,:,frame)-y_offset;
     z = -X(2,:,frame)-z_offset;
     
-    figure(6);
+    % Display 3D points
+    figure(7);
     trisurf(tri, x, y, z, 'LineWidth', 1.5);
-    axis equal
-    axis([-50 50 0 80 -60 80])
-    axis off
-%     shading interp
-    colormap(cool)
-    camlight right
-    light % create a light
-    lighting gouraud
-    material dull
+    axis equal; axis([-50 50 0 80 -60 80]); axis off;
     view([90,-160,45]);
+    
+    % Shading properties
+    % shading interp
+    colormap(cool);
+    camlight right; light; % create a light
+    lighting gouraud;
+    material dull;
+end
+
+%% Normalise face
+% So nose is always vertical
+for frame = 1:numImgs
+    % Keep tip of nose at [0,0,0]'
+    x_offset = X(1,54,frame); % Keep nose position at x = 0
+    y_offset = X(3,54,frame); % Keep nose position at y = 0
+    z_offset = -X(2,54,frame); % Keep nose position at z = 0
+    
+    x = X(1,:,frame)-x_offset;
+    y = X(3,:,frame)-y_offset;
+    z = -X(2,:,frame)-z_offset;
+    
+    % Angle correction
+    sintheta = x(48)/z(48); 
+    costheta = sqrt(1 - sintheta^2);
+    Ry = [costheta, 0, sintheta; 0, 1, 0; -sintheta, 0, costheta]; 
+    XX = [x;y;z];
+    XXnew = Ry' * XX; % Rotate points
+    
+    % Display 3D points
+    figure(8);
+    trisurf(tri, XXnew(1,:), XXnew(2,:), XX(3,:), 'LineWidth', 1.5);
+    axis equal; axis([-50 50 0 80 -60 80]); axis off;
+    view([90,-160,45]);
+    
+    % Shading properties
+    % shading interp
+    colormap(cool);
+    camlight right; light; % create a light
+    lighting gouraud;
+    material dull;
 end
