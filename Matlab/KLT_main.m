@@ -1,10 +1,11 @@
 %% KLT_main.m
+% Requires Matlab Computer Vision toolbox!
 clear all; close all; clc;
 
 %% Read in stereo image sequence
 disp('Reading stereo image sequence...');
 imgType = '.jpg';
-numImgs = 1000;
+numImgs = 500;
 
 % Left images
 if isunix
@@ -27,40 +28,41 @@ disp('Done!');
 figure(1);
 im_left = imArray_left{1};
 im_right = imArray_right{1};
+[height, width] = size(im_left);
 imshow([im_left,im_right]); hold on;
 Mov(1) = im2frame(flipud([im_left,im_right]), gray(256));
 
 %% Load features in left image (if exist!)
-load('fStore_left');
-numFeatures = size(fStore,2);
+load('points_left');
+numFeatures = size(points_left,2);
 
 % Plot left features
 figure(1);
-plot(fStore(1,:),fStore(2,:),'yO')
+plot(points_left(1,:),points_left(2,:),'yO')
 
 % Display feature numbers
 for i = 1:numFeatures
     figure(1);
-    text(fStore(1,i),fStore(2,i),num2str(i));
+    text(points_left(1,i),points_left(2,i),num2str(i));
 end
 
 %% Find corresponding features in right image
-im1_left = im2double(im_left);
-im1_right = im2double(im_right);
-fStore_right = fStore;
+imdouble_left = im2double(im_left);
+imdouble_right = im2double(im_right);
+points_right = points_left;
 
 w = 5; % Image patch size = (2*w + 1) x (2*w + 1) pixels
 NC = NaN(1,640);
 for i = 1:numFeatures % For each feature point in left image...
-    col = round(fStore(1,i)); % x-coordinate
-    row = round(fStore(2,i)); % y-coordinate
-    window_left = im1_left(row-w:row+w, col-w:col+w); % Left image patch
+    col = round(points_left(1,i)); % x-coordinate
+    row = round(points_left(2,i)); % y-coordinate
+    window_left = imdouble_left(row-w:row+w, col-w:col+w); % Left image patch
     mean_left = mean(window_left(:)); % Mean of image patch
     std_left = std(window_left(:)); % Std dev. of image patch
     window_left_shift = window_left - mean_left; % Patch shifted by mean
         
     for j = col-20:col+60 % For points in right image on same row...
-        window_right = im1_right(row-w:row+w, j-w:j+w); % Right image patch
+        window_right = imdouble_right(row-w:row+w, j-w:j+w); % Right image patch
         mean_right = mean(window_right(:)); % Mean of image patch
         std_right = std(window_right(:)); % Std dev. of image patch
         window_right_shift = window_right - mean_right; % Patch shifted by mean
@@ -76,22 +78,22 @@ for i = 1:numFeatures % For each feature point in left image...
         [val,ind] = max(NC); % Choose next best...
     end   
     
-    fStore_right(1,i) = ind; % Store right feature point
+    points_right(1,i) = ind; % Store right feature point
 end
 
 % Plot right features
 figure(1); hold on; 
-plot(fStore_right(1,:)+640,fStore_right(2,:),'rO')
+plot(points_right(1,:)+640,points_right(2,:),'rO')
 
 % Display feature numbers
 for i = 1:numFeatures
     figure(1); hold on;
-    text(fStore_right(1,i)+640,fStore_right(2,i),num2str(i));
+    text(points_right(1,i)+width,points_right(2,i),num2str(i));
 end
 
 %% Initialise point trackers
-points_left = cornerPoints(fStore'); % Create points object
-points_right = cornerPoints(fStore_right');
+pObj_left = cornerPoints(points_left'); % Create points object
+pObj_right = cornerPoints(points_right');
 
 % Create a point tracker and enable the bidirectional error constraint to
 % make it more robust in the presence of noise and clutter
@@ -100,18 +102,18 @@ pointTracker_right = vision.PointTracker('MaxBidirectionalError', inf);
 
 % Initialize the tracker with the initial point locations and the initial
 % video frame
-points_left = points_left.Location;
-points_right = points_right.Location;
-initialize(pointTracker_left, points_left, im_left);
-initialize(pointTracker_right, points_right, im_right);
+pObj_left = pObj_left.Location;
+pObj_right = pObj_right.Location;
+initialize(pointTracker_left, pObj_left, im_left);
+initialize(pointTracker_right, pObj_right, im_right);
 
 %% Track points
 disp('Tracking points...');
 
 % Make a copy of the points to be used for computing the geometric
 % transformation between the points in the previous and the current frames
-oldPoints_left = points_left;
-oldPoints_right = points_right;
+oldPoints_left = pObj_left;
+oldPoints_right = pObj_right;
 
 for frame = 2:numImgs
     % Get next frame
@@ -119,12 +121,14 @@ for frame = 2:numImgs
     newImg_right = imArray_right{frame};
 
     % Track the points. Note that some points may be lost
-    [points_left, isFound] = step(pointTracker_left, newImg_left);
-    visiblePoints_left = points_left(isFound, :);
+    % Left image
+    [pObj_left, isFound] = step(pointTracker_left, newImg_left);
+    visiblePoints_left = pObj_left(isFound, :);
     oldInliers_left = oldPoints_left(isFound, :);
     
-    [points_right, isFound] = step(pointTracker_right, newImg_right);
-    visiblePoints_right = points_right(isFound, :);
+    % Right image
+    [pObj_right, isFound] = step(pointTracker_right, newImg_right);
+    visiblePoints_right = pObj_right(isFound, :);
     oldInliers_right = oldPoints_right(isFound, :);
     
     % Estimate the geometric transformation between the old points
@@ -157,8 +161,8 @@ for frame = 2:numImgs
         disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
         break;
     end
-    fStore(:,:,frame) = visiblePoints_left';
-    fStore_right(:,:,frame) = visiblePoints_right';
+    points_left(:,:,frame) = visiblePoints_left';
+    points_right(:,:,frame) = visiblePoints_right';
 end
 disp('Done!')
 
@@ -182,11 +186,11 @@ P_left = K_left * eye(3,4);
 P_right = K_right * [R, t];
 
 %% Apply epipolar constraint
-fStore(2,:) = (fStore(2,:) + fStore_right(2,:))./2; % Set y-coordinate to average
-fStore_right(2,:) = fStore(2,:);
+points_left(2,:) = (points_left(2,:) + points_right(2,:))./2; % Set y-coordinate to average
+points_right(2,:) = points_left(2,:);
 
 %% 3D reconstruction
-X = Reconstruct(P_left, P_right, fStore(:,:,1), fStore_right(:,:,1));
+X = Reconstruct(P_left, P_right, points_left(:,:,1), points_right(:,:,1));
 VisualiseScene(P_left, P_right, X); % Visualise
 
 %% Reconstruct first frame
@@ -239,7 +243,7 @@ material dull
 %% Reconstruct all frames
 X = NaN(4,numFeatures,numImgs);
 for frame = 1:numImgs
-    X(:,:,frame) = Reconstruct(P_left, P_right, fStore(:,:,frame), fStore_right(:,:,frame));
+    X(:,:,frame) = Reconstruct(P_left, P_right, points_left(:,:,frame), points_right(:,:,frame));
 end
 
 %% Display 4D plot
@@ -257,7 +261,7 @@ for frame = 1:numImgs
     figure(7);
     trisurf(tri, x, y, z, 'LineWidth', 1.5);
     axis equal; axis([-50 50 0 80 -60 80]); axis off;
-    view([90,-160,45]);
+    view([90,-180,45]);
     
     % Shading properties
     % shading interp
@@ -290,7 +294,7 @@ for frame = 1:numImgs
     figure(8);
     trisurf(tri, XXnew(1,:), XXnew(2,:), XX(3,:), 'LineWidth', 1.5);
     axis equal; axis([-50 50 0 80 -60 80]); axis off;
-    view([90,-160,45]);
+    view([90,-180,45]);
     
     % Shading properties
     % shading interp
