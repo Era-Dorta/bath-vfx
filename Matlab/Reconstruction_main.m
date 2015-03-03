@@ -2,6 +2,8 @@
 close all; clc;
 clearvars -except Richard2_left_vx500 Richard2_left_vy500 ...
                     Richard2_right_vx500 Richard2_right_vy500;
+% Requires vlfeat toolbox
+addpath(genpath('vlfeat-0.9.20'));
 
 %% Read a pair of rectified stereo images
 folder_left = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Left\images_rect\';
@@ -57,15 +59,15 @@ vl_plotframe(f(:,:));
 plot(f(1,:),f(2,:),'r*');
 
 % Store features
-clear fStore;
-fStore(:,:,1) = f(1:2,:);
+clear points_left;
+points_left(:,:,1) = f(1:2,:);
 
 % Remove duplicate features
-x = fStore(1,:); y = fStore(2,:);
+x = points_left(1,:); y = points_left(2,:);
 indx = diff(x)==0; indy = diff(y)==0;
 ind = bsxfun(@and,indx,indy);
-fStore(:,ind) = [];
-numFeatures = size(fStore,2);
+points_left(:,ind) = [];
+numFeatures = size(points_left,2);
 
 %% Add points manually
 disp('Adding points, right click to exit');
@@ -73,14 +75,14 @@ addPoint = true;
 figure(1); subplot(1,2,1); hold on;
 i = numFeatures + 1;
 while(true)
-    [fStore(1,i,1), fStore(2,i,1), button] = ginput(1);
+    [points_left(1,i,1), points_left(2,i,1), button] = ginput(1);
     if button ~= 1
         break;
     end
-    plot(fStore(1,i,1),fStore(2,i,1),'r*');
+    plot(points_left(1,i,1),points_left(2,i,1),'r*');
     i = i + 1;
 end
-numFeatures = size(fStore,2);
+numFeatures = size(points_left,2);
 disp('Finished adding points');
 
 %% Remove points manually
@@ -94,67 +96,67 @@ while(true)
         break;
     end
     p = [px,py];
-    k = dsearchn(fStore',p);
-    fStore(:,k) = [];
-    imshow(im_left); subplot(1,2,1); plot(fStore(1,:),fStore(2,:),'r*');
+    k = dsearchn(points_left',p);
+    points_left(:,k) = [];
+    imshow(im_left); subplot(1,2,1); plot(points_left(1,:),points_left(2,:),'r*');
 end
-numFeatures = size(fStore,2);
+numFeatures = size(points_left,2);
 disp('Finished removing points');
 
 %% Remove points close to each other
 clearvars index dist
-kdtree = vl_kdtreebuild(fStore);
+kdtree = vl_kdtreebuild(points_left);
 n = 2; % 2 nearest neighbours (including the point itself!)
 for i = 1:numFeatures
-    [index(:,i), dist(:,i)] = vl_kdtreequery(kdtree, fStore, fStore(:,i), 'NumNeighbors', n);   
+    [index(:,i), dist(:,i)] = vl_kdtreequery(kdtree, points_left, points_left(:,i), 'NumNeighbors', n);   
 end
 distID = dist(2,:) < 2;
-fStore(:,distID) = [];
-numFeatures = size(fStore,2);
-subplot(1,2,1); imshow(im_left); plot(fStore(1,:),fStore(2,:),'r*');
+points_left(:,distID) = [];
+numFeatures = size(points_left,2);
+subplot(1,2,1); imshow(im_left); plot(points_left(1,:),points_left(2,:),'r*');
 
 %% Order features
-[fStore(1,:), sortID] = sort(fStore(1,:));
-fStore(2,:) = fStore(2,sortID);
+[points_left(1,:), sortID] = sort(points_left(1,:));
+points_left(2,:) = points_left(2,sortID);
 
 % Display feature numbers
 for i = 1:numFeatures
     figure(1); subplot(1,2,1); hold on;
-    text(fStore(1,i),fStore(2,i),num2str(i));
+    text(points_left(1,i),points_left(2,i),num2str(i));
 end
 
 %% Save features
-% save('fStore_left','fStore');
+% save('points_left','points_left');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Load features in left image (if exist!)
-load('fStore_left');
-numFeatures = size(fStore,2);
+load('points_left');
+numFeatures = size(points_left,2);
 
 % Plot left features
 figure(1);
 subplot(1,2,1); hold on; 
-plot(fStore(1,:),fStore(2,:),'yO')
+plot(points_left(1,:),points_left(2,:),'yO')
 
 % Display feature numbers
 for i = 1:numFeatures
     figure(1); subplot(1,2,1); hold on;
-    text(fStore(1,i),fStore(2,i),num2str(i));
+    text(points_left(1,i),points_left(2,i),num2str(i));
 end
 
 %% Find corresponding features in right image
 im_left = im2double(im_left);
 im_right = im2double(im_right);
-fStore_right = fStore;
+points_right = points_left;
 
 w = 5; % Image patch size = (2*w + 1) x (2*w + 1) pixels
 NC = NaN(1,640);
 for i = 1:numFeatures % For each feature point in left image...
-    col = round(fStore(1,i)); % x-coordinate
-    row = round(fStore(2,i)); % y-coordinate
+    col = round(points_left(1,i)); % x-coordinate
+    row = round(points_left(2,i)); % y-coordinate
     window_left = im_left(row-w:row+w, col-w:col+w); % Left image patch
     mean_left = mean(window_left(:)); % Mean of image patch
     std_left = std(window_left(:)); % Std dev. of image patch
@@ -177,70 +179,77 @@ for i = 1:numFeatures % For each feature point in left image...
         [val,ind] = max(NC); % Choose next best...
     end   
     
-    fStore_right(1,i) = ind; % Store right feature point
+    points_right(1,i) = ind; % Store right feature point
 end
 
 %% Plot right features
 figure(1);
 subplot(1,2,2); hold on; 
-plot(fStore_right(1,:),fStore_right(2,:),'rO')
+plot(points_right(1,:),points_right(2,:),'rO')
 
 % Display feature numbers
 for i = 1:numFeatures
     figure(1); subplot(1,2,2); hold on;
-    text(fStore_right(1,i),fStore_right(2,i),num2str(i));
+    text(points_right(1,i),points_right(2,i),num2str(i));
 end
 
 %% 3D reconstruction
-X = Reconstruct(P_left, P_right, fStore(:,:,1), fStore_right(:,:,1));
+X = Reconstruct(P_left, P_right, points_left(:,:,1), points_right(:,:,1));
+VisualiseScene(P_left, P_right, X); % Visualise
 
-%% Visualise
-VisualiseScene(P_left, P_right, X);
-
-%% Delaunay triangulation
+%% Reconstruct first frame
 figure('units','normalized','outerposition',[0 0 1 1]);
-x = X(1,:);
-y = X(3,:);
-z = -X(2,:);
-tri = delaunay(x, z);
-trisurf(tri, x, y, z, 'LineWidth', 2);
-% trimesh(tri, x, y, z, 'LineWidth', 2); 
-axis equal
-shading interp
-colormap(cool)
-% camlight right
-light % create a light
+
+x_offset = X(1,54); % Keep nose position at x = 0
+y_offset = X(3,54); % Keep nose position at y = 0
+z_offset = -X(2,54); % Keep nose position at z = 0
+    
+x = X(1,:)-x_offset;
+y = X(3,:)-y_offset;
+z = -X(2,:)-z_offset;
+
+% Display 3D points
+tri = delaunay(x, z); % Delaunay triangulation
+trisurf(tri, x, y, z, 'LineWidth', 1.5);
+axis equal; 
+
+% Shading properties
+shading interp;
+colormap(cool);
+light; % create a light
 lighting gouraud
 material dull
-% alpha(0.8) 
+% alpha(0.8)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Read in left image sequence
+%% Read in stereo image sequence
+disp('Reading stereo image sequence...');
+imgType = '.jpg';
+numImgs = 500;
+
+% Left images
 if isunix
     folder = '~/workspaces/matlab/vfx/Data/Richard2/Left/images_rect/';
 else
     folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Left\images_rect';
 end
-imgType = '.jpg';
-numImgs = 500;
 imArray_left = ReadImgs(folder, imgType, numImgs);
 
-%% Read in right image sequence
+% Right images
 if isunix
     folder = '~/workspaces/matlab/vfx/Data/Richard2/Left/images_rect/';
 else
     folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Right\images_rect';
 end
-imgType = '.jpg';
-numImgs = 500;
 imArray_right = ReadImgs(folder, imgType, numImgs);
+disp('Done!');
 
 %% Load optical flow
 folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\';
-disp('Loading vx and vy');
+disp('Loading vx and vy...');
 load([folder 'Richard2_left_vx500']);
 load([folder 'Richard2_left_vy500']);
 load([folder 'Richard2_right_vx500']);
@@ -251,23 +260,33 @@ disp('Done!');
 disp('Tracking features');
 newImg = imArray_left{1};
 for j = 1:numFeatures
-    newImg(round(fStore(2,j,1)) - 2:2 + round(fStore(2,j,1)), ...
-        round(fStore(1,j,1)) - 2:round(fStore(1,j,1)) + 2 ) = 255;
+    newImg(round(points_left(2,j,1)) - 2:2 + round(points_left(2,j,1)), ...
+        round(points_left(1,j,1)) - 2:round(points_left(1,j,1)) + 2 ) = 255;
 end
 
-Mov(1) = im2frame(flipud(newImg), gray(256));
+if isunix
+    Mov(1) = im2frame(newImg, gray(256));
+else
+    Mov(1) = im2frame(flipud(newImg), gray(256));
+end
+
 for frame = 2:numImgs
     newImg = imArray_left{frame};
     for j = 1:numFeatures
-        idx = round(fStore(1,j,frame-1));
-        idy = round(fStore(2,j,frame-1));
-        fStore(1,j,frame) = fStore(1,j,frame-1) + Richard2_left_vx500(idy,idx,frame-1);
-        fStore(2,j,frame) = fStore(2,j,frame-1) + Richard2_left_vy500(idy,idx,frame-1);
+        idx = round(points_left(1,j,frame-1));
+        idy = round(points_left(2,j,frame-1));
+        points_left(1,j,frame) = points_left(1,j,frame-1) + Richard2_left_vx500(idy,idx,frame-1);
+        points_left(2,j,frame) = points_left(2,j,frame-1) + Richard2_left_vy500(idy,idx,frame-1);
         
-        newImg(round(fStore(2,j,frame)) - 2:2 + round(fStore(2,j,frame)), ...
-            round(fStore(1,j,frame)) - 2:round(fStore(1,j,frame)) + 2 ) = 255;
+        newImg(round(points_left(2,j,frame)) - 2:2 + round(points_left(2,j,frame)), ...
+            round(points_left(1,j,frame)) - 2:round(points_left(1,j,frame)) + 2 ) = 255;
     end
-    Mov(frame) = im2frame(flipud(newImg), gray(256));
+    
+    if isunix
+        Mov(frame) = im2frame(newImg, gray(256));
+    else
+        Mov(frame) = im2frame(flipud(newImg), gray(256));
+    end
 end
 
 %% Play movie
@@ -278,23 +297,33 @@ movie(Mov,1,60);
 disp('Tracking features');
 newImg = imArray_right{1};
 for j = 1:numFeatures
-    newImg(round(fStore_right(2,j,1)) - 2:2 + round(fStore_right(2,j,1)), ...
-        round(fStore_right(1,j,1)) - 2:round(fStore_right(1,j,1)) + 2 ) = 255;
+    newImg(round(points_right(2,j,1)) - 2:2 + round(points_right(2,j,1)), ...
+        round(points_right(1,j,1)) - 2:round(points_right(1,j,1)) + 2 ) = 255;
 end
 
-Mov(1) = im2frame(flipud(newImg), gray(256));
+if isunix
+    Mov(1) = im2frame(newImg, gray(256));
+else
+    Mov(1) = im2frame(flipud(newImg), gray(256));
+end
+
 for frame = 2:numImgs
     newImg = imArray_right{frame};
     for j = 1:numFeatures
-        idx = round(fStore_right(1,j,frame-1));
-        idy = round(fStore_right(2,j,frame-1));
-        fStore_right(1,j,frame) = fStore_right(1,j,frame-1) + Richard2_right_vx500(idy,idx,frame-1);
-        fStore_right(2,j,frame) = fStore_right(2,j,frame-1) + Richard2_right_vy500(idy,idx,frame-1);
+        idx = round(points_right(1,j,frame-1));
+        idy = round(points_right(2,j,frame-1));
+        points_right(1,j,frame) = points_right(1,j,frame-1) + Richard2_right_vx500(idy,idx,frame-1);
+        points_right(2,j,frame) = points_right(2,j,frame-1) + Richard2_right_vy500(idy,idx,frame-1);
         
-        newImg(round(fStore_right(2,j,frame)) - 2:2 + round(fStore_right(2,j,frame)), ...
-            round(fStore_right(1,j,frame)) - 2:round(fStore_right(1,j,frame)) + 2 ) = 255;
+        newImg(round(points_right(2,j,frame)) - 2:2 + round(points_right(2,j,frame)), ...
+            round(points_right(1,j,frame)) - 2:round(points_right(1,j,frame)) + 2 ) = 255;
     end
-    Mov(frame) = im2frame(flipud(newImg), gray(256));
+    
+    if isunix
+        Mov(frame) = im2frame(newImg, gray(256));
+    else
+        Mov(frame) = im2frame(flipud(newImg), gray(256));
+    end
 end
 
 %% Play movie
@@ -302,17 +331,18 @@ figure; imshow(imArray_right{1});
 movie(Mov,1,60);
 
 %% Apply epipolar constraint
-fStore(2,:) = (fStore(2,:) + fStore_right(2,:))./2; % Set y-coordinate to average
-fStore_right(2,:) = fStore(2,:);
+points_left(2,:) = (points_left(2,:) + points_right(2,:))./2; % Set y-coordinate to average
+points_right(2,:) = points_left(2,:);
 
 %% Reconstruct all frames
 X = NaN(4,numFeatures,numImgs);
 for frame = 1:numImgs
-    X(:,:,frame) = Reconstruct(P_left, P_right, fStore(:,:,frame), fStore_right(:,:,frame));
+    X(:,:,frame) = Reconstruct(P_left, P_right, points_left(:,:,frame), points_right(:,:,frame));
 end
 
-%% Show 4D plot
-for frame = 1:500
+%% Display 4D plot
+for frame = 1:numImgs
+    % Keep tip of nose at [0,0,0]'
     x_offset = X(1,54,frame); % Keep nose position at x = 0
     y_offset = X(3,54,frame); % Keep nose position at y = 0
     z_offset = -X(2,54,frame); % Keep nose position at z = 0
@@ -321,17 +351,16 @@ for frame = 1:500
     y = X(3,:,frame)-y_offset;
     z = -X(2,:,frame)-z_offset;
     
-    figure(6);
+    % Display 3D points
+    figure(7);
     trisurf(tri, x, y, z, 'LineWidth', 1.5);
-    axis equal
-    axis([-50 50 0 80 -60 80])
-    axis off
-    colormap(cool)
-    camlight right
-    light % create a light
-    lighting gouraud
-    material dull
+    axis equal; axis([-50 50 0 80 -60 80]); axis off;
     view([90,-180,45]);
-end
-
     
+    % Shading properties
+    % shading interp
+    colormap(cool);
+    camlight right; light; % create a light
+    lighting gouraud;
+    material dull;
+end 
