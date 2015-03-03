@@ -30,7 +30,12 @@ im_left = imArray_left{1};
 im_right = imArray_right{1};
 [height, width] = size(im_left);
 imshow([im_left,im_right]); hold on;
-Mov(1) = im2frame(flipud([im_left,im_right]), gray(256));
+
+if isunix
+    Mov(1) = im2frame([im_left,im_right], gray(256));
+else
+    Mov(1) = im2frame(flipud([im_left,im_right]), gray(256));
+end
 
 %% Load features in left image (if exist!)
 load('points_left');
@@ -152,8 +157,12 @@ for frame = 2:numImgs
    
     % Store frame
     newImg = [newImg_left(:,:,1),newImg_right(:,:,1)];
-    Mov(frame) = im2frame(flipud(newImg), gray(256)); 
-    
+    if isunix
+        Mov(frame) = im2frame(newImg, gray(256));
+    else
+        Mov(frame) = im2frame(flipud(newImg), gray(256));
+    end
+       
     % Store points
     % If points are lost, break loop
     if size(visiblePoints_left,1)<numFeatures || size(visiblePoints_right,1)<numFeatures
