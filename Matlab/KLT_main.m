@@ -1,28 +1,30 @@
 %% KLT_main.m
-% Requires Matlab Computer Vision toolbox!
-clear all; close all; clc;
+clearvars -except imArray_left imArray_right;
+close all; clc;
 
 %% Read in stereo image sequence
-disp('Reading stereo image sequence...');
-imgType = '.jpg';
 numImgs = 500;
+imgType = '.jpg';
 
-% Left images
-if isunix
-    folder = '~/workspaces/matlab/vfx/Data/Richard2/Left/images_rect/';
-else
-    folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Left\images_rect';
-end
-imArray_left = ReadImgs(folder, imgType, numImgs);
+if ~(exist('imArray_left', 'var') && exist('imArray_right', 'var'))
+    disp('Reading stereo image sequence...');
+    % Left images
+    if isunix
+        folder = '~/workspaces/matlab/vfx/Data/Richard2/Left/images_rect/';
+    else
+        folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Left\images_rect';
+    end
+    imArray_left = ReadImgs(folder, imgType, numImgs);
 
-% Right images
-if isunix
-    folder = '~/workspaces/matlab/vfx/Data/Richard2/Right/images_rect/';
-else
-    folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Right\images_rect';
+    % Right images
+    if isunix
+        folder = '~/workspaces/matlab/vfx/Data/Richard2/Right/images_rect/';
+    else
+        folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Right\images_rect';
+    end
+    imArray_right = ReadImgs(folder, imgType, numImgs);
+    disp('Done!');
 end
-imArray_right = ReadImgs(folder, imgType, numImgs);
-disp('Done!');
 
 %% Display first frame
 figure(1);
@@ -31,6 +33,7 @@ im_right = imArray_right{1};
 [height, width] = size(im_left);
 imshow([im_left,im_right]); hold on;
 
+% Store movie frame
 if isunix
     Mov(1) = im2frame([im_left,im_right], gray(256));
 else
@@ -38,7 +41,11 @@ else
 end
 
 %% Load features in left image (if exist!)
-load('Data/points_left');
+if isunix
+    load('Data/points_left');
+else
+    load('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\points_left');
+end
 numFeatures = size(points_left,2);
 
 % Plot left features
@@ -73,7 +80,7 @@ for i = 1:numFeatures % For each feature point in left image...
         window_right_shift = window_right - mean_right; % Patch shifted by mean
         
         % Normalised cross-correlation
-        NC(j) = sum(sum(window_left_shift.*window_right_shift))/(std_left*std_right);
+        NC(j) = (window_left_shift(:)'*window_right_shift(:))/(std_left*std_right);
     end    
     
     [val,ind] = max(NC); % Max cross-correlation
@@ -97,7 +104,8 @@ for i = 1:numFeatures
 end
 
 %% Initialise point trackers
-pObj_left = cornerPoints(points_left'); % Create points object
+% Create points objects
+pObj_left = cornerPoints(points_left');
 pObj_right = cornerPoints(points_right');
 
 % Create a point tracker and enable the bidirectional error constraint to
@@ -285,27 +293,24 @@ for frame = 1:numImgs
 end
 
 %% Normalise face
-
 Xnorm = zeros(3, size(X,2), size(X,3));
 Xnorm(1, :, :) = X(1, :, :);
 Xnorm(2, :, :) = X(3, :, :);
 Xnorm(3, :, :) = -X(2, :, :);
 
 frame = 1;
-
 X_offset = Xnorm(1:3,54,frame); % Keep nose position at [0,0,0]
 Xnorm(:,:,frame) = bsxfun(@minus, Xnorm(:,:,frame), X_offset);
 
 for frame = 2:numImgs
-    
-    XXnew = AlignMesh(Xnorm(:,:,1), Xnorm(:,:,frame), [38, 48, 57, 54, 43, 58]);
+    % Apply rigid-body transform
+    Xnew = AlignMesh(Xnorm(:,:,1), Xnorm(:,:,frame), [38, 48, 57, 54, 43, 58]);
     
     % Display 3D points
     figure(8);
-    trisurf(tri, XXnew(1,:), XXnew(2,:), XXnew(3,:), 'LineWidth', 1.5);
-    
-    axis equal; %axis([-50 50 0 80 -60 80]); axis off;
-    %view([90,-180,45]);
+    trisurf(tri, Xnew(1,:), Xnew(2,:), Xnew(3,:), 'LineWidth', 1.5);
+    axis equal; axis([-50 50 0 80 -60 80]); axis off;
+    view([90,-180,45]);
     
     % Shading properties
     % shading interp
