@@ -17,7 +17,7 @@ imArray_left = ReadImgs(folder, imgType, numImgs);
 
 % Right images
 if isunix
-    folder = '~/workspaces/matlab/vfx/Data/Richard2/Left/images_rect/';
+    folder = '~/workspaces/matlab/vfx/Data/Richard2/Right/images_rect/';
 else
     folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Right\images_rect';
 end
@@ -38,7 +38,7 @@ else
 end
 
 %% Load features in left image (if exist!)
-load('points_left');
+load('Data/points_left');
 numFeatures = size(points_left,2);
 
 % Plot left features
@@ -180,7 +180,11 @@ figure; imshow([im_left,im_right]);
 movie(Mov,1,120);
 
 %% Load calibration data
-load('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Calib_Results_stereo_rectified');
+if isunix
+    load('~/workspaces/matlab/vfx/Data/Richard2/Calib_Results_stereo_rectified');
+else
+    load('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Calib_Results_stereo_rectified');
+end
 
 % Intrinsic camera matrices
 K_left = KK_left_new;
