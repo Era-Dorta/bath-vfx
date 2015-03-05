@@ -285,29 +285,27 @@ for frame = 1:numImgs
 end
 
 %% Normalise face
-% So nose is always vertical
-for frame = 1:numImgs
-    % Keep tip of nose at [0,0,0]'
-    x_offset = X(1,54,frame); % Keep nose position at x = 0
-    y_offset = X(3,54,frame); % Keep nose position at y = 0
-    z_offset = -X(2,54,frame); % Keep nose position at z = 0
+
+Xnorm = zeros(3, size(X,2), size(X,3));
+Xnorm(1, :, :) = X(1, :, :);
+Xnorm(2, :, :) = X(3, :, :);
+Xnorm(3, :, :) = -X(2, :, :);
+
+frame = 1;
+
+X_offset = Xnorm(1:3,54,frame); % Keep nose position at [0,0,0]
+Xnorm(:,:,frame) = bsxfun(@minus, Xnorm(:,:,frame), X_offset);
+
+for frame = 2:numImgs
     
-    x = X(1,:,frame)-x_offset;
-    y = X(3,:,frame)-y_offset;
-    z = -X(2,:,frame)-z_offset;
-    
-    % Angle correction
-    sintheta = x(48)/z(48); 
-    costheta = sqrt(1 - sintheta^2);
-    Ry = [costheta, 0, sintheta; 0, 1, 0; -sintheta, 0, costheta]; 
-    XX = [x;y;z];
-    XXnew = Ry' * XX; % Rotate points
+    XXnew = AlignMesh(Xnorm(:,:,1), Xnorm(:,:,frame), [38, 48, 57, 54, 43, 58]);
     
     % Display 3D points
     figure(8);
-    trisurf(tri, XXnew(1,:), XXnew(2,:), XX(3,:), 'LineWidth', 1.5);
-    axis equal; axis([-50 50 0 80 -60 80]); axis off;
-    view([90,-180,45]);
+    trisurf(tri, XXnew(1,:), XXnew(2,:), XXnew(3,:), 'LineWidth', 1.5);
+    
+    axis equal; %axis([-50 50 0 80 -60 80]); axis off;
+    %view([90,-180,45]);
     
     % Shading properties
     % shading interp
