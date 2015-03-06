@@ -304,7 +304,11 @@ Xnorm(:,:,frame) = bsxfun(@minus, Xnorm(:,:,frame), X_offset);
 
 for frame = 2:numImgs
     % Apply rigid-body transform
-    Xnew = AlignMesh(Xnorm(:,:,1), Xnorm(:,:,frame), [38, 48, 57, 54, 43, 58]);
+    Xnew = AlignMesh(Xnorm(:,:,1), Xnorm(:,:,frame), [9,19,31,44,61,72,83,48,54,43,58]);
+    
+    % Enforce nose at 0,0,0
+    X_offset = Xnew(:,54);
+    Xnew = bsxfun(@minus, Xnew, X_offset);    
     
     % Display 3D points
     figure(8);
