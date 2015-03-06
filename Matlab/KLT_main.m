@@ -42,7 +42,7 @@ end
 
 %% Load features in left image (if exist!)
 if isunix
-    load('Data/points_left');
+    load('~/workspaces/matlab/vfx/Data/Richard2/points_left');
 else
     load('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\points_left');
 end
