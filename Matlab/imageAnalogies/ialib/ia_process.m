@@ -41,17 +41,17 @@ fB = imB;
 
 % scale the features to be in the correct range
 if options.scaleFeatures
-    fA = fA - mean(fA(:)); 
+    fA = fA - mean(fA(:));
     fA = fA ./ norm(fA(:));
     
-    fB = fB - mean(fB(:)); 
+    fB = fB - mean(fB(:));
     fB = fB ./ norm(fB(:));
 end
 
 %
 % build features from A (using a 5x5 neighborhood)
-% 
-% Pad array adds 2 rows and colums at the beggining and the end of the 
+%
+% Pad array adds 2 rows and colums at the beggining and the end of the
 % image, copying the values of the first/last column/row.
 % im2col rearrangles blocks into colums, so 5x5 blocks around each
 % pixel are a colum in fAneigh
@@ -61,6 +61,7 @@ end
 % x - 2, y + 2 ... x + 2, y + 2
 % The first column in the block are the first n elements in the feature
 % column, then then next column, until the last
+% So it creates a 25 column vector of features for each pixel
 fAneigh = im2col(padarray(fA, [2 2], 'replicate'), [5 5], 'sliding');
 
 % apply gaussian weights to empahsize the middle pixel
@@ -72,7 +73,9 @@ fAneigh = bsxfun(@times, h(:), fAneigh);
 fApneigh = im2col(padarray(imAp, [2 2], 0), [5 5], 'sliding');
 
 % apply gaussian weights to empahsize the middle pixel (also ignore empty
-% pixels in B')
+% pixels in B'), this is the same as fApneigh(goodPixels(:),:), rembember
+% that (:) goes column wise, the same as im2col
+% So it creates a 12 column vector of features for each pixel
 fApneigh = fApneigh(goodPixels,:);
 fApneigh = bsxfun(@times, h(goodPixels), fApneigh);
 
