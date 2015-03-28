@@ -57,3 +57,6 @@ TOOLBOX_calib
 *.asv
 PVA_main.m
 Data
+Matlab/WOBJ_toolbox_Version2b/examples/example10.bmp
+Matlab/WOBJ_toolbox_Version2b/examples/example10.mtl
+WOBJ_toolbox_Version2b
