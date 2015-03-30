@@ -373,7 +373,7 @@ if __name__ == '__main__':
         d_yiq_imageB_prime = gpu.to_gpu(yiq_imageB_prime)
         d_rgb_imageB_prime = gpu.zeros((heightB, widthB, 3), dtype = np.float64)
         rgb_kernel(d_yiq_imageB_prime, d_rgb_imageB_prime, num_pixelsB, block = block_size_1D, grid = grid_size_B_1D)
-        rgb_imageB_prime = np.flipud(d_rgb_imageB_prime.get())
+        rgb_imageB_prime = d_rgb_imageB_prime.get()
 
         # END TIMER
         end_gpu_time.record()
