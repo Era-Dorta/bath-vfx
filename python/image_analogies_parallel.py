@@ -147,7 +147,7 @@ def MPI_coherence(comm, rank, feature_vectorA, feature_vectorB, imageB_match, y_
             # if feature_vectorB[i][j][12] < 0.2:
             #     y_imageB_prime[i][j] = 0
             # el
-            if coh_distance < 3 * ann_distance:
+            if coh_distance < 1 * ann_distance:
                 y_imageB_prime[i][j] = y_imageA_prime[match[0]][match[1]]
                 imageB_match[i][j] = match[0] * widthA + match[1]
 
