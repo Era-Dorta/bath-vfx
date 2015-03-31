@@ -2,6 +2,7 @@
 clearvars -except OBJ; close all; clc;
 % Requires TPS3D
 addpath(genpath('TPS3D')); 
+addpath(genpath('WOBJ_toolbox_Version2b')); 
 
 %% Load sparse points
 load('X_neutral'); % Richard neutral (sparse)
@@ -42,9 +43,9 @@ trisurf(tri, w(:, 1), w(:,2), w(:,3), ones(1,size(w,1)));
 axis equal; alpha(1.0);
 
 %% Brow raise
-load('X_mouthopen'); % Load Richard brow raise (sparse)
+load('X_browsup'); % Load Richard brow raise (sparse)
 % Transform Richard brow raise (sparse) to Victor brow raise (sparse) 
-wtemp = TSP3DTransformPoints(param, X, X_mouthopen);
+wtemp = TSP3DTransformPoints(param, X, X_browsup);
 figure(5);
 trisurf(tri, wtemp(:, 1), wtemp(:,2), wtemp(:,3), ones(1,size(wtemp,1)));
 axis equal; alpha(1.0);
