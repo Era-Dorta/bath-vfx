@@ -20,7 +20,7 @@ clearvars -except OBJ;
 close all; clc;
 
 % Choose vertices
-select_vertices = true;
+select_vertices = false;
 
 if ~(exist('OBJ', 'var'))
     OBJ=read_wobj('victorHead.obj');
@@ -28,6 +28,8 @@ end
 
 T = OBJ.objects.data.vertices;
 v = OBJ.vertices;
+
+% hgload('neutralface.fig');
 
 %% Select marker points.
 
@@ -38,8 +40,8 @@ if select_vertices
     hold on
     trisurf(T(2:end,:), v(:, 1), v(:,2), v(:,3), ones(1,size(v,1)));
     axis equal
-    
-    num_vertices = 9;
+    zoom(1.3)
+    num_vertices = 97;
     disp('Click anywhere on the surface, then hit return')
     
     v_store = zeros(3,num_vertices);
@@ -53,11 +55,24 @@ if select_vertices
             'MarkerFaceColor',[1 0 0]);
         disp(i)
     end
-else load('matched_vertices.mat');
+else
+    fig = figure(2);
+    hold on
+    trisurf(T(2:end,:), v(:, 1), v(:,2), v(:,3), ones(1,size(v,1)));
+    axis equal
+    zoom(1.3)
+    load('Victor_97vertices.mat');
+    % Display feature numbers
+    numFeatures = size(v_store,2);
+    for i = 1:numFeatures
+        text(v_store(1,i),v_store(2,i),v_store(3,i)+0.05, num2str(i),'color', [1 0 0], 'FontSize', 18)
+    end
 end
 % figure(3);
 % v_store = v_store';
 % scatter3(v_store(:,1),v_store(:,2),v_store(:,3))
+
+
 
 %% Load Richard neutral face.
 load('Richard_neutral_9pts');
