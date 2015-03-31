@@ -72,10 +72,22 @@ end
 % v_store = v_store';
 % scatter3(v_store(:,1),v_store(:,2),v_store(:,3))
 
+%% Triangulation.
+x_offset = v_store(1,54); % Keep nose position at x = 0
+y_offset = v_store(3,54); % Keep nose position at y = 0
+z_offset = -v_store(2,54); % Keep nose position at z = 0
+    
+x = v_store(1,:)-x_offset;
+y = v_store(3,:)-y_offset;
+z = v_store(2,:)-z_offset;
 
+% Display 3D points
+tri = delaunay(x, z); % Delaunay triangulation
+trisurf(tri, x, -y, z, 'LineWidth', 1.5);
+axis equal; 
 
 %% Load Richard neutral face.
-load('Richard_neutral_9pts');
+load('Richard_neutral_3D');
 Rich_neutral = X(1:3,:);
 
 %% Arrange points in terms of increasing x.
