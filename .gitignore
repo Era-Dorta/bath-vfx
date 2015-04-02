@@ -55,7 +55,9 @@ vlfeat-0.9.20
 TOOLBOX_calib
 *.mat
 *.asv
+*.fig
 PVA_main.m
 Data
 WOBJ_toolbox_Version2b
 nonrigidICP
+SpringLab

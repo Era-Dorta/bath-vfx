@@ -25,7 +25,7 @@ else
     folder_left = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Left\expressions\';
     folder_right = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Right\expressions\';
 end
-frame = 2270;
+frame = 6710;
 % load([folder_left, 'points_left_' num2str(frame,'% 05.f') '.mat']);
 % load([folder_right,'points_right_' num2str(frame,'% 05.f') '.mat']);
 load(['points_left_' num2str(frame,'% 05.f') '.mat']);
@@ -46,12 +46,3 @@ figure(1);
 trisurf(tri, x, y, z, 'LineWidth', 1.5); axis equal; 
 colormap(cool); light; lighting gouraud; material dull;
 
-%% Load Victor
-% if ~(exist('OBJ', 'var'))
-%     OBJ=read_wobj('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Victor\victorHead.obj');
-% end
-% T = OBJ.objects.data.vertices;
-% v = OBJ.vertices;
-% figure(2);
-% trisurf(T(2:end,:), v(:, 1), v(:,2), v(:,3), ones(1,size(v,1)));
-% axis equal; alpha(0.5);

@@ -16,8 +16,8 @@ sDir_right =  dir( fullfile(folder_right ,['*' imgType]) );
 numImgs = size(sDir_left, 1);
 
 % Specify frames and feature points
-firstFrame = 2270;
-lastFrame = 2330;
+firstFrame = 5150;
+lastFrame = 5880;
 load(['points_left_' num2str(firstFrame,'% 05.f') '.mat']);
 load(['points_right_' num2str(firstFrame,'% 05.f') '.mat']);
 numFeatures = size(points_left,2);
@@ -86,10 +86,10 @@ for frame = (firstFrame+1):lastFrame
     
     % Estimate the geometric transformation between the old points
     % and the new points and eliminate outliers
-%     [xform_left, oldInliers_left, visiblePoints_left] = estimateGeometricTransform(...
-%         oldInliers_left, visiblePoints_left, 'similarity', 'MaxDistance', 4);
-%     [xform_right, oldInliers_right, visiblePoints_right] = estimateGeometricTransform(...
-%             oldInliers_right, visiblePoints_right, 'similarity', 'MaxDistance', 4);
+    [xform_left, oldInliers_left, visiblePoints_left] = estimateGeometricTransform(...
+        oldInliers_left, visiblePoints_left, 'similarity', 'MaxDistance', 4);
+    [xform_right, oldInliers_right, visiblePoints_right] = estimateGeometricTransform(...
+            oldInliers_right, visiblePoints_right, 'similarity', 'MaxDistance', 4);
     
     % Display tracked points
     newImg_left = insertMarker(newImg_left, visiblePoints_left, '+', ...
@@ -115,7 +115,12 @@ for frame = (firstFrame+1):lastFrame
     if size(visiblePoints_left,1)<numFeatures || size(visiblePoints_right,1)<numFeatures
         numImgs = frame-1;
         disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
-        break;
+        % Re-estimate points in last frame
+        newImg_left = imread([folder_left '/' sDir_left(frame).name]);
+        newImg_right = imread([folder_right '/' sDir_right(f).name]);
+        points_left = ReEstimatePoints(newImg_left, points_left);
+        points_right = ReEstimatePoints(newImg_right, points_right);
+%         break;
     end
     
     % Store points
@@ -129,10 +134,12 @@ figure; imshow([im_left,im_right]);
 movie(Mov,1,120);
 
 %% Get points from last frame
-points_left = storePoints_left(:,:,frame);
-points_right = storePoints_right(:,:,frame);
+points_left = storePoints_left(:,:,lastFrame);
+points_right = storePoints_right(:,:,lastFrame);
 
 %% Re-estimate points in last frame
+newImg_left = imread([folder_left '/' sDir_left(lastFrame).name]);
+newImg_right = imread([folder_right '/' sDir_right(lastFrame).name]);
 points_left = ReEstimatePoints(newImg_left, points_left);
 points_right = ReEstimatePoints(newImg_right, points_right);
 
@@ -140,7 +147,7 @@ points_right = ReEstimatePoints(newImg_right, points_right);
 points_left(2,:) = (points_left(2,:) + points_right(2,:))./2; 
 points_right(2,:) = points_left(2,:);
 
-%%
+%% Display points
 figure; imshow([newImg_left,newImg_right],[]); hold on;
 plot(storePoints_left(1,:,firstFrame),storePoints_left(2,:,firstFrame),'g*'); hold on;
 plot(points_left(1,:),points_left(2,:),'r*'); hold on;
@@ -154,6 +161,7 @@ line([storePoints_right(1,i,firstFrame)+width points_right(1,i)+width],...
 end
 
 %% Save points
-save(['points_left_' num2str(frame,'% 05.f') '.mat'], 'points_left');
-save(['points_right_' num2str(frame,'% 05.f') '.mat'], 'points_right');
+save(['points_left_' num2str(lastFrame,'% 05.f') '.mat'], 'points_left');
+save(['points_right_' num2str(lastFrame,'% 05.f') '.mat'], 'points_right');
+disp('Saved!');
 

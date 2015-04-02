@@ -1,6 +1,7 @@
 function [newPoints] = ReEstimatePoints(I, points)
 
 h = figure; imshow(I); hold on;
+plot(points(1,:),points(2,:),'y+');
 newPoints = points;
 
 while(true)
