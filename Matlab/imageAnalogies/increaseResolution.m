@@ -3,6 +3,10 @@ clear all;
 close all;
 
 %% Loading and initialization
+
+% Uncoment to recompute all the skin samples
+% imblur
+
 segments_centres = [2540, 556;
     3260, 2124;
     2212, 3716;
@@ -17,8 +21,8 @@ segments_centres = [2540, 556;
 %Switch x,y for matlab indexing
 segments_centres = [segments_centres(:,2), segments_centres(:,1)];
 
-
-face_segmented = imread('~/workspaces/matlab/vfx/Data/skinRender/microgeometry/face_segmented.png');
+data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry';
+face_segmented = imread([data_path '/face_segmented.png']);
 face_tex = imread('~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_face_simplified_0.png');
 bump_map = histeq(rgb2gray(face_tex));
 %imshow(bum_map);
@@ -28,8 +32,9 @@ face_segmented = ~face_segmented;
 
 %% Texture up-sampling
 
+sec_index = 1;
 % Get the first section
-filled_with_bg = imfill(face_segmented,segments_centres(1,:));
+filled_with_bg = imfill(face_segmented,segments_centres(sec_index,:));
 
 % Delete the extra lines, i.e. subtract common pixels in both images
 only_region = logical(filled_with_bg - (filled_with_bg & face_segmented));
@@ -49,3 +54,23 @@ bump_map1(only_region) = 0;
 imshow(bump_map1);
 hold on;
 plot(y, x, 'b-', 'LineWidth', 3);
+hold off;
+
+% Get the image of the texture region
+region_ori_tex = face_tex(min_indx:max_indx, min_indy:max_indy);
+path_b0 = [data_path '/synthesized/B0_' int2str(sec_index) '.png'];
+imwrite(region_ori_tex, path_b0);
+
+path_b1 = [data_path '/synthesized/B1_' int2str(sec_index) '.png'];
+path_a0 = [data_path '/original/A0_' int2str(sec_index) '.png'];
+path_a1 = [data_path '/original/A1_' int2str(sec_index) '.png'];
+
+pathToScript = '~/workspaces/github/vfx/python/image_analogies_parallel.py';
+
+cmdStr = ['~/workspaces/github/vfx/python/run.sh' ' ' path_a0 ' ' path_a1 ' ' path_b0 ' ' path_b1];
+
+system(cmdStr);
+
+synt_im = imread(path_b1);
+
+imshow(synt_im);
