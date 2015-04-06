@@ -39,13 +39,17 @@
 # Extra information for the header of the output file.
 ##############################################################
 date
-pwd
 echo "****************************************"
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PY_SCRIPT_PATH=$DIR"/image_analogies_parallel.py"
+
 ##############################################################
 # Full command of the job
 ##############################################################
 #mpiexec -n 4 --mca btl_tcp_if_include ib0 python image_analogies_parallel.py artistic1_A1.jpg artistic1_A2.jpg fun.jpg fun_2.jpg
-mpiexec -n 4 python image_analogies_parallel.py A0g3.jpg A1g3.jpg B0g3.jpg B1g3.jpg
+#mpiexec -n 4 python image_analogies_parallel.py A0g.png A1g.png B0g.png B1g.png
+mpiexec -n 4 python $PY_SCRIPT_PATH $1 $2 $3 $4
+#mpiexec -n 4 python image_analogies_parallel.py embossA1g.png embossA2g.png blurB1.png embossB2g.png
 #
 ##############################################################
 # Extra information for the footer of the output file
