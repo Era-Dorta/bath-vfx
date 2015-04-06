@@ -8,7 +8,7 @@ patch_size = 600;
 
 % Blur an image
 for i = 1:10
-    I = imread([data_path 'A0_' int2str(i) '.JPG']);
+    I = imread([data_path 'A1_' int2str(i) '.JPG']);
     
     figure(1);
     imshow(I);
@@ -25,7 +25,7 @@ for i = 1:10
     I = rgb2gray(I);
     Igray = imadjust(I,stretchlim(I));
     imshow(Igray);
-    imwrite(Igray, [data_path 'A0_' int2str(i) '.png']);
+    imwrite(Igray, [data_path 'A1_' int2str(i) '.png']);
     
     %Igray = imread('~/A0gt.png');
     %imshow(Igray);
@@ -42,5 +42,5 @@ for i = 1:10
     
     %B = imgaussfilt(Igray,2,'FilterSize',[3 3]);
     imshow(B);
-    imwrite(B, [data_path 'A1_' int2str(i) '.png']);
+    imwrite(B, [data_path 'A0_' int2str(i) '.png']);
 end
