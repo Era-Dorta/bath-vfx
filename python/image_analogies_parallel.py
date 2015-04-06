@@ -256,7 +256,6 @@ if __name__ == '__main__':
         # ANN search function
         def ANNalgo(flnn, featureA_prime, featureB):       
             # find the ANN!
-            print "be patient, doing ANN takes a while"
             indices,dist = flnn.knnSearch(featureB, 1, params={})
 
             # convert the index to row and col
