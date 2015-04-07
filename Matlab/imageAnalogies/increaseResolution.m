@@ -27,14 +27,14 @@ data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry';
 face_segmented = imread([data_path '/face_segmented.png']);
 face_tex = imread('~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_face_simplified_0.png');
 
-create_bump_map = false;
+create_disp_map = false;
 
-if create_bump_map
-    bump_map = histeq(rgb2gray(face_tex));
-    imwrite(bump_map, [data_path '/synthesized/bump_map.png']);
-    imshow(bump_map);
+if create_disp_map
+    disp_map = histeq(rgb2gray(face_tex));
+    imwrite(disp_map, [data_path '/synthesized/disp_map.png']);
+    imshow(disp_map);
 else
-    bump_map = imread([data_path '/synthesized/bump_map.png']);
+    disp_map = imread([data_path '/synthesized/disp_map.png']);
 end
 
 % 0 is background, 1 are lines
@@ -66,9 +66,9 @@ for i = 1:num_seg
         x = [max_indx(i), min_indx(i), min_indx(i), max_indx(i), max_indx(i)];
         y = [max_indy(i), max_indy(i), min_indy(i), min_indy(i), max_indy(i)];
         
-        bump_map1 = bump_map;
-        bump_map1(region_pixels{i}) = 0;
-        imshow(bump_map1);
+        disp_map1 = disp_map;
+        disp_map1(region_pixels{i}) = 0;
+        imshow(disp_map1);
         hold on;
         plot(y, x, 'b-', 'LineWidth', 3);
         hold off;
@@ -90,15 +90,15 @@ for i = 1:num_seg
 end
 
 %% Compose the generated textures
-new_bump_map = bump_map;
+new_disp_map = double(disp_map);
 
 for i = 1:num_seg
-    new_bump_map(region_pixels{i}) = new_tex_seg{i}(region_pixels{i}(min_indx(i):max_indx(i), min_indy(i):max_indy(i)));
+    new_disp_map(region_pixels{i}) = new_tex_seg{i}(region_pixels{i}(min_indx(i):max_indx(i), min_indy(i):max_indy(i)));
 end
 
 %% Fill in the gaps with lineal interpolation
 
-new_bump_map(face_segmented) = NaN;
+new_disp_map(face_segmented) = NaN;
 [border_row, border_col] = find(face_segmented == 1);
 
 imshow(new_bump_map);
