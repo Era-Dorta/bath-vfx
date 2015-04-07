@@ -124,4 +124,4 @@ while( sum(index_fill) > 0)
 end
 
 new_disp_map = uint8(new_disp_map);
-imwrite(new_disp_map, [data_path '/synthesized/new_disp_map.png'])
+imwrite(new_disp_map, [data_path '/synthesized/new_disp_map.png']);
