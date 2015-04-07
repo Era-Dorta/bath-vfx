@@ -40,6 +40,8 @@
 ##############################################################
 date
 echo "****************************************"
+echo "****************************************"
+echo "Computation starting"
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PY_SCRIPT_PATH=$DIR"/image_analogies_parallel.py"
 
@@ -50,6 +52,9 @@ cd ~/workspaces/matlab/vfx/Data/skinRender/microgeometry
 # Run 4 processes for each image
 I=1
 while [  $I -lt 11 ]; do
+	echo "****************************************"
+	echo "Image num:" $I
+	echo "****************************************"
 	mpiexec -n 4 python $PY_SCRIPT_PATH "./original/A0_"$I".png" "./original/A1_"$I".png" "./synthesized/B0_"$I".png" "./synthesized/B1_"$I".png"
 	let I=I+1 
 done
@@ -62,5 +67,7 @@ done
 ##############################################################
 # Extra information for the footer of the output file
 ##############################################################
-echo "*****************************************"
+echo "Computation ended"
+echo "****************************************"
+echo "****************************************"
 date
