@@ -7,6 +7,8 @@ close all;
 % Uncoment to recompute all the skin samples
 % imblur
 
+num_seg = 10;
+
 segments_centres = [2540, 556;
     3260, 2124;
     2212, 3716;
@@ -38,47 +40,65 @@ end
 % 0 is background, 1 are lines
 face_segmented = ~face_segmented;
 
-%% Texture up-sampling
+% Texture up-sampling
+%% Save the original images for each segment
+save_files = false;
+region_pixels = cell(num_seg,1);
+max_indx = zeros(num_seg,1);
+min_indx = zeros(num_seg,1);
+max_indy = zeros(num_seg,1);
+min_indy = zeros(num_seg,1);
+for i = 1:num_seg
+    % Get the first section
+    filled_with_bg = imfill(face_segmented,segments_centres(i,:));
+    
+    % Delete the extra lines, i.e. subtract common pixels in both images
+    region_pixels{i} = logical(filled_with_bg - (filled_with_bg & face_segmented));
+    
+    % Find the smallest square that contains the region
+    [indx, indy] = find(region_pixels{i} == 1);
+    max_indx(i) = max(indx);
+    min_indx(i) = min(indx);
+    max_indy(i) = max(indy);
+    min_indy(i) = min(indy);
+    
+    if save_files
+        x = [max_indx(i), min_indx(i), min_indx(i), max_indx(i), max_indx(i)];
+        y = [max_indy(i), max_indy(i), min_indy(i), min_indy(i), max_indy(i)];
+        
+        bump_map1 = bump_map;
+        bump_map1(region_pixels{i}) = 0;
+        imshow(bump_map1);
+        hold on;
+        plot(y, x, 'b-', 'LineWidth', 3);
+        hold off;
+        
+        % Get the image of the texture region
+        region_ori_tex = face_tex(min_indx(i):max_indx(i), min_indy(i):max_indy(i));
+        path_b0 = [data_path '/synthesized/B0_' int2str(i) '.png'];
+        imwrite(region_ori_tex, path_b0);
+    end
+end
 
-sec_index = 1;
-% Get the first section
-filled_with_bg = imfill(face_segmented,segments_centres(sec_index,:));
+%TODO Execute the script here rather than outside
 
-% Delete the extra lines, i.e. subtract common pixels in both images
-only_region = logical(filled_with_bg - (filled_with_bg & face_segmented));
+%% Read the generated textures
+new_tex_seg = cell(num_seg,1);
+for i = 1:num_seg
+    path_b1 = [data_path '/synthesized/B1_' int2str(i) '.png'];
+    new_tex_seg{i} = imread(path_b1);
+end
 
-% Find the smallest square that contains the region
-[indx, indy] = find(only_region == 1);
-max_indx = max(indx);
-min_indx = min(indx);
-max_indy = max(indy);
-min_indy = min(indy);
+%% Compose the generated textures
+new_bump_map = bump_map;
 
-x = [max_indx, min_indx, min_indx, max_indx, max_indx];
-y = [max_indy, max_indy, min_indy, min_indy, max_indy];
+for i = 1:num_seg
+    new_bump_map(region_pixels{i}) = new_tex_seg{i}(region_pixels{i}(min_indx(i):max_indx(i), min_indy(i):max_indy(i)));
+end
 
-bump_map1 = bump_map;
-bump_map1(only_region) = 0;
-imshow(bump_map1);
-hold on;
-plot(y, x, 'b-', 'LineWidth', 3);
-hold off;
+%% Fill in the gaps with lineal interpolation
 
-% Get the image of the texture region
-region_ori_tex = face_tex(min_indx:max_indx, min_indy:max_indy);
-path_b0 = [data_path '/synthesized/B0_' int2str(sec_index) '.png'];
-imwrite(region_ori_tex, path_b0);
+new_bump_map(face_segmented) = NaN;
+[border_row, border_col] = find(face_segmented == 1);
 
-path_b1 = [data_path '/synthesized/B1_' int2str(sec_index) '.png'];
-path_a0 = [data_path '/original/A0_' int2str(sec_index) '.png'];
-path_a1 = [data_path '/original/A1_' int2str(sec_index) '.png'];
-
-pathToScript = '~/workspaces/github/vfx/python/image_analogies_parallel.py';
-
-cmdStr = ['~/workspaces/github/vfx/python/run.sh' ' ' path_a0 ' ' path_a1 ' ' path_b0 ' ' path_b1];
-
-system(cmdStr);
-
-synt_im = imread(path_b1);
-
-imshow(synt_im);
+imshow(new_bump_map);
