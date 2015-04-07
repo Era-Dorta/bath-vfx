@@ -1,4 +1,5 @@
 from sys import argv
+import sys
 import numpy as np
 import time
 import colorsys
@@ -226,6 +227,7 @@ if __name__ == '__main__':
         # START TIMER
         start_gpu_time.record()
 
+        
         d_feature_imageA = gpu.zeros((heightA, widthA, 25), dtype = np.float64)
         feature_kernel(d_imageA, d_feature_imageA, np.int32(heightA), np.int32(widthA), block = block_size_2D, grid = grid_size_A_2D)
         feature_vectorA = d_feature_imageA.get()
@@ -333,6 +335,13 @@ if __name__ == '__main__':
    
         # START TIMER
         start_gpu_time.record()
+        
+        del d_imageA
+        del d_feature_imageA_prime
+        del d_feature_imageA
+        del d_feature_imageB
+        del d_imageA_prime
+        raw_input("Press enter if memory has been fred")
         
         yiq_imageB_prime = np.float64(np.array(zip(np.array(imageB_prime))))
         d_yiq_imageB_prime = gpu.to_gpu(yiq_imageB_prime)
