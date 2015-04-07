@@ -24,8 +24,16 @@ segments_centres = [segments_centres(:,2), segments_centres(:,1)];
 data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry';
 face_segmented = imread([data_path '/face_segmented.png']);
 face_tex = imread('~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_face_simplified_0.png');
-bump_map = histeq(rgb2gray(face_tex));
-%imshow(bum_map);
+
+create_bump_map = false;
+
+if create_bump_map
+    bump_map = histeq(rgb2gray(face_tex));
+    imwrite(bump_map, [data_path '/synthesized/bump_map.png']);
+    imshow(bump_map);
+else
+    bump_map = imread([data_path '/synthesized/bump_map.png']);
+end
 
 % 0 is background, 1 are lines
 face_segmented = ~face_segmented;
