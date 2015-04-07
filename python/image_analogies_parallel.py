@@ -336,12 +336,14 @@ if __name__ == '__main__':
         # START TIMER
         start_gpu_time.record()
         
+        # Free some GPU memory by deleting variables that hold references 
+        # to GPU data, and wait a bit to allow the garbage collector to work 
         del d_imageA
         del d_feature_imageA_prime
         del d_feature_imageA
         del d_feature_imageB
         del d_imageA_prime
-        raw_input("Press enter if memory has been fred")
+        time.sleep(5)
         
         yiq_imageB_prime = np.float64(np.array(zip(np.array(imageB_prime))))
         d_yiq_imageB_prime = gpu.to_gpu(yiq_imageB_prime)
