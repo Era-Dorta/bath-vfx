@@ -9,6 +9,7 @@ close all;
 
 num_seg = 10;
 
+% Pixel positions known to be in the senter of each face segment
 segments_centres = [2540, 556;
     3260, 2124;
     2212, 3716;
@@ -20,7 +21,7 @@ segments_centres = [2540, 556;
     596, 1980;
     1260, 2044];
 
-%Switch x,y for matlab indexing
+% Switch x,y for matlab indexing
 segments_centres = [segments_centres(:,2), segments_centres(:,1)];
 
 data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry';
@@ -30,6 +31,8 @@ face_tex = imread('~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_
 create_disp_map = false;
 
 if create_disp_map
+    % Create a displacement map by taking the texture to gray and doing a
+    % histogrami equalization
     disp_map = histeq(rgb2gray(face_tex));
     imwrite(disp_map, [data_path '/synthesized/disp_map.png']);
     imshow(disp_map);
@@ -37,7 +40,7 @@ else
     disp_map = imread([data_path '/synthesized/disp_map.png']);
 end
 
-% 0 is background, 1 are lines
+% Negate the image so 0 is background, 1 are lines
 face_segmented = ~face_segmented;
 
 % Texture up-sampling
@@ -66,6 +69,7 @@ for i = 1:num_seg
         x = [max_indx(i), min_indx(i), min_indx(i), max_indx(i), max_indx(i)];
         y = [max_indy(i), max_indy(i), min_indy(i), min_indy(i), max_indy(i)];
         
+        % Display the sqaure
         disp_map1 = disp_map;
         disp_map1(region_pixels{i}) = 0;
         imshow(disp_map1);
@@ -73,7 +77,7 @@ for i = 1:num_seg
         plot(y, x, 'b-', 'LineWidth', 3);
         hold off;
         
-        % Get the image of the texture region
+        % Save an image as big as the square
         region_ori_tex = face_tex(min_indx(i):max_indx(i), min_indy(i):max_indy(i));
         path_b0 = [data_path '/synthesized/B0_' int2str(i) '.png'];
         imwrite(region_ori_tex, path_b0);
@@ -98,11 +102,13 @@ end
 
 %% Fill in the gaps with lineal interpolation
 
+% Set the borders initialy to not a number
 new_disp_map(face_segmented) = NaN;
 [border_row, border_col] = find(face_segmented == 1);
 
 index_fill = ones(size(border_row));
 
+% Interpolate with the vertical or horizontal neighbour pixels
 while( sum(index_fill) > 0)
     for i=1:size(border_row,1)
         if index_fill(i)
@@ -123,5 +129,6 @@ while( sum(index_fill) > 0)
     %disp(sum(index_fill));
 end
 
+%% Save the generated texture map
 new_disp_map = uint8(new_disp_map);
 imwrite(new_disp_map, [data_path '/synthesized/new_disp_map.png']);
