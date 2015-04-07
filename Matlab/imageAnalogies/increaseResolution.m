@@ -101,4 +101,27 @@ end
 new_disp_map(face_segmented) = NaN;
 [border_row, border_col] = find(face_segmented == 1);
 
-imshow(new_bump_map);
+index_fill = ones(size(border_row));
+
+while( sum(index_fill) > 0)
+    for i=1:size(border_row,1)
+        if index_fill(i)
+            c_row = border_row(i);
+            c_col = border_col(i);
+            if ~isnan(new_disp_map(c_row+1, c_col)) && ~isnan(new_disp_map(c_row-1, c_col))
+                new_disp_map(c_row, c_col) = 0.5 * (new_disp_map(c_row+1, c_col) + new_disp_map(c_row-1, c_col));
+                index_fill(i) = 0;
+            else
+                if ~isnan(new_disp_map(c_row, c_col+1)) && ~isnan(new_disp_map(c_row, c_col-1))
+                    new_disp_map(c_row, c_col) = 0.5 * (new_disp_map(c_row, c_col+1) + new_disp_map(c_row, c_col-1));
+                    index_fill(i) = 0;
+                end
+            end
+        end
+    end
+    % Uncomment to show the reamining pixels to be interpolated
+    %disp(sum(index_fill));
+end
+
+new_disp_map = uint8(new_disp_map);
+imwrite(new_disp_map, [data_path '/synthesized/new_disp_map.png'])
