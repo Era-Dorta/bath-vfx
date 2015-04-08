@@ -78,7 +78,8 @@ for i = 1:num_seg
         hold off;
         
         % Save an image as big as the square
-        region_ori_tex = face_tex(min_indx(i):max_indx(i), min_indy(i):max_indy(i));
+        % Add two extra pixels so the borders can be computed as well
+        region_ori_tex = face_tex(min_indx(i)-2:max_indx(i)+2, min_indy(i)-2:max_indy(i)+2);
         path_b0 = [data_path '/synthesized/B0_' int2str(i) '.png'];
         imwrite(region_ori_tex, path_b0);
     end
@@ -91,13 +92,16 @@ new_tex_seg = cell(num_seg,1);
 for i = 1:num_seg
     path_b1 = [data_path '/synthesized/B1_' int2str(i) '.png'];
     new_tex_seg{i} = imread(path_b1);
+    % Take out the two extra pixels for the borders
+    new_tex_seg{i} = new_tex_seg{i}(3:end-2,3:end-2);
 end
 
 %% Compose the generated textures
 new_disp_map = double(disp_map);
 
 for i = 1:num_seg
-    new_disp_map(region_pixels{i}) = new_tex_seg{i}(region_pixels{i}(min_indx(i):max_indx(i), min_indy(i):max_indy(i)));
+    new_disp_map(region_pixels{i}) = ...
+        new_tex_seg{i}(region_pixels{i}(min_indx(i):max_indx(i), min_indy(i):max_indy(i)));
 end
 
 %% Fill in the gaps with lineal interpolation
