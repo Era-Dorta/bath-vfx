@@ -36,7 +36,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 
 	// TODO Change pup:allBlends for name given by parameter
 	// Add blenshapes to the selection list
-	stat = MGlobal::getSelectionListByName("pup:allBlends", selection);
+	/*stat = MGlobal::getSelectionListByName("shapesBS", selection);
 	if (checkStat(stat, AT)) {
 		return MS::kFailure;
 	}
@@ -48,24 +48,24 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		return MS::kFailure;
 	}
 
-	MFnDagNode blendShapeFn(blendShapePath);
+	MFnDagNode blendShapeFn(blendShapePath);*/
 
 	// Get all user defined attributes
-	MString cmd("listAttr -userDefined pup:allBlends");
-	MStringArray referencedAttributes;
-	MGlobal::executeCommand(cmd, referencedAttributes);
+	MString cmd("getAttr -s shapesBS.weight");
+	int numWeights;
+	MGlobal::executeCommand(cmd, numWeights);
+	numWeights -= 1;
 
 	// Go through all the plugs and save the index of valid ones
-	for (unsigned i = 0; i < referencedAttributes.length(); i++) {
+	for (unsigned int i = 0; i < numWeights; i++) {
 
-		MPlug plug = blendShapeFn.findPlug(referencedAttributes[i], true);
-		MFnAttribute mfnAttr(plug);
 
-		if (mfnAttr.isReadable() && !plug.isNull()) {
-			attrIndices.push_back(i);
-			// Testing: set them to 0.5
-			dgMod.newPlugValueFloat(plug, 0.5);
-		}
+		cmd = "setAttr shapesBS.weight[";
+		cmd = cmd + i;
+		cmd = cmd +"] ";
+		cmd = cmd + 0.01;
+		MGlobal::executeCommand(cmd);
+		
 	}
 
 	return redoIt();
