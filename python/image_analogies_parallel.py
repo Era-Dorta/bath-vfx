@@ -46,11 +46,13 @@ __global__ void rgb_kernel(double* yiq, double* rgb, int total_pixels)
 {
     int gid = blockIdx.x * blockDim.x + threadIdx.x;
     if (gid < total_pixels){
-        double pix[1];
-        #for $i in range(1)
-            pix[$i] = yiq[gid + $i];
+        double pix[3];
+        #for $i in range(3)
+            pix[$i] = yiq[3 * gid + $i];
         #end for
-        rgb[gid] = fmax(0., pix[0] / 255.);
+        rgb[3 * gid] = fmax(0., (pix[0] + $TO_RGB[0][0] * pix[1] + $TO_RGB[0][1] * pix[2]) / 255.);
+        rgb[3 * gid + 1] = fmax(0., (pix[0] + $TO_RGB[1][0] * pix[1] + $TO_RGB[1][1] * pix[2]) / 255.);
+        rgb[3 * gid + 2] = fmax(0., (pix[0] + $TO_RGB[2][0] * pix[1] + $TO_RGB[2][1] * pix[2]) / 255.);
     }
 }
 
@@ -187,8 +189,8 @@ if __name__ == '__main__':
         B_prime_name = argv[4]
 
         # determine the shape of each image
-        heightA, widthA = imageA.shape
-        heightB, widthB = imageB.shape
+        heightA, widthA, _ = imageA.shape
+        heightB, widthB, _ = imageB.shape
         num_pixelsA = np.int32(heightA * widthA)
         num_pixelsB = np.int32(heightB * widthB)
 
@@ -206,6 +208,9 @@ if __name__ == '__main__':
 
         # Get kernel functions
         analogy_module = nvcc.SourceModule(get_analogy_template(heightA, widthA, heightB, widthB, num_pixelsA))
+        y_kernel = analogy_module.get_function("y_kernel")
+        i_kernel = analogy_module.get_function("i_kernel")
+        q_kernel = analogy_module.get_function("q_kernel")
         rgb_kernel = analogy_module.get_function("rgb_kernel")
         feature_kernel = analogy_module.get_function("feature_kernel")
         similar_kernel = analogy_module.get_function("similar_kernel")
@@ -222,6 +227,35 @@ if __name__ == '__main__':
         d_imageA_prime = gpu.to_gpu(np.float64(np.array(imageA_prime)))
         d_imageB = gpu.to_gpu(np.float64(np.array(imageB)))
       
+        d_y_imageA = gpu.zeros((heightA, widthA), dtype = np.float64)
+        y_kernel(d_imageA, d_y_imageA, num_pixelsA, block = block_size_1D, grid = grid_size_A_1D)
+        y_imageA = d_y_imageA.get()
+
+        d_y_imageA_prime = gpu.zeros((heightA, widthA), dtype = np.float64)
+        y_kernel(d_imageA_prime, d_y_imageA_prime, num_pixelsA, block = block_size_1D, grid = grid_size_A_1D)
+        y_imageA_prime = d_y_imageA_prime.get()
+
+        d_y_imageB = gpu.zeros((heightB, widthB), dtype = np.float64)
+        y_kernel(d_imageB, d_y_imageB, num_pixelsB, block = block_size_1D, grid = grid_size_B_1D)
+        y_imageB = d_y_imageB.get()
+
+        d_i_imageB = gpu.zeros((heightB, widthB), dtype = np.float64)
+        i_kernel(d_imageB, d_i_imageB, num_pixelsB, block = block_size_1D, grid = grid_size_B_1D)
+        i_imageB = d_i_imageB.get()
+
+        d_q_imageB = gpu.zeros((heightB, widthB), dtype = np.float64)
+        q_kernel(d_imageB, d_q_imageB, num_pixelsB, block = block_size_1D, grid = grid_size_B_1D)
+        q_imageB = d_q_imageB.get()
+
+        # END TIMER
+        end_gpu_time.record()
+        end_gpu_time.synchronize()
+        gpu_time = start_gpu_time.time_till(end_gpu_time) * 1e-3
+
+        print "Done with conversion to YIQ"
+        print "GPU Time: %f" % gpu_time
+
+
         # FEATURE VECTORS
 
         # START TIMER
@@ -229,19 +263,19 @@ if __name__ == '__main__':
 
         
         d_feature_imageA = gpu.zeros((heightA, widthA, 25), dtype = np.float64)
-        feature_kernel(d_imageA, d_feature_imageA, np.int32(heightA), np.int32(widthA), block = block_size_2D, grid = grid_size_A_2D)
+        feature_kernel(d_y_imageA, d_feature_imageA, np.int32(heightA), np.int32(widthA), block = block_size_2D, grid = grid_size_A_2D)
         feature_vectorA = d_feature_imageA.get()
 
         d_feature_imageA_prime = gpu.zeros((heightA, widthA, 25), dtype = np.float64)
-        feature_kernel(d_imageA_prime, d_feature_imageA_prime, np.int32(heightA), np.int32(widthA), block = block_size_2D, grid = grid_size_A_2D)
+        feature_kernel(d_y_imageA_prime, d_feature_imageA_prime, np.int32(heightA), np.int32(widthA), block = block_size_2D, grid = grid_size_A_2D)
         feature_vectorA_prime = d_feature_imageA_prime.get()
 
         d_feature_imageB = gpu.zeros((heightB, widthB, 25), dtype = np.float64)
-        feature_kernel(d_imageB, d_feature_imageB, np.int32(heightB), np.int32(widthB), block = block_size_2D, grid = grid_size_B_2D)
+        feature_kernel(d_y_imageB, d_feature_imageB, np.int32(heightB), np.int32(widthB), block = block_size_2D, grid = grid_size_B_2D)
         feature_vectorB = d_feature_imageB.get()
         # similar_kernel = analogy_module.get_function("similar_kernel")
 
-        d_imageB_prime = gpu.zeros((heightB, widthB), dtype = np.float64)
+        d_y_imageB_prime = gpu.zeros((heightB, widthB), dtype = np.float64)
         d_match_list = gpu.zeros((heightB, widthB), dtype = np.int32)
 
         # END TIMER
@@ -267,8 +301,8 @@ if __name__ == '__main__':
             d_jminlist = gpu.to_gpu(np.array(jminlist, dtype = np.int32))
             d_iminlist = gpu.to_gpu(np.array(iminlist, dtype = np.int32))
 
-            ann_helper_kernel(d_imageA_prime, d_imageB_prime, d_match_list, d_jminlist, d_iminlist, block = block_size_2D, grid = grid_size_B_2D)
-            return d_match_list.get(), d_imageB_prime.get()
+            ann_helper_kernel(d_y_imageA_prime, d_y_imageB_prime, d_match_list, d_jminlist, d_iminlist, block = block_size_2D, grid = grid_size_B_2D)
+            return d_match_list.get(), d_y_imageB_prime.get()
 
         feature_vectorA.shape = (num_pixelsA, 25)
         feature_vectorB.shape = (num_pixelsB, 25)
@@ -279,7 +313,7 @@ if __name__ == '__main__':
         trainset = np.array(feature_vectorA, dtype=np.float32)
         params = dict(algorithm=1,trees=4)
         flnn = cv2.flann_Index(trainset,params)
-        imageB_match, imageB_prime = ANNalgo(flnn, np.float32(feature_vectorA_prime), np.float32(feature_vectorB))
+        imageB_match, y_imageB_prime = ANNalgo(flnn, np.float32(feature_vectorA_prime), np.float32(feature_vectorB))
 
         # END TIMER
         end_gpu_time.record()
@@ -309,29 +343,29 @@ if __name__ == '__main__':
         feature_vectorB.shape = (heightB, widthB, 25)
 
         split_imageB_match = []
-        split_imageB_prime = []
+        split_y_imageB_prime = []
         for i in range(size - 1):
             split_imageB_match.append(imageB_match[i * heightB / size : (i + 1) * heightB / size])
-            split_imageB_prime.append(imageB_prime[i * heightB / size : (i + 1) * heightB / size])
+            split_y_imageB_prime.append(y_imageB_prime[i * heightB / size : (i + 1) * heightB / size])
         split_imageB_match.append(imageB_match[(size - 1) * heightB / size:])
-        split_imageB_prime.append(imageB_prime[(size - 1) * heightB / size:])
+        split_y_imageB_prime.append(y_imageB_prime[(size - 1) * heightB / size:])
     else:
         feature_vectorA = None
         feature_vectorB = None
-        imageA_prime = None
+        y_imageA_prime = None
         split_imageB_match = None
-        split_imageB_prime = None
+        split_y_imageB_prime = None
 
     comm.barrier()
-    b_prime = MPI_coherence(comm, rank, feature_vectorA, feature_vectorB, split_imageB_match, imageA_prime, split_imageB_prime)
+    b_prime = MPI_coherence(comm, rank, feature_vectorA, feature_vectorB, split_imageB_match, y_imageA_prime, split_y_imageB_prime)
     
     # regrouping image and converting back to RGB
     if rank == 0:
         end = time.time()
         print "MPI coherence: %f" % (end - start)
-        imageB_prime = []
+        y_imageB_prime = []
         for mini_list in b_prime:
-            imageB_prime.extend(mini_list.flatten())
+            y_imageB_prime.extend(mini_list.flatten())
           
         # Free some GPU memory by deleting variables that hold references 
         # to GPU data, and wait a bit to allow the garbage collector to work 
@@ -340,14 +374,13 @@ if __name__ == '__main__':
         del d_feature_imageA
         del d_feature_imageB
         del d_imageA_prime
-        time.sleep(5)
-        
+            
         # START TIMER
         start_gpu_time.record()        
         
-        yiq_imageB_prime = np.float64(np.array(zip(np.array(imageB_prime))))
+        yiq_imageB_prime = np.float64(np.array(zip(np.array(y_imageB_prime), i_imageB.flatten(), q_imageB.flatten())))
         d_yiq_imageB_prime = gpu.to_gpu(yiq_imageB_prime)
-        d_rgb_imageB_prime = gpu.zeros((heightB, widthB), dtype = np.float64)
+        d_rgb_imageB_prime = gpu.zeros((heightB, widthB, 3), dtype = np.float64)
         rgb_kernel(d_yiq_imageB_prime, d_rgb_imageB_prime, num_pixelsB, block = block_size_1D, grid = grid_size_B_1D)
         rgb_imageB_prime = d_rgb_imageB_prime.get()
 
