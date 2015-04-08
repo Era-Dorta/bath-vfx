@@ -332,10 +332,7 @@ if __name__ == '__main__':
         imageB_prime = []
         for mini_list in b_prime:
             imageB_prime.extend(mini_list.flatten())
-   
-        # START TIMER
-        start_gpu_time.record()
-        
+          
         # Free some GPU memory by deleting variables that hold references 
         # to GPU data, and wait a bit to allow the garbage collector to work 
         del d_imageA
@@ -344,6 +341,9 @@ if __name__ == '__main__':
         del d_feature_imageB
         del d_imageA_prime
         time.sleep(5)
+        
+        # START TIMER
+        start_gpu_time.record()        
         
         yiq_imageB_prime = np.float64(np.array(zip(np.array(imageB_prime))))
         d_yiq_imageB_prime = gpu.to_gpu(yiq_imageB_prime)
