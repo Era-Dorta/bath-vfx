@@ -1,0 +1,33 @@
+INCLUDE = -I$(GLUTTOP)/include -I$(GLUI)/include -Iann_0.2/include
+
+CSRCS = 
+CPPSRCS = BmpReader.cpp color.cpp lf.cpp MLP.cpp TSVQR.cpp \
+	bd_tree.cpp kd_pr_search.cpp kd_search.cpp kd_split.cpp \
+	kd_tree.cpp kd_util.cpp ParseArgs.cpp SearchEnvironment.cpp
+CPPNOH =ANN.cpp bd_pr_search.cpp bd_search.cpp brute.cpp 
+INLHDRS = FilterLearnerInline.h CVectorInline.h ImageInline.h PyramidInline.h \
+	TSVQInline.h 
+HDRS = ${CPPSRCS:.cpp=.h} ${CSRCS:.c=.h} ${INLHDRS:Inline.h=.h} \
+	TSVQ.h compat.h cvec2t.h cvec3t.h pyramid.h my_lapack.h FlagPyramid.h \
+	Histogram.h pr_queue_k.h
+OBJS = ${CPPSRCS:.cpp=.o} ${CPPNOH:.cpp=.o} ${CSRCS:.c=.o}
+TARGET = lf
+
+.SUFFIXES: .cpp .c
+
+.cpp.o:
+	$(CCC) $(CC_FLAGS) $(INCLUDE) -c $<
+
+.c.o:  
+	$(CC) $(CC_FLAGS) $(INCLUDE) -c $<
+
+all:$(TARGET)
+
+$(TARGET):   $(OBJS)
+	@echo Compiling $@
+	$(CCC) $(CC_FLAGS) $(OBJS) $(LDFLAGS) $(LDLIBS) -o $(TARGET)
+	@echo
+	@echo $@ is made.
+
+clean:
+	rm $(OBJS) lf.exe

@@ -1,0 +1,15 @@
+useFilter: true
+
+srcExample: images/oxbow-mask.png
+filteredExample: images/oxbow.png
+srcImage: images/oxbow-newmask.png
+
+coherenceEps: 10
+useSplineWeights: true
+samplerEpsilon: 0.1
+
+useYIQ: false
+matchMeanVariance: false
+
+useInterface: false
+

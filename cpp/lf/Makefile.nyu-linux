@@ -1,0 +1,19 @@
+GLUI = /home/hertzman/glui_v2beta_linux
+
+CC = gcc
+CCC = g++
+
+#OPT_FLAGS = -g   # -I/usr/X11R6/include
+OPT_FLAGS = -O9 -DNDEBUG -funroll-loops  -march=i686
+
+
+CC_FLAGS = $(OPT_FLAGS) -MD -D__UNIX__ -DTHREADS -DUSE_LIBPNG   -DLAPACK
+
+LDLIBS = -L$(GLUI)/lib -L/usr/X11R6/lib \
+	 -lglut -lglui -lGL -lGLU -lXmu -lX11 -lm -lpng \
+	-lpthread -llapack -lblas -lF77 -lI77
+
+include Makefile-rules
+include ${OBJS:.o=.d}
+
+

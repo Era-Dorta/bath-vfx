@@ -1,0 +1,15 @@
+useFilter: true
+
+srcExample: images/newreflect3-src.png
+filteredExample: images/newreflect3.png
+srcImage: images/darkclouds.png
+
+coherenceEps: 5
+useSplineWeights: true
+samplerEpsilon: 0.1
+
+useYIQ: true
+matchMeanVariance: true
+
+useInterface: false
+

@@ -1,0 +1,21 @@
+GLUTTOP = /home/meyer/gl/glut-3.6
+GLUI = /u/hertzman/glui_v2beta_aix
+
+CC = gcc
+CCC = g++
+
+OPT_FLAGS = -g
+#OPT_FLAGS = -O2 -OPT:Olimit=0
+#OPT_FLAGS = -O2 -OPT:Olimit=0  -DNDEBUG
+
+
+
+CC_FLAGS = $(OPT_FLAGS)     -M   -Wall
+
+LDLIBS = -L$(GLUTTOP)/lib/glut.n32 -L$(GLUI)/lib \
+	 -lglui -lglut -lGL -lGLU -lXmu -lX11 -lm 
+
+include Makefile-rules
+include ${OBJS:.o=.u}
+
+
