@@ -807,7 +807,7 @@ ApplyPrediction(Point2 targetLoc, int currLevel, Point2 bestLoc,
     GetNeighborhoodDist(targetLoc,bestLoc,currLevel,isValid,
 			m_neighborhoodWidth) * coherenceFac;
   
-  assert(isValid);
+  //assert(isValid);
       
   for(set<Point2>::iterator it=candidates.begin();it!=candidates.end();++it)
     {
@@ -2196,7 +2196,7 @@ GetNeighborhoodDist( Point2 targetLoc, Point2 srcLoc, int currLevel,
       if (!isValid)
 	return -1;
 
-      if (d2 >= 0 && !isnan(d2))
+      if (d2 >= 0 && !std::isnan(d2))
 	{
 	  d2 *= levelWeight;
 	  dist += d2 * levelWeight;
@@ -2292,7 +2292,7 @@ GetNeighborhoodDistForLevel( Point2 targetLoc, Point2 srcLoc,
       double weight = m_kernel->get(neighborhoodWidth,iix)*
 	m_kernel->get(neighborhoodWidth,iiy);
       
-      if (isnan(weight))
+      if (std::isnan(weight))
 	printf("weight = %f, m_sourceFac = %f,iix = %d,iiy = %d,k[iix]=%f,k[iiy]=%f\n",weight,m_sourceFacNow,iix,iiy,m_kernel->get(neighborhoodWidth,iix),m_kernel->get(neighborhoodWidth,iiy));
       
       assert(weight > 0);
@@ -2325,7 +2325,7 @@ GetNeighborhoodDistForLevel( Point2 targetLoc, Point2 srcLoc,
 	  //		  validPixels++;
 	  hitValidPixel = true;
 
-	  assert(!isnan(dist) && !isnan(totalWeight));
+	  assert(!std::isnan(dist) && !std::isnan(totalWeight));
 	}
 	else // really penalize stuff that goes off the edge
 	{
@@ -2374,7 +2374,7 @@ GetNeighborhoodDistForLevel( Point2 targetLoc, Point2 srcLoc,
 	  //		  validPixels++;
 	  hitValidPixel = true;
 
-	  assert(!isnan(dist) && !isnan(totalWeight));
+	  assert(!std::isnan(dist) && !std::isnan(totalWeight));
 	}
 	else // really penalize stuff that goes off the edge
 	{
@@ -2397,7 +2397,7 @@ GetNeighborhoodDistForLevel( Point2 targetLoc, Point2 srcLoc,
   if( totalWeight > 0 )
     dist /= (totalWeight*totalWeight);
 
-  assert(!isnan(dist));
+  assert(!std::isnan(dist));
   assert(dist >= 0);
 
   //  printf(", final dist = %f\n",dist);
@@ -2455,10 +2455,10 @@ FindBestMatchLocParent( Point2 targetLoc, Point2 srcLoc,
   float divisor = pow2( maxLevel - minLevel );
   Point2 newTargetLoc = Point2( targetLoc[0] / divisor, targetLoc[1] / divisor );
 
-  bool thisValid = false;
+  bool thisValid = false, hitValid;
   float dist = GetNeighborhoodDistForLevel( newTargetLoc, 
 					    srcLoc,
-					    maxLevel, thisValid );
+					    maxLevel, thisValid, hitValid,5,false);
   isValid = isValid || thisValid;
 
   if( cumulDist >= 0 && dist >= 0 )

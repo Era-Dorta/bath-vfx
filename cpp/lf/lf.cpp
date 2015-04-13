@@ -11,7 +11,7 @@ extern "C" {
 
 #include <string.h>
 #include <GL/glut.h>
-#include <glui.h>
+#include <GL/glui.h>
 
 #include "compat.h"
 #include "Image.h"
@@ -2353,6 +2353,7 @@ int main(int argc, char* argv[])
 
   if( useInterface )
   {
+	glutInit(&argc, argv);
     createUI();
     
     // --- enter the main loop --- 

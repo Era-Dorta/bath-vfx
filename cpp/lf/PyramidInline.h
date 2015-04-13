@@ -178,7 +178,7 @@ makePyramid(int levels,int imWidth,int imHeight,int imDim,PyramidType ptype)
 {
   assert(imDim > 0);
 	// if steerable pyramid return because the filter is missing
-  assert(ptype==STEERABLE_PYRAMID);
+  assert(ptype!=STEERABLE_PYRAMID);
   _myType = ptype;
   if (_imgs != NULL)
     {
