@@ -1,27 +1,51 @@
-function [newPoints] = ReEstimatePoints(I, points)
+function [newPoints] = ReEstimatePoints(I, points, inliers)
 
-h = figure; imshow(I); hold on;
-plot(points(1,:),points(2,:),'y+');
 newPoints = points;
+plotPoints = [];
 
-while(true)
-    [px, py, button] = ginput(1);
+figure; imshow(I); hold on;
+plot(points(1,:),points(2,:),'y+');
+plot(inliers(1,:),inliers(2,:),'gO');
+hold off;
+
+s = 30;
+scale = 5;
+count = 1;
+
+while(true)    
+    [c,r,button] = ginput(1);
     if button ~= 1
         break;
     end
-    p = [px,py];
+    p = [c,r];
     k = dsearchn(points',p);
-    plot(points(1,k),points(2,k),'rO'); hold on;
     
-    [px, py, button] = ginput(1);
+    wc1 = c-s; wc2 = c+s;
+    wr1 = r-s; wr2 = r+s;
+    w = I(wr1:wr2,wc1:wc2);
+    w = imresize(w,scale);
+    imshow(w,[]); 
+        
+    [c,r,button] = ginput(1);
     if button ~= 1
         break;
     end
-    newPoints(:,k) = [px,py]';
-    plot(newPoints(1,k),newPoints(2,k),'r*'); hold on;
+    c = wc1 + c/scale - 0.5;  
+    r = wr1 + r/scale - 0.5;
+    
+    newPoints(:,k) = [c,r]';
+    plotPoints(:,count) = [c,r]';
+    count = count + 1;
+    
+    imshow(I,[]); hold on;
+    plot(points(1,:),points(2,:),'y+');
+    plot(inliers(1,:),inliers(2,:),'gO');
+    plot(plotPoints(1,:),plotPoints(2,:),'r*');
+    hold off;
 end
+
 imshow(I); hold on;
-plot(newPoints(1,:),newPoints(2,:),'rO'); hold on;
+plot(newPoints(1,:),newPoints(2,:),'rO');
 % Display feature numbers
 for i = 1:size(newPoints,2)
     text(newPoints(1,i),newPoints(2,i),num2str(i));

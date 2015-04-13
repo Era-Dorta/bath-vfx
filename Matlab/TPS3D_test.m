@@ -6,9 +6,9 @@ addpath(genpath('WOBJ_toolbox_Version2b'));
 
 %% Load sparse points
 load('X_0300'); % Richard neutral (sparse)
-load('X_emilyface'); % Victor neutral (sparse)
 Xn = X;
-X_emily = X_emilyface;
+load('X_emilyface'); % Victor neutral (sparse)
+X_emily = X;
 tri = delaunay(Xn(:,1),Xn(:,2)); % Delaunay triangulation
 
 % Show Richard neutral (sparse)
@@ -27,15 +27,14 @@ for i = 1:97
     text(X_emily(i,1),X_emily(i,2),X_emily(i,3)+0.1,num2str(i));
 end
 
-%% Load Victor OBJ (dense)
+%% Load Emily OBJ (dense)
 if ~(exist('OBJ', 'var'))
 %     OBJ = read_wobj('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Victor\victorHead.obj');
 %     OBJ = read_wobj('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Emily\Emily.obj');
     OBJ = read_wobj('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Emily\EmilyFace.obj');
 end
 % T = OBJ.objects.data.vertices;
-% T = OBJ.objects(5).data.vertices;
-T = OBJ.objects(6).data.vertices;
+T = OBJ.objects(5).data.vertices;
 v = OBJ.vertices;
 figure(3);
 trisurf(T, v(:, 1), v(:,2), v(:,3), ones(1,size(v,1)));
@@ -49,7 +48,7 @@ trisurf(tri, w(:, 1), w(:,2), w(:,3), ones(1,size(w,1)));
 axis equal; alpha(1.0);
 
 %% Brow raise
-load('X_1556'); % Load Richard brow raise (sparse)
+load('Xa_8230'); % Load Richard brow raise (sparse)
 Xnew = X;
 % Transform Richard brow raise (sparse) to Victor brow raise (sparse) 
 wtemp = TSP3DTransformPoints(param, Xn, Xnew);
@@ -62,3 +61,8 @@ axis equal; alpha(1.0);
 figure(6);
 trisurf(T, w2(:, 1), w2(:,2), w2(:,3), ones(1,size(w2,1)));
 axis equal; axis([-15 15 -15 10 -15 15]); view([0 90]); alpha(1.0);
+
+%% Save new OBJ
+OBJnew = OBJ;
+OBJnew.vertices = w2;
+write_wobj(OBJnew, 'Emily_mouthopen.obj');

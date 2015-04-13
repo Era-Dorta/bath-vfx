@@ -37,6 +37,10 @@ for i = 1:numFeatures
     text(points_left(1,i),points_left(2,i),num2str(i));
     text(points_right(1,i)+width,points_right(2,i),num2str(i));
 end
+points_left = ReEstimatePoints(im_left, points_left, points_left);
+points_right = ReEstimatePoints(im_right, points_right, points_right);
+points_left(2,:) = (points_left(2,:) + points_right(2,:))./2; 
+points_right(2,:) = points_left(2,:);
 % Store movie frame
 if isunix
     Mov(1) = im2frame([im_left,im_right], gray(256));
@@ -87,10 +91,26 @@ for frame = (firstFrame+1):lastFrame
     % Estimate the geometric transformation between the old points
     % and the new points and eliminate outliers
     [xform_left, oldInliers_left, visiblePoints_left] = estimateGeometricTransform(...
-        oldInliers_left, visiblePoints_left, 'similarity', 'MaxDistance', 4);
+        oldInliers_left, visiblePoints_left, 'similarity', 'MaxDistance', 2);
     [xform_right, oldInliers_right, visiblePoints_right] = estimateGeometricTransform(...
-            oldInliers_right, visiblePoints_right, 'similarity', 'MaxDistance', 4);
-    
+            oldInliers_right, visiblePoints_right, 'similarity', 'MaxDistance', 2);
+        
+    [X,Y] = transformPointsForward(xform_left,oldPoints_left(:,1),oldPoints_left(:,2));
+    predict_left = [X';Y'];
+    [X,Y] = transformPointsForward(xform_right,oldPoints_right(:,1),oldPoints_right(:,2));
+    predict_right = [X';Y'];
+        
+    % If points are lost, break loop
+    if size(visiblePoints_left,1)<numFeatures || size(visiblePoints_right,1)<numFeatures
+        disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
+        % Re-estimate points in last frame
+        visiblePoints_left = ReEstimatePoints(newImg_left, double(predict_left), visiblePoints_left');
+        visiblePoints_right = ReEstimatePoints(newImg_right, double(predict_right), visiblePoints_right');
+        visiblePoints_left = single(visiblePoints_left)';
+        visiblePoints_right = single(visiblePoints_right)';
+        pause;
+    end
+        
     % Display tracked points
     newImg_left = insertMarker(newImg_left, visiblePoints_left, '+', ...
             'Color', 'white');
@@ -109,20 +129,8 @@ for frame = (firstFrame+1):lastFrame
         Mov(count) = im2frame(newImg, gray(256));
     else
         Mov(count) = im2frame(flipud(newImg), gray(256));
-    end
-       
-    % If points are lost, break loop
-    if size(visiblePoints_left,1)<numFeatures || size(visiblePoints_right,1)<numFeatures
-        numImgs = frame-1;
-        disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
-        % Re-estimate points in last frame
-        newImg_left = imread([folder_left '/' sDir_left(frame).name]);
-        newImg_right = imread([folder_right '/' sDir_right(f).name]);
-        points_left = ReEstimatePoints(newImg_left, points_left);
-        points_right = ReEstimatePoints(newImg_right, points_right);
-%         break;
-    end
-    
+    end 
+        
     % Store points
     storePoints_left(:,:,frame) = visiblePoints_left';
     storePoints_right(:,:,frame) = visiblePoints_right';
