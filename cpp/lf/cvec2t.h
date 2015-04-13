@@ -10,6 +10,8 @@
 #include "compat.h"
 #include <float.h>
 #include <math.h>
+#include <istream>
+#include <ostream>
 /*
 inline double min(double x, double y){ return x<=y?x:y;}
 inline double max(double x, double y){ return x>=y?x:y;}
@@ -20,7 +22,7 @@ inline int max(int x, int y){ return x>=y?x:y;}
 template <class F> class CVec2T;
 
 template <class F>
-istream& operator>> ( istream& is, CVec2T<F>& v) {
+std::istream& operator>> ( std::istream& is, CVec2T<F>& v) {
   is >> v.v[0];
   is >> v.v[1];
   return is;
@@ -151,7 +153,7 @@ public:
 
 
 template <class F>
-ostream& operator<<( ostream& os, const CVec2T<F>& v) {
+std::ostream& operator<<( std::ostream& os, const CVec2T<F>& v) {
   return os << v(0) << " " << v(1);
 }
 

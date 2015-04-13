@@ -69,6 +69,7 @@ CVector<T> & CVector<T>::operator=(const CVector & v)
 }
 
 #ifdef LAPACK
+template <>
 inline CVector<double> & CVector<double>::operator+=(const CVector & v)
 {
   assert(_length == v._length);
@@ -78,6 +79,7 @@ inline CVector<double> & CVector<double>::operator+=(const CVector & v)
   return *this;
 }
 
+template <>
 inline CVector<double> & CVector<double>::operator-=(const CVector & v)
 {
   assert(_length == v._length);
@@ -304,6 +306,7 @@ void CVector<T>::printFloat(FILE * fp)
 }
       
 #ifdef LAPACK
+template<> 
 inline double CVector<double>::L2() const
 {
   int one = 1;
@@ -326,6 +329,7 @@ T CVector<T>::sum() const
 template<class T> 
 T CVector<T>::L2sqr() const { return dot(*this); }
 
+template<>
 inline CVector<double> CVector<double>::sigmoid() const 
 {
   double * data = new double[_length];
@@ -341,7 +345,7 @@ inline CVector<double> CVector<double>::sigmoid() const
   return CVector<double>(_length,data);
 }
 
-
+template<>
 inline CVector<double> CVector<double>::tanh() const 
 {
   double * data = new double[_length];

@@ -158,6 +158,7 @@ CMatrix<T>::transpose() const
 
 
 #ifdef LAPACK
+template<> 
 inline CVector<double> 
 CMatrix<double>::symmetricEigenvalues()
 {
@@ -199,7 +200,7 @@ CMatrix<double>::symmetricEigenvalues()
   return CVector<double>(_rows,eigsfull);
 }
 
-
+template<> 
 inline CVector<double> 
 CMatrix<double>::symmetricEigenvectors(CMatrix<double> & evecs,
 				      int maxVal, int minVal)
@@ -433,6 +434,7 @@ T CMatrix<T>::sumsqr() const
 }
 
 #ifdef LAPACK
+template<> 
 inline CMatrix<double> & CMatrix<double>::operator+=(const CMatrix & v)
 {
   assert(_rows == v._rows && _columns == v._columns);

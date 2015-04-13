@@ -47,8 +47,8 @@ extern "C"
 	     double *z__, int *ldz, double *work, int *lwork, 
 	     int *iwork, int *ifail, int *info);
 
-  int DGESV(int *n, int *n, double *A, int *n, int * ipiv,
-	    double *B, int * ldb, int * info);
+  //int DGESV(int *m, int *n, double *A, int *n, int * ipiv,
+//	    double *B, int * ldb, int * info);
 
   int DGESVD(char * jobu, char * jobvt, int * m, int * n,
 	     double * A, int * lda, double * s, double * u,

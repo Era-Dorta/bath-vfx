@@ -130,7 +130,7 @@ public:
 
   int NumExamplePairs( void ) { return m_filteredExamplePyramid.size(); }
   Pyramid<TSrcImage> & sourceExamplePyramid( int num = 0 ) { return m_sourceExamplePyramid[num]; }
-  const Pyramid<TSrcImage> & sourceExamplePyramid( int nu = 0 ) const { return m_sourceExamplePyramid[num]; }
+  const Pyramid<TSrcImage> & sourceExamplePyramid( int num = 0 ) const { return m_sourceExamplePyramid[num]; }
 
   Pyramid<TSrcImage> & sourcePyramid() { return m_sourcePyramid; }
   const Pyramid<TSrcImage> & sourcePyramid() const { return m_sourcePyramid; }

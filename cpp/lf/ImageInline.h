@@ -2,19 +2,26 @@ enum ImageFileFormat { UNKNOWN_FORMAT, BMP_FORMAT, PNM_FORMAT, PNG_FORMAT,
 		       RAW_FORMAT };
 // image formats we can read
 
+template<> 
 inline int Image<GLubyte>::mytype() const { return GL_UNSIGNED_BYTE; }
 
+template<> 
 inline int Image<GLfloat>::mytype() const { return GL_FLOAT; }
 
+template<> 
 inline int Image<GLshort>::mytype() const { return GL_SHORT; }
+
+template<> 
 inline int Image<GLint>::mytype() const { return GL_INT; }
 
+template<> 
 inline GLubyte Image<GLubyte>::maxVal() const { return 255; }
 
+template<> 
 inline GLfloat Image<GLfloat>::maxVal() const { return 1; }
 
+template<> 
 inline GLint Image<GLint>::maxVal() const { return 1; }
-
 
 inline
 ImageFileFormat getFileFormat( const char *filename )
@@ -628,6 +635,7 @@ Image<T> * Image<T>::upsample()
   return img;
 }
 
+template<> 
 inline
 void ColorImage::loadPNM( const char * filename)
 {
@@ -759,6 +767,7 @@ void ColorImage::loadPNM( const char * filename)
   fclose(fp);
 }
 
+template<> 
 inline
 void ColorImage::savePNG(const char * filename)
 {
@@ -867,6 +876,7 @@ void ColorImage::savePNG(const char * filename)
 #endif
 }
 
+template<> 
 inline
 void ColorImage::loadPNG( const char * filename)
 {
@@ -1113,6 +1123,7 @@ bool Image<T>::loadBMP( const char *filename )
   return true;
 }
 
+template<> 
 ColorImage::Image(const char *filename)  : 
   _pixels(NULL), _width(-1), _height(-1), _dim(3), _winx(-1), _winy(-1), _colorspace( RGB_SPACE )
 {
@@ -1148,7 +1159,7 @@ ColorImage::Image(const char *filename)  :
 }
 
 template <class T>
-Image<T>::Image<T>(const char * filename) : 
+Image<T>::Image(const char * filename) : 
   _pixels(NULL), _width(-1), _height(-1), _dim(3), _winx(-1), _winy(-1), _colorspace( RGB_SPACE )
 {
   //  assert(_dim == 3 || _dim == 4);

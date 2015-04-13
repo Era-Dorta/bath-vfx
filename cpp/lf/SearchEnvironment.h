@@ -87,4 +87,4 @@ protected:
 
 
 
-#endif SEARCHENVIRONMENT_H
+#endif //SEARCHENVIRONMENT_H

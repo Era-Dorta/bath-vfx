@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "ParseArgs.h"
 #include "compat.h"
+#include <strstream>
+#include <cstring>
 
 
 void ParseArgs::ParseInput( int argc, char *argv[] )
@@ -34,7 +36,7 @@ void ParseArgs::ParseInput( char *filename )
     if( buffer[0] == '#' )
       continue;
 
-    istrstream lineStream( buffer );
+    std::istrstream lineStream( buffer );
     while( lineStream >> name )
       m_inputParams.push_back( name );
   }

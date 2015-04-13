@@ -4,7 +4,7 @@
 
 
 
-#include <assert.h>
+#include <cassert>
 
 
 
@@ -39,7 +39,7 @@
 
 #include <fstream>
 
-#include <strstream>
+//#include <strstream>
 
 #else 
 
@@ -61,13 +61,9 @@
 
 // in other cases need this to avoid std:: prefixes
 
-#if ( defined(_WIN32) || defined(__sgi) ) && !defined(__GNUG__)
-
 namespace std {}
 
 using namespace std;
-
-#endif
 
 
 
@@ -91,11 +87,8 @@ class bidirectional_iterator: public iterator<bidirectional_iterator_tag,T,dist>
 
 
 
-#if (defined(__sgi) || defined(__GNU__))
+#include <algorithm>
 
-#include <algobase.h>
-
-#endif
 
 
 

@@ -14,7 +14,7 @@ TSVQ<PointN>::TSVQ(const vector<PointN*> & points, float maxError,
   if ( !m_leafNode)
     {
       m_leafNode = true;
-      for(vector<PointN*>::const_iterator it = points.begin(); it != points.end(); ++ it)
+      for(typename vector<PointN*>::const_iterator it = points.begin(); it != points.end(); ++ it)
 	if ( cent.dist(*(*it)) > maxError)
 	  {
 	    m_leafNode = false;
@@ -82,7 +82,7 @@ TSVQ<PointN>::TSVQ(const vector<PointN*> & points, float maxError,
       npts1 = 0;
       npts2 = 0;
 
-      for(vector<PointN*>::const_iterator it = points.begin(); 
+      for(typename vector<PointN*>::const_iterator it = points.begin(); 
 	  it != points.end(); ++it)
 	{
 	  if ( oldcenter1.dist2(**it) < oldcenter2.dist2(**it) )
@@ -126,7 +126,7 @@ TSVQ<PointN>::TSVQ(const vector<PointN*> & points, float maxError,
   assert(m_center2.dist(oldcenter2) < 1e-8 || n == 1);
   
   vector<PointN*> pts1, pts2;
-  for(vector<PointN*>::const_iterator it = points.begin(); 
+  for(typename vector<PointN*>::const_iterator it = points.begin(); 
       it != points.end(); ++it)
     if ( m_center1.dist2(**it) < m_center2.dist2(**it) )
       pts1.push_back(*it); 
@@ -217,7 +217,7 @@ template <class PointN>
 PointN TSVQ<PointN>::centroid(const vector<PointN*> & pts)
 {
   assert(!pts.empty());
-  vector<PointN*>::const_iterator it = pts.begin();
+  typename vector<PointN*>::const_iterator it = pts.begin();
   PointN c = (**it);
   /*
   return c;
@@ -250,7 +250,7 @@ template <class PointN>
 PointN TSVQ<PointN>::stdev(const vector<PointN*> & pts, const PointN & mean)
 {
   assert(!pts.empty());
-  vector<PointN*>::const_iterator it = pts.begin();
+  typename vector<PointN*>::const_iterator it = pts.begin();
   PointN v = sqr(**it - mean);
   for(++it; it != pts.end(); ++it)
     v = v + sqr(**it - mean);
