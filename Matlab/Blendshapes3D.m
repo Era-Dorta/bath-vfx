@@ -71,11 +71,11 @@ scatter3(sparse_OBJ{1, k}(:,1),sparse_OBJ{1, k}(:,2),sparse_OBJ{1, k}(:,3), 50, 
             'MarkerFaceColor',[1 0 0]);
 
 %% CHOOSE new frame/pose.
-OBJ_new = read_wobj('Emily_blendshapes/E_new4.obj');
+OBJ_new = read_wobj('Emily_blendshapes/E_new8.obj');
 sparse_new = OBJ_new.vertices(idx,:);
 
 % x = reshape(OBJ_new.vertices, 3*num_vertices, 1);
-num_sparse_vertices = size(sparse_neutral,1);
+num_sparse_vertices = size(v_store,2);
 x = reshape(sparse_new, 3*num_sparse_vertices, 1);
 sparse_neutral = reshape(sparse_neutral, 3*num_sparse_vertices, 1);
 displacement = bsxfun(@minus, x, sparse_neutral);
@@ -98,16 +98,27 @@ lb = 0*ones(2*num_sparse_vertices,1);
 ub = 1*ones(2*num_sparse_vertices,1);
 [w3,resnorm2] = lsqlin(sparse_key_disp, displacement,[], [], [],[],lb,ub);
 
-OBJ_blend = OBJ_new;
-v_temp = bsxfun(@plus, sparse_key_disp*w1, sparse_neutral);
-OBJ_blend.vertices = reshape( v_temp, num_sparse_vertices,3);
-OBJ_blend2 = OBJ_new;
-v_temp = bsxfun(@plus, sparse_key_disp*w2, sparse_neutral);
-OBJ_blend2.vertices = reshape( v_temp, num_sparse_vertices,3);
-OBJ_blend3 = OBJ_new;
-v_temp = bsxfun(@plus, sparse_key_disp*w3, sparse_neutral);
-OBJ_blend3.vertices = reshape( v_temp, num_sparse_vertices,3);
+% OBJ_blend = OBJ_new;
+% v_temp = bsxfun(@plus, sparse_key_disp*w1, sparse_neutral);
+% OBJ_blend.vertices = reshape( v_temp, num_sparse_vertices,3);
+% OBJ_blend2 = OBJ_new;
+% v_temp = bsxfun(@plus, sparse_key_disp*w2, sparse_neutral);
+% OBJ_blend2.vertices = reshape( v_temp, num_sparse_vertices,3);
+% OBJ_blend3 = OBJ_new;
+% v_temp = bsxfun(@plus, sparse_key_disp*w3, sparse_neutral);
+% OBJ_blend3.vertices = reshape( v_temp, num_sparse_vertices,3);
 %% Plot.
+
+OBJ_blend = OBJ_new;
+v_temp = bsxfun(@plus, key_disp*w1, neutral_pose);
+OBJ_blend.vertices = reshape( v_temp, num_vertices,3);
+OBJ_blend2 = OBJ_new;
+v_temp = bsxfun(@plus, key_disp*w2, neutral_pose);
+OBJ_blend2.vertices = reshape( v_temp, num_vertices,3);
+OBJ_blend3 = OBJ_new;
+v_temp = bsxfun(@plus, key_disp*w3, neutral_pose);
+OBJ_blend3.vertices = reshape( v_temp, num_vertices,3);
+
 
 T = OBJ_blend.objects(1,5).data.vertices;
 v = OBJ_blend.vertices;
@@ -131,3 +142,13 @@ view([0 90]);axis equal
 figure(5);
 trisurf(T, v_neutral(:,1),v_neutral(:,2),v_neutral(:,3), ones(1,size(v,1)));
 view([0 90]);axis equal
+
+%% Save data as txt.
+for i = 1:size(w3,1)
+    if w3(i) < 1e-3
+        w3(i) = 0;
+    end
+end
+% myfilename2 = sprintf('data/weights_%d.txt', k);
+
+save data/weights_1.txt w3 -ASCII
