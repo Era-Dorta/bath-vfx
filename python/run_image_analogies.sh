@@ -50,12 +50,14 @@ PY_SCRIPT_PATH=$DIR"/image_analogies_parallel.py"
 ##############################################################
 cd ~/workspaces/matlab/vfx/Data/skinRender/microgeometry
 # Run 4 processes for each image
+EXT="c"
+#EXT=""
 I=1
 while [  $I -lt 11 ]; do
 	echo "****************************************"
 	echo "Image num:" $I
 	echo "****************************************"
-	mpiexec -n 4 python $PY_SCRIPT_PATH "./original/A0_"$I".png" "./original/A1_"$I".png" "./synthesized/B0_"$I".png" "./synthesized/B1_"$I".png"
+	mpiexec -n 4 python $PY_SCRIPT_PATH "./original/A0_"$I$EXT".png" "./original/A1_"$I$EXT".png" "./synthesized/B0_"$I$EXT".png" "./synthesized/B1_"$I$EXT".png"
 	let I=I+1 
 done
 
