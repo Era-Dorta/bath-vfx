@@ -58,17 +58,6 @@ PFILTER steerFilter;
 int     steerFilterFwConvType=0;
 */
 typedef char * MYSTR;
-static MYSTR stfConvTypeArr[] ={
-    "reflect1",   /* reflect about edge pixels - new name */
-    "reflect2",    /* standard reflection */
-    "repeat",      /* repeat edge pixel */
-    "zero",       /* zero outside of image */
-    "extend",        /* extend (reflect & invert) */
-    "dont-compute", /* ignore edge (zero output for filter near edge) */
-    "predict",      /* predict based on portion covered by filt */
-    "ereflect",  	/* orthogonal QMF reflection */
-    "treflect" 	/* reflect about edge pixels - old name */
-  };
 
 #if 0
 char inputSourceExampleName[MAX_FILENAME_SIZE] = "InputImages/bigbook/oxbow-mask.png";
