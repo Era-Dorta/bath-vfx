@@ -798,7 +798,7 @@ void writeHTMLFile( void )
 
 void savePNGs(int)
 {
-  filteredImage->savePNG(filteredName);
+  //filteredImage->savePNG(filteredName);
   if (outputFilteredImage != NULL)
     outputFilteredImage->savePNG(outputFilteredName);
 }
@@ -2099,6 +2099,7 @@ void SetupArgParser( ParseArgs &parser )
 
   parser.AddStringParam( "outputPattern:", outputSummaryPattern, MAX_FILENAME_SIZE );
   parser.AddStringParam( "outputDirectory:", outputDirectoryName, MAX_FILENAME_SIZE );
+  parser.AddStringParam( "outputImageName:", outputFilteredName, MAX_FILENAME_SIZE );
   
   parser.AddBoolParam( "useFilter:", &useSourceImages );
   parser.AddIntParam( "pyramidHeight:", &pyramidHeight );
@@ -2353,10 +2354,11 @@ int main(int argc, char* argv[])
     fprintf( stderr, "running with no GUI\n" );
 
     // 'Go'
-    writeHTMLFile();
+    //writeHTMLFile();
     //    saveOutput(); // write the params first, so we can recover
     computeOutput();
-    saveOutput();
+    //saveOutput();
+    savePNGs(0);
 
 #ifdef _WIN32
     fprintf( stderr, "\n<end>\n" );

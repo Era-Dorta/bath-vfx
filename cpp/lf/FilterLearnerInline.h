@@ -516,7 +516,7 @@ SynthesizePyramidLevel( int level )
       //#endif
 
       if ( ((iy+1) % 100) == 0)
-	result.savePNG(imgname);
+	//result.savePNG(imgname);
 
       SignalRedraw();
 
@@ -772,7 +772,7 @@ SynthesizePyramidLevel( int level )
     }
 
   sprintf(imgname,"filtered%d-pass%d.png",level,m_pass);
-  result.savePNG(imgname);
+  //result.savePNG(imgname);
 
   //  printf("Sampling percentages: ");
   //  m_sampler->printStats();
