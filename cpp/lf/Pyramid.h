@@ -17,7 +17,7 @@ class Pyramid
 //  PYRAMID  _steerPyr;
 
 public:
-  Pyramid() : _levels(-1),_imgs(NULL), _ownsFine(false) { }
+  Pyramid() : _levels(-1),_imgs(NULL), _ownsFine(false), _myType(GAUSSIAN_PYRAMID) { }
   Pyramid(const Pyramid & p);
   Pyramid( int levels, int width, int height, int dim );
   //  Pyramid(int height,TImage * FineImage);
