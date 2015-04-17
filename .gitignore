@@ -61,3 +61,7 @@ Data
 WOBJ_toolbox_Version2b
 nonrigidICP
 SpringLab
+
+#Lf library
+*.d
+lf

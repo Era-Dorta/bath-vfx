@@ -1,0 +1,16 @@
+CC = gcc
+CCC = g++
+
+OPT_FLAGS = -O9 -DNDEBUG -funroll-loops
+
+
+CC_FLAGS = $(OPT_FLAGS) -MD -D__UNIX__ -DTHREADS -DUSE_LIBPNG   -DLAPACK
+
+LDLIBS = -L/usr/lib -L/usr/local/lib \
+	 -lglut -lglui -lGL -lGLU -lXmu -lX11 -lm -lpng \
+	-lpthread -llapack -lblas -lANN
+
+include Makefile-rules
+include ${OBJS:.o=.d}
+
+

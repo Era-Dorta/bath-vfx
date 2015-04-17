@@ -1,0 +1,14 @@
+CC = gcc
+CCC = g++
+
+OPT_FLAGS = -g
+
+CC_FLAGS = $(OPT_FLAGS)  -M   -Wall
+
+LDLIBS = -L/usr/lib -L/usr/local/li \
+	 -lglui -lglut -lGL -lGLU -lXmu -lX11 -lm 
+
+include Makefile-rules
+include ${OBJS:.o=.u}
+
+

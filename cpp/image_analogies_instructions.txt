@@ -1,0 +1,27 @@
+Download and install
+libglui-dev and libglui2c2
+Install first libglui2c2
+
+http://packages.ubuntu.com/source/lucid/devel/glui
+
+Download ANN from http://www.cs.umd.edu/~mount/ANN/
+on the ann root folder run
+make linux-g++
+
+then install on /usr/local
+
+sudo cp ./bin/* /usr/local/bin/
+sudo cp ./lib/* /usr/local/lib/
+sudo cp -r ./include/* /usr/local/include/
+
+Install dependencies for this libraries
+ -lglut -lglui -lGL -lGLU -lXmu -lX11 -lm -lpng \
+-lpthread -llapack -lblas -lF77 -lI77
+# Installing libblas-dev, freeglut3-dev, liblapack-dev
+
+Download image analogies library from
+http://www.mrl.nyu.edu/projects/image-analogies/lf/
+
+./touchd.sh
+
+
