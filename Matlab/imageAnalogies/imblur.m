@@ -2,8 +2,10 @@ clear all;
 close all;
 
 data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry/original/';
+data_path_new = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry/synthesized/';
 
 choose_new_points = false;
+do_color_correction = true;
 
 % Points from macro lens
 %x = [2186, 1316, 1312, 299, 161, 1357, 1649, 1395, 1666, 2800];
@@ -46,6 +48,25 @@ for i = 1:10
     
     figure(2);
     imshow(I);
+    
+    % Compute the mean on each channel and make the A0 and A1 in the same
+    % color space/mean as B0
+    if do_color_correction
+        B0 = imread([data_path_new 'B0_' int2str(i) 'c.png']);
+        B0mean(1) = mean(reshape(B0(:,:,1), 1, []));
+        B0mean(2) = mean(reshape(B0(:,:,2), 1, []));
+        B0mean(3) = mean(reshape(B0(:,:,3), 1, []));
+        
+        Imean(1) = mean(reshape(I(:,:,1), 1, []));
+        Imean(2) = mean(reshape(I(:,:,2), 1, []));
+        Imean(3) = mean(reshape(I(:,:,3), 1, []));
+        
+        meanDiff = B0mean - Imean;
+        
+        I(:,:,1) = I(:,:,1) + meanDiff(1);
+        I(:,:,2) = I(:,:,2) + meanDiff(2);
+        I(:,:,3) = I(:,:,3) + meanDiff(3);
+    end
     
     Igray = rgb2gray(I);
     Igray = imadjust(Igray,stretchlim(Igray));
