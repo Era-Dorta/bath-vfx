@@ -69,7 +69,7 @@ for i = 1:10
     end
     
     Igray = rgb2gray(I);
-    Igray = imadjust(Igray,stretchlim(Igray));
+    Igray = histeq(Igray);
     imshow(Igray);
     imwrite(Igray, [data_path 'A1_' int2str(i) '.png']);
     imwrite(I, [data_path 'A1_' int2str(i) 'c.png']);
