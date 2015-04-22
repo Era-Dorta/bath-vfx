@@ -85,10 +85,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		cmd = cmd + names[j];
 		cmd = cmd + ".output shapesBS.";
 		cmd = cmd + names[j];
-		stat = dgMod.commandToExecute(cmd);
-		if (stat == MS::kFailure) {
-			break;
-		}
+		dgMod.commandToExecute(cmd);
 	}
 
 	// Key everything.
@@ -99,14 +96,14 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		dgMod.commandToExecute(cmd);
 	}
 
-	// Set frame number in Maya.
-	cmd = "playbackOptions -min 1 -max ";
-	cmd = cmd + numFrames;
-	dgMod.commandToExecute(cmd);
+	MAnimControl anim;
+	prevMaxTime = anim.maxTime();
+	prevMinTime = anim.minTime();
+	prevStartTime = anim.animationStartTime();
+	prevEndTime = anim.animationEndTime();
 
-	cmd = "playbackOptions - ast 1 - aet ";
-	cmd = cmd + numFrames;
-	dgMod.commandToExecute(cmd);
+	anim.setMinMaxTime(MTime(1.0), MTime((double) numFrames));
+	anim.setAnimationStartEndTime(MTime(1.0), MTime((double) numFrames));
 
 	numFrames -= 1;
 
@@ -134,6 +131,9 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 }
 
 MStatus VfxCmd::undoIt() {
+	MAnimControl anim;
+	anim.setMinMaxTime(prevMinTime, prevMaxTime);
+	anim.setAnimationStartEndTime(prevStartTime, prevEndTime);
 	return dgMod.undoIt();
 }
 

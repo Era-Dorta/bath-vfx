@@ -8,6 +8,7 @@
 #include <maya/MDagPath.h>
 #include <maya/MFnSet.h>
 #include <maya/MFnDagNode.h>
+#include <maya/MTime.h>
 
 class VfxCmd: public MPxCommand {
 public:
@@ -20,8 +21,11 @@ public:
 private:
 	std::vector<unsigned int> attrIndices;
 	const static MString names[];
-private:
 	MDGModifier dgMod;
+	MTime prevMinTime;
+	MTime prevMaxTime;
+	MTime prevStartTime;
+	MTime prevEndTime;
 };
 
 #endif
