@@ -19,6 +19,7 @@ public:
 	static MSyntax newSyntax();
 private:
 	std::vector<unsigned int> attrIndices;
+	const static MString names[];
 private:
 	MDGModifier dgMod;
 };

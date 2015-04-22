@@ -1,4 +1,3 @@
-#include "VfxNode.h"
 #include "VfxCmd.h"
 #include <maya/MFnPlugin.h>
 
@@ -10,13 +9,6 @@ MStatus initializePlugin(MObject obj) {
 	stat = plugin.registerCommand("VfxDo", VfxCmd::creator);
 	if (!stat) {
 		errStr = "registerCommand failed";
-		goto error;
-	}
-
-	stat = plugin.registerNode("intrpl", VfxNode::id, VfxNode::creator,
-			VfxNode::initialize);
-	if (!stat) {
-		errStr = "registerNode failed";
 		goto error;
 	}
 
@@ -36,12 +28,6 @@ MStatus uninitializePlugin(MObject obj) {
 	stat = plugin.deregisterCommand("VfxDo");
 	if (!stat) {
 		errStr = "deregisterCommand failed";
-		goto error;
-	}
-
-	stat = plugin.deregisterNode(VfxNode::id);
-	if (!stat) {
-		errStr = "deregisterNode failed";
 		goto error;
 	}
 
