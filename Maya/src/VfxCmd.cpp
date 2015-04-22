@@ -1,5 +1,4 @@
 #include "VfxCmd.h"
-#include "VfxNode.h"
 #include <maya/MSelectionList.h>
 #include <maya/MGlobal.h>
 #include <maya/MDagPath.h>
@@ -86,7 +85,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		cmd = cmd + names[j];
 		cmd = cmd + ".output shapesBS.";
 		cmd = cmd + names[j];
-		stat = MGlobal::executeCommand(cmd);
+		stat = dgMod.commandToExecute(cmd);
 		if (stat == MS::kFailure) {
 			break;
 		}
@@ -97,17 +96,17 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		cmd = "setKeyframe { \"shapesBS.w[";
 		cmd = cmd + j;
 		cmd = cmd + "]\" }";
-		MGlobal::executeCommand(cmd);
+		dgMod.commandToExecute(cmd);
 	}
 
 	// Set frame number in Maya.
 	cmd = "playbackOptions -min 1 -max ";
 	cmd = cmd + numFrames;
-	MGlobal::executeCommand(cmd);
+	dgMod.commandToExecute(cmd);
 
 	cmd = "playbackOptions - ast 1 - aet ";
 	cmd = cmd + numFrames;
-	MGlobal::executeCommand(cmd);
+	dgMod.commandToExecute(cmd);
 
 	numFrames -= 1;
 
@@ -117,18 +116,18 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		for (unsigned int i = 0; i < weights.at(j).size(); i++) {
 			cmd = "currentTime ";
 			cmd = cmd + (j + 1);
-			MGlobal::executeCommand(cmd);
+			dgMod.commandToExecute(cmd);
 
 			cmd = "setAttr shapesBS.weight[";
 			cmd = cmd + i;
 			cmd = cmd + "] ";
 			cmd = cmd + weights.at(j).at(i);
-			MGlobal::executeCommand(cmd);
+			dgMod.commandToExecute(cmd);
 
 			cmd = "setKeyframe { \"shapesBS.w[";
 			cmd = cmd + i;
 			cmd = cmd + "]\" }";
-			MGlobal::executeCommand(cmd);
+			dgMod.commandToExecute(cmd);
 		}
 	}
 	return redoIt();
@@ -143,7 +142,7 @@ MStatus VfxCmd::redoIt() {
 }
 
 bool VfxCmd::isUndoable() const {
-	return false;
+	return true;
 }
 
 void *VfxCmd::creator() {
