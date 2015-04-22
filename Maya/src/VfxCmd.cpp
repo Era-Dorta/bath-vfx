@@ -66,32 +66,40 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	// Read the data from a text file into an array.
 	std::fstream myfile( WEIGHTS_PATH, std::ios_base::in);
 	std::vector<std::vector<float>> weights;
-	float a;
-	unsigned int numFrames = 2;
 
-	weights.clear();
-	weights.resize(numFrames, std::vector<float>(numWeights, 0.0));
-	for (unsigned int i = 0; i < numFrames; i++) {
-		for (unsigned int j = 0; j < (unsigned int) numWeights; j++) {
-			myfile >> a;
-			weights.at(i).at(j) = a;
-		}
-	}
+	unsigned int numFrames = 0;
+
+	std::string line;
+	unsigned int weightNum = 0;
+	std::vector<float> currentWeights(numWeights, 0.0);
+    while ( std::getline (myfile,line) )
+    {
+    	// Save current weight
+    	currentWeights.at(weightNum) = std::stof(line);
+    	weightNum++;
+    	if(weightNum == (unsigned int)(numWeights)){
+    		// Save weights for current frame in weights vector
+    		weights.push_back(currentWeights);
+    		std::fill(currentWeights.begin(), currentWeights.end(), 0);
+    		weightNum = 0;
+    		numFrames++;
+    	}
+    }
 	myfile.close();
 
 	// Break connections.
-	for (unsigned int j = 0; j < (unsigned int) numWeights; j++) {
+	for (unsigned int i = 0; i < (unsigned int) numWeights; i++) {
 		cmd = "disconnectAttr shapesBS_";
-		cmd = cmd + names[j];
+		cmd = cmd + names[i];
 		cmd = cmd + ".output shapesBS.";
-		cmd = cmd + names[j];
+		cmd = cmd + names[i];
 		dgMod.commandToExecute(cmd);
 	}
 
 	// Key everything.
-	for (unsigned int j = 0; j < (unsigned int) numWeights; j++) {
+	for (unsigned int i = 0; i < (unsigned int) numWeights; i++) {
 		cmd = "setKeyframe { \"shapesBS.w[";
-		cmd = cmd + j;
+		cmd = cmd + i;
 		cmd = cmd + "]\" }";
 		dgMod.commandToExecute(cmd);
 	}
@@ -108,21 +116,20 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	numFrames -= 1;
 
 	// 
-	for (unsigned int j = 0; j < weights.size(); j++) {
+	for (unsigned int i = 0; i < weights.size(); i++) {
+		cmd = "currentTime ";
+		cmd = cmd + (i + 1);
+		dgMod.commandToExecute(cmd);
 
-		for (unsigned int i = 0; i < weights.at(j).size(); i++) {
-			cmd = "currentTime ";
-			cmd = cmd + (j + 1);
-			dgMod.commandToExecute(cmd);
-
+		for (unsigned int j = 0; j < weights.at(i).size(); j++) {
 			cmd = "setAttr shapesBS.weight[";
-			cmd = cmd + i;
+			cmd = cmd + j;
 			cmd = cmd + "] ";
-			cmd = cmd + weights.at(j).at(i);
+			cmd = cmd + weights.at(i).at(j);
 			dgMod.commandToExecute(cmd);
 
 			cmd = "setKeyframe { \"shapesBS.w[";
-			cmd = cmd + i;
+			cmd = cmd + j;
 			cmd = cmd + "]\" }";
 			dgMod.commandToExecute(cmd);
 		}
