@@ -45,7 +45,8 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 		"mouth_pucker_r", "mouth_screamFix_c", "mouth_sideways_l",
 		"mouth_sideways_r", "mouth_stretch_c", "mouth_suck_dl", "mouth_suck_dr",
 		"mouth_suck_ul", "mouth_suck_ur", "mouth_upperLipRaise_l",
-		"mouth_upperLipRaise_r", "nose_wrinkle_l", "nose_wrinkle_r" };
+		"mouth_upperLipRaise_r", "nose_wrinkle_l", "nose_wrinkle_r",
+		"smoothCompensated" };
 
 #ifdef OS_WINDOWS
 #define WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
@@ -61,7 +62,6 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	MString cmd("getAttr -s shapesBS.weight");
 	int numWeights = 0;
 	MGlobal::executeCommand(cmd, numWeights);
-	numWeights -= 1;
 
 	// Read the data from a text file into an array.
 	std::fstream myfile( WEIGHTS_PATH, std::ios_base::in);
@@ -72,20 +72,22 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	std::string line;
 	unsigned int weightNum = 0;
 	std::vector<float> currentWeights(numWeights, 0.0);
-    while ( std::getline (myfile,line) )
-    {
-    	// Save current weight
-    	currentWeights.at(weightNum) = std::stof(line);
-    	weightNum++;
-    	if(weightNum == (unsigned int)(numWeights)){
-    		// Save weights for current frame in weights vector
-    		weights.push_back(currentWeights);
-    		std::fill(currentWeights.begin(), currentWeights.end(), 0);
-    		weightNum = 0;
-    		numFrames++;
-    	}
-    }
+	while (std::getline(myfile, line)) {
+		// Save current weight
+		currentWeights.at(weightNum) = std::stof(line);
+		weightNum++;
+		if (weightNum == (unsigned int) (numWeights)) {
+			// Save weights for current frame in weights vector
+			weights.push_back(currentWeights);
+			std::fill(currentWeights.begin(), currentWeights.end(), 0);
+			weightNum = 0;
+			numFrames++;
+		}
+	}
 	myfile.close();
+
+	// Ignore the last weight
+	numWeights--;
 
 	// Break connections.
 	for (unsigned int i = 0; i < (unsigned int) numWeights; i++) {
@@ -104,6 +106,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		dgMod.commandToExecute(cmd);
 	}
 
+	//Save and set max and min time in the playback slider
 	MAnimControl anim;
 	prevMaxTime = anim.maxTime();
 	prevMinTime = anim.minTime();
@@ -113,9 +116,9 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	anim.setMinMaxTime(MTime(1.0), MTime((double) numFrames));
 	anim.setAnimationStartEndTime(MTime(1.0), MTime((double) numFrames));
 
+	//Set numFrames to start at 0 for c++ indexing
 	numFrames -= 1;
 
-	// 
 	for (unsigned int i = 0; i < weights.size(); i++) {
 		cmd = "currentTime ";
 		cmd = cmd + (i + 1);
