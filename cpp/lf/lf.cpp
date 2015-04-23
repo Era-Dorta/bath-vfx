@@ -798,12 +798,14 @@ void writeHTMLFile( void )
 
 void savePNGs(int)
 {
-	if(filteredImage->dim() == 1){
-		filteredImage->savePNG(outputFilteredName);
-	}
   //filteredImage->savePNG(filteredName);
-  if (outputFilteredImage != NULL)
+  if (outputFilteredImage != NULL){
     outputFilteredImage->savePNG(outputFilteredName);
+  } else {
+	  if(filteredImage != NULL){
+		  filteredImage->savePNG(outputFilteredName);
+	  }
+  }
 }
 
 void saveScreenshot(int)
