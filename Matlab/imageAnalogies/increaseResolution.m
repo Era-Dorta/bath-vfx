@@ -29,7 +29,7 @@ face_segmented = imread([data_path '/face_segmented.png']);
 face_tex = imread('~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_face_simplified_0.png');
 
 % Set to false to do the displacement map
-do_texture = true;
+do_texture = false;
 
 tex_extra = '';
 
@@ -79,8 +79,10 @@ for i = 1:num_seg
     max_indy(i) = max(indy);
     min_indy(i) = min(indy);
     
-    region_pixels{i}(:,:,2) = region_pixels{i}(:,:,1);
-    region_pixels{i}(:,:,3) = region_pixels{i}(:,:,1);
+    if do_texture
+        region_pixels{i}(:,:,2) = region_pixels{i}(:,:,1);
+        region_pixels{i}(:,:,3) = region_pixels{i}(:,:,1);
+    end
     
     if save_files
         x = [max_indx(i), min_indx(i), min_indx(i), max_indx(i), max_indx(i)];
@@ -155,6 +157,6 @@ new_disp_map = uint8(new_disp_map);
 if do_texture
     out_name = 'new_text_map.png';
 else
-    out_name = 'disp_map.png';
+    out_name = 'new_disp_map.png';
 end
 imwrite(new_disp_map, [data_path '/synthesized/' out_name]);
