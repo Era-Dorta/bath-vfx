@@ -146,7 +146,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		// Set the teeth movement for this frame, interpolates between the two
 		// blend shapes that can open the mouth
 		cmd = "setAttr con_jaw_c.translateY ";
-		cmd += -2 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
+		cmd += -3 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
 		dgMod.commandToExecute(cmd);
