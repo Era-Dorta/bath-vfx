@@ -51,7 +51,7 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 #ifdef OS_WINDOWS
 #define WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
 #else
-#define WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_6.txt"
+#define WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_w2.txt"
 #endif
 
 MStatus VfxCmd::doIt(const MArgList &args) {
@@ -98,6 +98,9 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		dgMod.commandToExecute(cmd);
 	}
 
+	cmd = "disconnectAttr con_jaw_c_translateY.output con_jaw_c.translateY";
+	dgMod.commandToExecute(cmd);
+
 	// Key everything.
 	for (unsigned int i = 0; i < (unsigned int) numWeights; i++) {
 		cmd = "setKeyframe { \"shapesBS.w[";
@@ -105,6 +108,9 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 		cmd = cmd + "]\" }";
 		dgMod.commandToExecute(cmd);
 	}
+
+	cmd = "setKeyframe  \"con_jaw_c.translateY\"";
+	dgMod.commandToExecute(cmd);
 
 	//Save and set max and min time in the playback slider
 	MAnimControl anim;
@@ -136,6 +142,14 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 			cmd = cmd + "]\" }";
 			dgMod.commandToExecute(cmd);
 		}
+
+		// Set the teeth movement for this frame, interpolates between the two
+		// blend shapes that can open the mouth
+		cmd = "setAttr con_jaw_c.translateY ";
+		cmd += -3 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
+		dgMod.commandToExecute(cmd);
+		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
+		dgMod.commandToExecute(cmd);
 	}
 	return redoIt();
 }
