@@ -48,7 +48,7 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 		"mouth_upperLipRaise_r", "nose_wrinkle_l", "nose_wrinkle_r",
 		"smoothCompensated" };
 
-#ifdef OS_WINDOWS
+#ifdef _WIN32
 #define WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
 #else
 #define WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_w2.txt"
