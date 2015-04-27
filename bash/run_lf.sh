@@ -18,7 +18,7 @@ while [  $I -lt 11 ]; do
 	#echo $EXE_PATH "useYIQ: true" srcExample: "original/A0_"$I$EXT".png" filteredExample: "original/A1_"$I$EXT".png" srcImage: "synthesized/B0_"$I$EXT".png" outputImageName: "synthesized/B1_"$I$EXT".png"
 	#$EXE_PATH srcExample: "original/A0_"$I$EXT".png" filteredExample: "original/A1_"$I$EXT".png" srcImage: "synthesized/B0_"$I$EXT".png" outputImageName: "synthesized/B1_"$I$EXT".png" useInterface: "false" &
 	if [ $EXT == "c" ]; then
-	   $EXE_PATH useYIQ: "true" usePCA: "true" srcExample: "original/A0_"$I$EXT".png" filteredExample: "original/A1_"$I$EXT".png" srcImage: "synthesized/B0_"$I$EXT".png" outputImageName: "synthesized/B1_"$I$EXT".png" useInterface: "false" &
+	   $EXE_PATH coherenceEps: "10" matchMeanVariance: "true" useYIQ: "true" usePCA: "true" srcExample: "original/A0_"$I$EXT".png" filteredExample: "original/A1_"$I$EXT".png" srcImage: "synthesized/B0_"$I$EXT".png" outputImageName: "synthesized/B1_"$I$EXT".png" useInterface: "false" &
 	else
 	  $EXE_PATH srcExample: "original/A0_"$I$EXT".png" filteredExample: "original/A1_"$I$EXT".png" srcImage: "synthesized/B0_"$I$EXT".png" outputImageName: "synthesized/B1_"$I$EXT".png" useInterface: "false" &
 	fi	
