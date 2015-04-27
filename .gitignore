@@ -53,6 +53,8 @@ optical-flow_mblack
 rpca
 vlfeat-0.9.20
 TOOLBOX_calib
+MatlabEXR
+Matlab/imageAnalogies/ScSR
 *.mat
 *.asv
 *.fig
