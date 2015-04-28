@@ -9,27 +9,47 @@ close all;
 
 num_seg = 10;
 
+% 0 for richard, 1 for emily
+actor_ind = 1;
+
 % Pixel positions known to be in the senter of each face segment
-segments_centres = [2540, 556;
-    3260, 2124;
-    2212, 3716;
-    2612, 1380;
-    2412, 2892;
-    1996, 804;
-    2052, 2076;
-    1740, 3196;
-    596, 1980;
-    1260, 2044];
+if actor_ind == 0
+    segments_centres = [2540, 556;
+        3260, 2124;
+        2212, 3716;
+        2612, 1380;
+        2412, 2892;
+        1996, 804;
+        2052, 2076;
+        1740, 3196;
+        596, 1980;
+        1260, 2044];
+    face_segmented_path = '/face_segmented.png';
+    face_tex_path = '~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_face_simplified_0.png';
+else
+    segments_centres = [194, 346;
+        502, 202;
+        826, 372;
+        342, 364;
+        672, 368;
+        288, 525;
+        518, 479;
+        772, 523;
+        320, 711;
+        523, 689];
+    face_segmented_path = '/face_segmented_emily.png';
+    face_tex_path = '~/workspaces/github/vfx/Maya/sourceimages/Textures/Head_Diff.jpg';
+end
 
 % Switch x,y for matlab indexing
 segments_centres = [segments_centres(:,2), segments_centres(:,1)];
 
 data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry';
-face_segmented = imread([data_path '/face_segmented.png']);
-face_tex = imread('~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_face_simplified_0.png');
+face_segmented = imread([data_path face_segmented_path]);
+face_tex = imread(face_tex_path);
 
 % Set to false to do the displacement map
-do_texture = false;
+do_texture = true;
 
 tex_extra = '';
 
