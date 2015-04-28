@@ -2157,6 +2157,7 @@ void SetupArgParser( ParseArgs &parser )
   parser.AddFloatParam( "coherencePow:", &coherencePow);
   parser.AddBoolParam( "oneway:", &oneway);
   parser.AddBoolParam( "onePixelSource:", &onePixelSource);
+  parser.AddBoolParam( "usePCA:", &usePCA);
 
   EnumValueInfo pyramidTypeValues[] = { { "Gaussian", 0 }, { "Laplacian", 1 }, { "Steerable", 2 } };
   parser.AddEnumParam( "pyramidType:", pyramidTypeValues, 3, &sourcePyramidType );
