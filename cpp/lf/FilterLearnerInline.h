@@ -803,6 +803,7 @@ ApplyPrediction(Point2 targetLoc, int currLevel, Point2 bestLoc,
   
   bool isValid = false;
 
+  // bestDist = d_app*(1 + k*2^(l-L))
   double bestDist = 
     GetNeighborhoodDist(targetLoc,bestLoc,currLevel,isValid,
 			m_neighborhoodWidth) * coherenceFac;
