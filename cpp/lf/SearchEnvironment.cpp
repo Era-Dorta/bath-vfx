@@ -9,7 +9,7 @@ CANNSearchEnvironment::CANNSearchEnvironment( vector<Neigh*> &neighborhoods,
 					      Sampler<Point2> * sampler ) : 
   CSearchEnvironment( sampler )
 {
-  printf( "Building ANN tree..." );
+  printf( "Building ANN tree...\n" );
   
   m_numPoints = neighborhoods.size();
   m_annDim = neighborhoods[0]->Length();  // TODO: get this
