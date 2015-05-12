@@ -233,6 +233,7 @@ int oneway = false;
 
 float coherenceEps = 5;
 float coherencePow = 2;
+float alpha = 0.5;
 
 int MLPnumHidden = 20;
 double MLPdecayWeight = 0;
@@ -342,6 +343,7 @@ void computeOutput(int redisplay=0)
 
   fl.coherenceEps() = coherenceEps;
   fl.coherencePow() = coherencePow;
+  fl.alpha() = alpha;
 
   fl.oneway() = oneway;
 

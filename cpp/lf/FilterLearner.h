@@ -264,6 +264,9 @@ public:
   float coherencePow() const { return m_coherencePow; }
   float & coherencePow() { return m_coherencePow; }
 
+  float alpha() const { return m_alpha; }
+  float & alpha() { return m_alpha; }
+
   bool cheesyBoundaries() const { return m_cheesyBoundaries; }
   bool & cheesyBoundaries() { return m_cheesyBoundaries; }
 
@@ -327,6 +330,7 @@ public:
   bool m_createSrcLocHisto;
   float m_coherenceEps;
   float m_coherencePow;
+  float m_alpha;
 
   int m_MLPnumHidden;
   double m_MLPhiddenDecayWeight, m_MLPoutputDecayWeight;
