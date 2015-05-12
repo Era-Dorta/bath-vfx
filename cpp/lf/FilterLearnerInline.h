@@ -1014,7 +1014,9 @@ Neigh CFilterLearner<TSource, TFilter>::GetNeighborhood(Point2 loc,
 
 		bool levelCausal = causal && level == currLevel;
 
-		for (int iy = 0; iy <= radius || (iy < width && !levelCausal); ++iy)
+		// Build neighbourhood from B', in FindBestMatchLocation
+		// Build neighbourhood from A', in GetTrainingData for ANN
+		for (int iy = 0; iy <= radius || (iy < width && !levelCausal); ++iy) {
 			for (int ix = 0;
 					ix < width && (ix < radius || iy < radius || !levelCausal);
 					++ix) {
@@ -1022,8 +1024,8 @@ Neigh CFilterLearner<TSource, TFilter>::GetNeighborhood(Point2 loc,
 				if (iy == radius && ix == radius && level == currLevel)
 					continue;
 
-				double fac = m_kernel->get(width, iy) * m_kernel->get(width, ix)
-						/ maxVal;
+				double fac = m_alpha * m_kernel->get(width, iy)
+						* m_kernel->get(width, ix) / maxVal;
 				if (computeWeightVector)
 					for (int d = 0; d < dim; d++)
 						n[i++] = fac;
@@ -1034,6 +1036,7 @@ Neigh CFilterLearner<TSource, TFilter>::GetNeighborhood(Point2 loc,
 										p[1] + iy - radius, d);
 				totalWeight += fac;
 			}
+		}
 
 		// Build neighbourhood from B, in FindBestMatchLocation
 		// Build neighbourhood from A, in GetTrainingData for ANN
@@ -1045,7 +1048,8 @@ Neigh CFilterLearner<TSource, TFilter>::GetNeighborhood(Point2 loc,
 			//	  int sdim = m_grayscaleMode ? 1 : impcur.dim();
 			for (int iy = 0; iy < width; ++iy)
 				for (int ix = 0; ix < width; ++ix) {
-					double fac = m_sourceFacNow * m_kernel->get(width, iy)
+					double fac = m_alpha * m_sourceFacNow
+							* m_kernel->get(width, iy)
 							* m_kernel->get(width, ix) / maxVS;
 					if (computeWeightVector)
 						for (int d = 0; d < sdim; d++)
