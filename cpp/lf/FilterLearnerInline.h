@@ -32,9 +32,8 @@ template<class TSource, class TFilter>
 CFilterLearner<TSource, TFilter>::CFilterLearner(void) :
 		m_filteredExamplePyramid(), m_filteredPyramid(), m_sourceExamplePyramid(), m_sourcePyramid(), m_sourcesPyramid(), m_neighborhoodWidth(
 				9), m_sourceFac(0.1), m_destImage(NULL), m_sampler(NULL), m_kernel(
-				NULL), m_numLevels(3), m_levelWeighting(1), m_useSourceImages(
-				false), m_createSrcLocHisto(false), m_ashikhminLastLevel(false), m_onePixelSource(
-				false) {
+		NULL), m_numLevels(3), m_levelWeighting(1), m_useSourceImages(false), m_createSrcLocHisto(
+				false), m_ashikhminLastLevel(false), m_onePixelSource(false) {
 	srand((unsigned int) time(NULL));
 }
 
@@ -133,6 +132,7 @@ void CFilterLearner<TSource, TFilter>::Synthesize(void) {
 		m_filteredPyramid[numLevels - 1].copy(m_sourcePyramid[numLevels - 1]);
 		m_destMaskPyramid[numLevels - 1].set();
 	} else {
+		// Only gets executed once, for the first image
 		for (m_pass = 0; m_pass < m_numPasses; m_pass++) {
 			//	  printf("    *********** pass = %d ************* \n",m_pass);
 			m_useSourceImagesNow = m_useSourceImages
@@ -155,6 +155,7 @@ void CFilterLearner<TSource, TFilter>::Synthesize(void) {
 		}
 	}
 
+	// Main loop
 	for (int level = numLevels - 2; level >= 0; level--) {
 		m_numComparisons = 0;
 
@@ -430,6 +431,7 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 	sprintf(imgname, "filtered%d-pass%d.png", level, m_pass);
 
 	CSearchEnvironment *currentSearchEnvironment = searchEnvironment;
+	// Just assigning memory, neighbourhoods is empty after the free
 	vector<Neigh*> * currentNeighborhoods = &neighborhoods;
 
 	// another diagnostic image
@@ -463,6 +465,7 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 	int startx = ((m_pass % 2) == 0 || m_oneway) ? 0 : result.width() - 1;
 	int starty = ((m_pass % 2) == 0 || m_oneway) ? 0 : result.height() - 1;
 
+	// Main loop for each image, this treats each line
 	for (int iy = starty; iy < result.height() && iy >= 0; iy += inc) // ugh
 			{
 		//#ifdef __UNIX__
@@ -809,6 +812,7 @@ void CFilterLearner<TSource, TFilter>::GatherTrainingData(int currLevel,
 								false, img, imgProto));
 				points.push_back(n);
 
+				// When called trough GatherTraining Data, pixels are NULL
 				if (pixels != NULL) {
 					int dim = (*img)[currLevel].dim();
 					assert(dim > 0);
@@ -1031,6 +1035,8 @@ Neigh CFilterLearner<TSource, TFilter>::GetNeighborhood(Point2 loc,
 				totalWeight += fac;
 			}
 
+		// Build neighbourhood from B, in FindBestMatchLocation
+		// Build neighbourhood from A, in GetTrainingData for ANN
 		if (useSource && !m_onePixelSource) {
 			TSrcImage & impcur = (*imgProto)[level];
 			TSource maxVS = impcur.maxVal();
