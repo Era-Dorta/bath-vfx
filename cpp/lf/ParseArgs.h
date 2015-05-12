@@ -33,13 +33,13 @@ public:
 	// add descriptions of params
 	void AddFlagParam(const char *name, FlagCallbackType *callback = NULL);
 	void AddIntParam(const char *name, int *var, IntCallbackType *callback =
-			NULL);
+	NULL);
 	void AddFloatParam(const char *name, float *var,
 			FloatCallbackType *callback = NULL);
 	void AddDoubleParam(const char *name, double *var,
 			DoubleCallbackType *callback = NULL);
 	void AddBoolParam(const char *name, bool *var, BoolCallbackType *callback =
-			NULL);
+	NULL);
 	void AddBoolParam(const char *name, int *var,
 			BoolIntCallbackType *callback = NULL);
 	void AddEnumParam(const char *name, EnumValueInfo *info, int numVals,

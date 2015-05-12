@@ -863,7 +863,7 @@ void reshape(int w, int h) {
  */
 
 void matchMV(ColorImage * mvsrc, ColorImage * target, ColorImage * target2 =
-		NULL)
+NULL)
 // Compute a colorspace transform that maps target's colors to mvsrc's 
 // colors, and apply the transform to target.  Also, apply the same 
 // transform to target2 if target2 is non-NULL.
@@ -1606,8 +1606,7 @@ void createUI() {
 
 		if (targetModeMask != NULL || filterModeMask != NULL)
 			glui->add_spinner_to_panel(mmp, "Mode mask weight",
-					GLUI_SPINNER_FLOAT, &modeMaskWeight)->set_float_limits(0,
-					1);
+			GLUI_SPINNER_FLOAT, &modeMaskWeight)->set_float_limits(0, 1);
 	}
 
 	glui->add_spinner("Pyramid height", GLUI_SPINNER_INT, &pyramidHeight, 1,
@@ -1997,21 +1996,21 @@ void SetupArgParser(ParseArgs &parser) {
 
 	// image filenames
 	parser.AddStringParam("srcExample:", inputSourceExampleName,
-			MAX_FILENAME_SIZE, ExampleCallback);
+	MAX_FILENAME_SIZE, ExampleCallback);
 	parser.AddStringParam("filteredExample:", inputFilteredExampleName,
-			MAX_FILENAME_SIZE, ExampleCallback);
+	MAX_FILENAME_SIZE, ExampleCallback);
 	parser.AddStringParam("srcImage:", inputSourceName, MAX_FILENAME_SIZE);
 	parser.AddStringParam("filterModeMask:", filterModeMaskName,
-			MAX_FILENAME_SIZE);
+	MAX_FILENAME_SIZE);
 	parser.AddStringParam("targetModeMask:", targetModeMaskName,
-			MAX_FILENAME_SIZE);
+	MAX_FILENAME_SIZE);
 
 	parser.AddStringParam("outputPattern:", outputSummaryPattern,
-			MAX_FILENAME_SIZE);
+	MAX_FILENAME_SIZE);
 	parser.AddStringParam("outputDirectory:", outputDirectoryName,
-			MAX_FILENAME_SIZE);
+	MAX_FILENAME_SIZE);
 	parser.AddStringParam("outputImageName:", outputFilteredName,
-			MAX_FILENAME_SIZE);
+	MAX_FILENAME_SIZE);
 
 	parser.AddBoolParam("useFilter:", &useSourceImages);
 	parser.AddIntParam("pyramidHeight:", &pyramidHeight);

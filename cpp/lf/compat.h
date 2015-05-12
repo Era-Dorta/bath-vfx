@@ -118,7 +118,6 @@ class bidirectional_iterator: public iterator<bidirectional_iterator_tag,T,dist>
 // this is routine whe compiling templates
 // unfortunately, it does not seem to work in all cases
 // and the messages are still visible when compiling STL
-
 #ifdef _WIN32
 
 #pragma warning(disable:4786)
