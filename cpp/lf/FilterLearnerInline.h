@@ -515,7 +515,7 @@ SynthesizePyramidLevel( int level )
       fflush(stdout);
       //#endif
 
-      if ( ((iy+1) % 100) == 0)
+     // if ( ((iy+1) % 100) == 0)
 	//result.savePNG(imgname);
 
       SignalRedraw();
