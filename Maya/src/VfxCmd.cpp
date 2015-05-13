@@ -49,109 +49,53 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 		"smoothCompensated" };
 
 #ifdef _WIN32
-#define WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
+#define LOAD_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
+#define SAVE_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_out"
 #else
-#define WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_w2.txt"
+#define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_w2.txt"
+#define SAVE_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_out"
 #endif
 
 MStatus VfxCmd::doIt(const MArgList &args) {
 
 	MStatus stat;
 
+	action = SAVE;
+	file_ind = 0;
+
+	// Get state parameter
+	MString paramVal;
+	unsigned int index;
+	index = args.flagIndex("a", "action");
+	if (MArgList::kInvalidArgIndex != index) {
+		args.get(index + 1, paramVal);
+		if (paramVal == "load") {
+			action = LOAD;
+		}
+	}
+
+	index = args.flagIndex("n", "filen");
+	if (MArgList::kInvalidArgIndex != index) {
+		args.get(index + 1, file_ind);
+	}
+
 	// Get all user defined attributes
 	MString cmd("getAttr -s shapesBS.weight");
-	int numWeights = 0;
+	numWeights = 0;
 	MGlobal::executeCommand(cmd, numWeights);
 
-	// Read the data from a text file into an array.
-	std::fstream myfile( WEIGHTS_PATH, std::ios_base::in);
-	std::vector<std::vector<float>> weights;
-
-	unsigned int numFrames = 0;
-
-	std::string line;
-	unsigned int weightNum = 0;
-	std::vector<float> currentWeights(numWeights, 0.0);
-	while (std::getline(myfile, line)) {
-		// Save current weight
-		currentWeights.at(weightNum) = std::stof(line);
-		weightNum++;
-		if (weightNum == (unsigned int) (numWeights)) {
-			// Save weights for current frame in weights vector
-			weights.push_back(currentWeights);
-			std::fill(currentWeights.begin(), currentWeights.end(), 0);
-			weightNum = 0;
-			numFrames++;
-		}
+	switch (action) {
+	case SAVE: {
+		saveWeights();
+		return MStatus::kSuccess;
 	}
-	myfile.close();
-
-	// Ignore the last weight
-	numWeights--;
-
-	// Break connections.
-	for (unsigned int i = 0; i < (unsigned int) numWeights; i++) {
-		cmd = "disconnectAttr shapesBS_";
-		cmd = cmd + names[i];
-		cmd = cmd + ".output shapesBS.";
-		cmd = cmd + names[i];
-		dgMod.commandToExecute(cmd);
+	case LOAD: {
+		loadWeights(numWeights);
+		return dgMod.doIt();
+	}
 	}
 
-	cmd = "disconnectAttr con_jaw_c_translateY.output con_jaw_c.translateY";
-	dgMod.commandToExecute(cmd);
-
-	// Key everything.
-	for (unsigned int i = 0; i < (unsigned int) numWeights; i++) {
-		cmd = "setKeyframe { \"shapesBS.w[";
-		cmd = cmd + i;
-		cmd = cmd + "]\" }";
-		dgMod.commandToExecute(cmd);
-	}
-
-	cmd = "setKeyframe  \"con_jaw_c.translateY\"";
-	dgMod.commandToExecute(cmd);
-
-	//Save and set max and min time in the playback slider
-	MAnimControl anim;
-	prevMaxTime = anim.maxTime();
-	prevMinTime = anim.minTime();
-	prevStartTime = anim.animationStartTime();
-	prevEndTime = anim.animationEndTime();
-
-	anim.setMinMaxTime(MTime(1.0), MTime((double) numFrames));
-	anim.setAnimationStartEndTime(MTime(1.0), MTime((double) numFrames));
-
-	//Set numFrames to start at 0 for c++ indexing
-	numFrames -= 1;
-
-	for (unsigned int i = 0; i < weights.size(); i++) {
-		cmd = "currentTime ";
-		cmd = cmd + (i + 1);
-		dgMod.commandToExecute(cmd);
-
-		for (unsigned int j = 0; j < weights.at(i).size(); j++) {
-			cmd = "setAttr shapesBS.weight[";
-			cmd = cmd + j;
-			cmd = cmd + "] ";
-			cmd = cmd + weights.at(i).at(j);
-			dgMod.commandToExecute(cmd);
-
-			cmd = "setKeyframe { \"shapesBS.w[";
-			cmd = cmd + j;
-			cmd = cmd + "]\" }";
-			dgMod.commandToExecute(cmd);
-		}
-
-		// Set the teeth movement for this frame, interpolates between the two
-		// blend shapes that can open the mouth
-		cmd = "setAttr con_jaw_c.translateY ";
-		cmd += -3 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
-		dgMod.commandToExecute(cmd);
-		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
-		dgMod.commandToExecute(cmd);
-	}
-	return redoIt();
+	return MStatus::kFailure;
 }
 
 MStatus VfxCmd::undoIt() {
@@ -162,7 +106,17 @@ MStatus VfxCmd::undoIt() {
 }
 
 MStatus VfxCmd::redoIt() {
-	return dgMod.doIt();
+	switch (action) {
+	case SAVE: {
+		saveWeights();
+		return MStatus::kSuccess;
+	}
+	case LOAD: {
+		loadWeights(numWeights);
+		return dgMod.doIt();
+	}
+	}
+	return MStatus::kFailure;
 }
 
 bool VfxCmd::isUndoable() const {
@@ -171,4 +125,101 @@ bool VfxCmd::isUndoable() const {
 
 void *VfxCmd::creator() {
 	return new VfxCmd;
+}
+
+void VfxCmd::loadWeights(int numWeights) {
+	MString cmd;
+	// Read the data from a text file into an array.
+	std::fstream myfile( LOAD_WEIGHTS_PATH, std::ios_base::in);
+	std::vector<std::vector<float> > weights;
+	unsigned int numFrames = 0;
+	std::string line;
+	unsigned int weightNum = 0;
+	std::vector<float> currentWeights(numWeights, 0.0);
+	while (std::getline(myfile, line)) {
+		// Save current weight
+		currentWeights.at(weightNum) = std::stof(line);
+		weightNum++;
+		if (weightNum == (unsigned int) ((numWeights))) {
+			// Save weights for current frame in weights vector
+			weights.push_back(currentWeights);
+			std::fill(currentWeights.begin(), currentWeights.end(), 0);
+			weightNum = 0;
+			numFrames++;
+		}
+	}
+	myfile.close();
+	// Ignore the last weight
+	numWeights--;
+	// Break connections.
+	for (unsigned int i = 0; i < (unsigned int) (numWeights); i++) {
+		cmd = "disconnectAttr shapesBS_";
+		cmd = cmd + names[i];
+		cmd = cmd + ".output shapesBS.";
+		cmd = cmd + names[i];
+		dgMod.commandToExecute(cmd);
+	}
+	cmd = "disconnectAttr con_jaw_c_translateY.output con_jaw_c.translateY";
+	dgMod.commandToExecute(cmd);
+	// Key everything.
+	for (unsigned int i = 0; i < (unsigned int) (numWeights); i++) {
+		cmd = "setKeyframe { \"shapesBS.w[";
+		cmd = cmd + i;
+		cmd = cmd + "]\" }";
+		dgMod.commandToExecute(cmd);
+	}
+	cmd = "setKeyframe  \"con_jaw_c.translateY\"";
+	dgMod.commandToExecute(cmd);
+	//Save and set max and min time in the playback slider
+	MAnimControl anim;
+	prevMaxTime = anim.maxTime();
+	prevMinTime = anim.minTime();
+	prevStartTime = anim.animationStartTime();
+	prevEndTime = anim.animationEndTime();
+	anim.setMinMaxTime(MTime(1.0), MTime((double) (numFrames)));
+	anim.setAnimationStartEndTime(MTime(1.0), MTime((double) (numFrames)));
+	//Set numFrames to start at 0 for c++ indexing
+	numFrames -= 1;
+	for (unsigned int i = 0; i < weights.size(); i++) {
+		cmd = "currentTime ";
+		cmd = cmd + (i + 1);
+		dgMod.commandToExecute(cmd);
+		for (unsigned int j = 0; j < weights.at(i).size(); j++) {
+			cmd = "setAttr shapesBS.weight[";
+			cmd = cmd + j;
+			cmd = cmd + "] ";
+			cmd = cmd + weights.at(i).at(j);
+			dgMod.commandToExecute(cmd);
+			cmd = "setKeyframe { \"shapesBS.w[";
+			cmd = cmd + j;
+			cmd = cmd + "]\" }";
+			dgMod.commandToExecute(cmd);
+		}
+		// Set the teeth movement for this frame, interpolates between the two
+		// blend shapes that can open the mouth
+		cmd = "setAttr con_jaw_c.translateY ";
+		cmd += -3 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
+		dgMod.commandToExecute(cmd);
+		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
+		dgMod.commandToExecute(cmd);
+	}
+}
+
+void VfxCmd::saveWeights() {
+	MStatus stat;
+	std::string path = SAVE_WEIGHTS_PATH;
+	path = path + std::to_string(file_ind) + ".txt";
+	std::fstream myfile(path, std::ios_base::app | std::fstream::out);
+	MDoubleArray weights;
+
+	MString cmd("getAttr shapesBS.weight");
+	stat = MGlobal::executeCommand(cmd, weights);
+
+	MGlobal::displayInfo(MString("Save path: ") + path.c_str());
+
+	for (unsigned int i = 0; i < weights.length(); i++) {
+		myfile << weights[i] << endl;
+	}
+
+	myfile.close();
 }
