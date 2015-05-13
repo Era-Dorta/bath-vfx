@@ -235,7 +235,7 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 	 }
 	 */
 
-	vector<Neigh*> neighborhoods;
+	vector<Neigh*> neighborhoods, neighborhoodsSource;
 	vector<CVector<double> *> pixels;
 	bool pointsGathered = false;
 	bool pixelsGathered = false;
@@ -243,6 +243,7 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 	TSVQR * rtree = NULL;
 	MLP * mlp = NULL;
 	CSearchEnvironment *searchEnvironment = NULL;
+	CSearchEnvironment *searchEnvironmentSource = NULL;
 
 	// auxiliary mode mask data
 	vector<Neigh*> neighborhoodsMM;
@@ -251,10 +252,17 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 
 	bool causal = bool(m_pass == 0);
 
-	if (m_sampler == NULL)
+	if (m_sampler == NULL) {
 		m_sampler = new Sampler<Point2>(m_samplerEpsilon);
-	else
+	} else {
 		m_sampler->setEpsilon(m_samplerEpsilon);
+	}
+
+	if (m_samplerSource == NULL) {
+		m_samplerSource = new Sampler<Point2>(m_samplerEpsilon);
+	} else {
+		m_samplerSource->setEpsilon(m_samplerEpsilon);
+	}
 
 	m_useMMnow = false;
 	m_sourceFacNow =
@@ -272,7 +280,10 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 		pixelsGathered = (m_searchType == MLP_SEARCH
 				|| m_searchType == TSVQR_SEARCH);
 
-		GatherTrainingData( level, neighborhoods,
+		GatherTrainingData(level, m_filteredExamplePyramid, neighborhoods,
+				pixelsGathered ? &pixels : NULL, m_useFilterModeMask);
+
+		GatherTrainingData(level, m_sourceExamplePyramid, neighborhoodsSource,
 				pixelsGathered ? &pixels : NULL, m_useFilterModeMask);
 
 		int numSolidNeighborhoods = 0;
@@ -294,7 +305,8 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 			m_sourceFacNow = m_modeMaskWeight;
 			pointsGatheredMM = true;
 
-			GatherTrainingData(level, neighborhoodsMM, NULL, false);
+			GatherTrainingData(level, m_filteredExamplePyramid, neighborhoodsMM,
+			NULL, false);
 			printf("%d MM data points.\n", neighborhoodsMM.size());
 
 			m_useSourceImagesNow = m_useSourceImages;
@@ -305,7 +317,7 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 			m_finalSourceFac >= 0 && level == 0 ?
 					m_finalSourceFac : m_sourceFac;
 
-	if (neighborhoods.size() > 0) {
+	if (neighborhoods.size() > 0 && neighborhoodsSource.size() > 0) {
 		/*
 		 tree = new TSVQ<Neigh>(neighborhoods,m_maxTSVQerror,m_maxTSVQdepth);
 		 rtree = new TSVQR(neighborhoods,pixels,m_maxTSVQdepth);
@@ -339,6 +351,7 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 		if (m_usePCA) {
 #ifdef LAPACK
 			m_eigenvectors = PCA(neighborhoods, m_mean);
+			m_eigenvectorsSource = PCA(neighborhoodsSource, m_meanSource);
 #else
 			printf("PCA unavailable\n");
 			exit(1);
@@ -380,6 +393,11 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 			evt->SetANNEpsilon(m_annEpsilon);
 			searchEnvironment = evt;
 
+			evt = new CANNSearchEnvironment(neighborhoodsSource,
+					m_samplerSource);
+			evt->SetANNEpsilon(m_annEpsilon);
+			searchEnvironmentSource = evt;
+
 			if ((m_useFilterModeMask || m_useTargetModeMask)
 					&& !m_ignoreModeMaskPass) {
 				CANNSearchEnvironment *evt = new CANNSearchEnvironment(
@@ -416,6 +434,12 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 			delete *it;
 		neighborhoods.erase(neighborhoods.begin(), neighborhoods.end());
 
+		for (it = neighborhoodsSource.begin(); it != neighborhoodsSource.end();
+				++it)
+			delete *it;
+		neighborhoodsSource.erase(neighborhoodsSource.begin(),
+				neighborhoodsSource.end());
+
 		for (it = neighborhoodsMM.begin(); it != neighborhoodsMM.end(); ++it)
 			delete *it;
 		neighborhoodsMM.erase(neighborhoodsMM.begin(), neighborhoodsMM.end());
@@ -431,8 +455,10 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 	sprintf(imgname, "filtered%d-pass%d.png", level, m_pass);
 
 	CSearchEnvironment *currentSearchEnvironment = searchEnvironment;
+	CSearchEnvironment *currentSearchEnvironmentSource = searchEnvironmentSource;
 	// Just assigning memory, neighbourhoods is empty after the free
 	vector<Neigh*> * currentNeighborhoods = &neighborhoods;
+	vector<Neigh*> * currentNeighborhoodsSource = &neighborhoodsSource;
 
 	// another diagnostic image
 	vector<ColorImage *> sourceLocHistoImages;
@@ -571,7 +597,8 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 				case TSVQ_SEARCH:
 				case ANN_SEARCH:
 					bestLoc = FindBestMatchLocation(Point2(ix, iy), level,
-							currentSearchEnvironment);
+							currentSearchEnvironment,
+							currentSearchEnvironmentSource);
 					break;
 
 				case ASHIKHMIN_SEARCH:
@@ -710,6 +737,9 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 	if (searchEnvironment)
 		delete searchEnvironment;
 
+	if (searchEnvironmentSource)
+		delete searchEnvironmentSource;
+
 	if (searchEnvironmentMM)
 		delete searchEnvironmentMM;
 
@@ -717,6 +747,10 @@ void CFilterLearner<TSource, TFilter>::SynthesizePyramidLevel(int level) {
 		vector<Neigh*>::iterator it;
 
 		for (it = neighborhoods.begin(); it != neighborhoods.end(); ++it)
+			delete *it;
+
+		for (it = neighborhoodsSource.begin(); it != neighborhoodsSource.end();
+				++it)
 			delete *it;
 
 		for (it = neighborhoodsMM.begin(); it != neighborhoodsMM.end(); ++it)
@@ -775,21 +809,18 @@ Point2 CFilterLearner<TSource, TFilter>::ApplyPrediction(Point2 targetLoc,
 
 template<class TSource, class TFilter>
 void CFilterLearner<TSource, TFilter>::GatherTrainingData(int currLevel,
-		vector<Neigh*> & points, vector<CVector<double> *> * pixels,
-		bool ignoreUnmaskedPixels) {
+		vector<Pyramid<TFiltImage> >& pyramid, vector<Neigh*> & points,
+		vector<CVector<double> *> * pixels, bool ignoreUnmaskedPixels) {
 	printf("Collecting training data\n");
 
-	assert(m_filteredExamplePyramid.size() > 0);
+	assert(pyramid.size() > 0);
 	if (m_useSourceImagesNow)
 		assert(
 				m_filteredExamplePyramid.size()
 						== m_sourceExamplePyramid.size());
 
-	for (int imageID = 0; imageID < m_filteredExamplePyramid.size();
-			imageID++) {
-		Pyramid<TFiltImage> * img = &m_filteredExamplePyramid[imageID];
-		Pyramid<TSrcImage> * imgProto =
-				m_useSourceImagesNow ? &m_sourceExamplePyramid[imageID] : NULL;
+	for (int imageID = 0; imageID < pyramid.size(); imageID++) {
+		Pyramid<TFiltImage> * img = &pyramid[imageID];
 
 		int height = (*img)[currLevel].height();
 		int width = (*img)[currLevel].width();
@@ -809,7 +840,7 @@ void CFilterLearner<TSource, TFilter>::GatherTrainingData(int currLevel,
 
 				Neigh * n = new Neigh(
 						GetNeighborhood(Point2(ix, iy, imageID), currLevel,
-								false, img, imgProto));
+								false, img));
 				points.push_back(n);
 
 				// When called trough GatherTraining Data, pixels are NULL
@@ -1024,8 +1055,8 @@ Neigh CFilterLearner<TSource, TFilter>::GetNeighborhood(Point2 loc,
 				if (iy == radius && ix == radius && level == currLevel)
 					continue;
 
-				double fac = m_alpha * m_kernel->get(width, iy)
-						* m_kernel->get(width, ix) / maxVal;
+				double fac = m_kernel->get(width, iy) * m_kernel->get(width, ix)
+						/ maxVal;
 				if (computeWeightVector)
 					for (int d = 0; d < dim; d++)
 						n[i++] = fac;
@@ -1048,8 +1079,7 @@ Neigh CFilterLearner<TSource, TFilter>::GetNeighborhood(Point2 loc,
 			//	  int sdim = m_grayscaleMode ? 1 : impcur.dim();
 			for (int iy = 0; iy < width; ++iy)
 				for (int ix = 0; ix < width; ++ix) {
-					double fac = m_alpha * m_sourceFacNow
-							* m_kernel->get(width, iy)
+					double fac = m_sourceFacNow * m_kernel->get(width, iy)
 							* m_kernel->get(width, ix) / maxVS;
 					if (computeWeightVector)
 						for (int d = 0; d < sdim; d++)
@@ -1262,7 +1292,8 @@ Point2 CFilterLearner<TSource, TFilter>::FindBestMatchLocationHeuristic(
 			|| targetLoc[0] + radius + num >= (*img)[currLevel].width()
 			|| targetLoc[1] < radius
 			|| targetLoc[1] + radius + num >= (*img)[currLevel].height())
-		return FindBestMatchLocation(targetLoc, currLevel, searchEnvironment);
+		return FindBestMatchLocation(targetLoc, currLevel, searchEnvironment,
+				searchEnvironment);
 	//    return FindBestMatchLocation(targetLoc,currLevel);
 
 	/*
@@ -1916,8 +1947,10 @@ template<class TSource, class TFilter>
 Point2 CFilterLearner<TSource, TFilter>::FindBestMatchLocation(Point2 targetLoc,
 		int currLevel) {
 	assert(m_filteredExamplePyramid.size() > 0);
+	assert(m_sourceExamplePyramid.size() > 0);
 
 	m_sampler->eraseSamples();
+	m_samplerSource->eraseSamples();
 
 	for (int imageID = 0; imageID < m_filteredExamplePyramid.size();
 			imageID++) {
@@ -1977,7 +2010,8 @@ Point2 CFilterLearner<TSource, TFilter>::FindBestMatchLocation(Point2 targetLoc,
 
 template<class TSource, class TFilter>
 Point2 CFilterLearner<TSource, TFilter>::FindBestMatchLocation(Point2 targetLoc,
-		int currLevel, CSearchEnvironment *searchEnvironment) {
+		int currLevel, CSearchEnvironment *searchEnvironment,
+		CSearchEnvironment *searchEnvironmentSource) {
 	if (searchEnvironment == NULL
 			|| currLevel >= m_filteredExamplePyramid[0].NLevels())
 		return FindBestMatchLocation(targetLoc, currLevel);
@@ -2005,15 +2039,31 @@ Point2 CFilterLearner<TSource, TFilter>::FindBestMatchLocation(Point2 targetLoc,
 		return FindBestMatchLocation(targetLoc, currLevel);
 	}
 
-	Neigh nb = GetNeighborhood(targetLoc, currLevel, false, img, imgFilt);
+	Neigh nb = GetNeighborhood(targetLoc, currLevel, false, img);
+	Neigh nbSource = GetNeighborhood(targetLoc, currLevel, false, imgFilt);
 
-	Neigh n;
-	if (m_usePCA)
+	Neigh n, nSource;
+	if (m_usePCA) {
 		n = m_eigenvectors * (nb - m_mean);
-	else
+		nSource = m_eigenvectorsSource * (nbSource - m_meanSource);
+	} else {
 		n = nb;
+		nSource = nbSource;
+	}
 
-	return searchEnvironment->FindBestMatchLocation(n);
+	Point2 p = searchEnvironment->FindBestMatchLocation(n);
+	Point2 pSource = searchEnvironmentSource->FindBestMatchLocation(nSource);
+
+	bool isValid;
+	double d = GetNeighborhoodDist(targetLoc, p, currLevel, isValid,
+			m_neighborhoodWidth, m_sampler->threshold());
+	double dSource = GetNeighborhoodDist(targetLoc, pSource, currLevel, isValid,
+			m_neighborhoodWidth, m_samplerSource->threshold());
+	if ((1 - m_alpha) * d < m_alpha * dSource) {
+		return p;
+	}
+
+	return pSource;
 }
 
 template<class T>

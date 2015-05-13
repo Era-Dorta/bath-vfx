@@ -54,8 +54,8 @@ public:
 // other routines to do actual work
 	void Synthesize(void);
 	void SynthesizePyramidLevel(int level);
-	void GatherTrainingData(int level, vector<Neigh*> & points,
-			vector<CVector<double> *> * pixels = NULL,
+	void GatherTrainingData(int level, vector<Pyramid<TFiltImage> >& pyramid,
+			vector<Neigh*> & points, vector<CVector<double> *> * pixels = NULL,
 			bool gatherMMdata = false);
 #ifdef LAPACK
 	static CMatrix<double> PCA(vector<Neigh*> & points, Neigh & mean,
@@ -72,7 +72,8 @@ public:
 			bool twoLevel = false);
 
 	Point2 FindBestMatchLocation(Point2 targetLoc, int level,
-			CSearchEnvironment *searchEnvironment);
+			CSearchEnvironment *searchEnvironment,
+			CSearchEnvironment *searchEnvironmentSource);
 	Point2 FindBestMatchLocationHeuristic(Point2 targetLoc, int level,
 			CSearchEnvironment *tsvqEnvironment);
 
@@ -497,6 +498,7 @@ protected:
 	float m_samplerEpsilon;
 	SearchType m_searchType;
 	Sampler<Point2> * m_sampler;
+	Sampler<Point2> * m_samplerSource;
 	bool m_useSplineWeights;
 	PyramidType m_sourcePyramidType;
 	PyramidType m_filteredPyramidType;
@@ -529,8 +531,8 @@ protected:
 
 	bool m_oneway;
 
-	CMatrix<double> m_eigenvectors; // for PCA
-	Neigh m_mean;
+	CMatrix<double> m_eigenvectors, m_eigenvectorsSource; // for PCA
+	Neigh m_mean, m_meanSource;
 	int m_neighborhoodWidth;
 	CMatrix<double> * m_kernel;
 
