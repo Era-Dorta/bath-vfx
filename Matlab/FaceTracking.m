@@ -1,5 +1,6 @@
 %% FaceTracking.m
 clear; close all; clc
+saveon = false;
 
 %% Initialise
 % Specify image folders
@@ -78,38 +79,49 @@ for frame = (firstFrame+1):lastFrame
     newImg_right = imread([folder_right '/' sDir_right(frame).name]);
 
     % Track the points. Note that some points may be lost
-    % Left image
     [pObj_left, isFound_left] = step(pointTracker_left, newImg_left);
-    visiblePoints_left = pObj_left(isFound_left, :);
-    oldInliers_left = oldPoints_left(isFound_left, :);
-    
-    % Right image
     [pObj_right, isFound_right] = step(pointTracker_right, newImg_right);
+    
+    % Epipolar constraint
+    pObj_left(:,2) = (pObj_left(:,2) + pObj_right(:,2))./2; 
+    pObj_right(:,2) = pObj_left(:,2);
+    
+    visiblePoints_left = pObj_left(isFound_left, :);
     visiblePoints_right = pObj_right(isFound_right, :);
-    oldInliers_right = oldPoints_right(isFound_right, :);
+    oldInliers_left = oldPoints_left(isFound_left, :);    
+    oldInliers_right = oldPoints_right(isFound_right, :);  
     
     % Estimate the geometric transformation between the old points
     % and the new points and eliminate outliers
+    dist = 2;
     [xform_left, oldInliers_left, visiblePoints_left] = estimateGeometricTransform(...
-        oldInliers_left, visiblePoints_left, 'similarity', 'MaxDistance', 2);
+        oldInliers_left, visiblePoints_left, 'similarity', 'MaxDistance', dist);
     [xform_right, oldInliers_right, visiblePoints_right] = estimateGeometricTransform(...
-            oldInliers_right, visiblePoints_right, 'similarity', 'MaxDistance', 2);
-        
+            oldInliers_right, visiblePoints_right, 'similarity', 'MaxDistance', dist);
+    
+    % Transform points
     [X,Y] = transformPointsForward(xform_left,oldPoints_left(:,1),oldPoints_left(:,2));
-    predict_left = [X';Y'];
+    predict_left = double([X';Y']);
     [X,Y] = transformPointsForward(xform_right,oldPoints_right(:,1),oldPoints_right(:,2));
-    predict_right = [X';Y'];
+    predict_right = double([X';Y']);
         
-    % If points are lost, break loop
-    if size(visiblePoints_left,1)<numFeatures || size(visiblePoints_right,1)<numFeatures
+    % If points are lost, re-estimate points
+    if size(visiblePoints_left,1)<numFeatures
         disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
         % Re-estimate points in last frame
-        visiblePoints_left = ReEstimatePoints(newImg_left, double(predict_left), visiblePoints_left');
-        visiblePoints_right = ReEstimatePoints(newImg_right, double(predict_right), visiblePoints_right');
+        visiblePoints_left = ReEstimatePoints(newImg_left, predict_left, visiblePoints_left');
         visiblePoints_left = single(visiblePoints_left)';
-        visiblePoints_right = single(visiblePoints_right)';
-        pause;
     end
+    if size(visiblePoints_right,1)<numFeatures
+        disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
+        % Re-estimate points in last frame
+        visiblePoints_right = ReEstimatePoints(newImg_right, predict_right, visiblePoints_right');
+        visiblePoints_right = single(visiblePoints_right)';
+    end
+    
+    % Re-apply epipolar constraint
+    visiblePoints_left(:,2) = (visiblePoints_left(:,2) + visiblePoints_right(:,2))./2; 
+    visiblePoints_right(:,2) = visiblePoints_left(:,2);
         
     % Display tracked points
     newImg_left = insertMarker(newImg_left, visiblePoints_left, '+', ...
@@ -145,16 +157,6 @@ movie(Mov,1,120);
 points_left = storePoints_left(:,:,lastFrame);
 points_right = storePoints_right(:,:,lastFrame);
 
-%% Re-estimate points in last frame
-newImg_left = imread([folder_left '/' sDir_left(lastFrame).name]);
-newImg_right = imread([folder_right '/' sDir_right(lastFrame).name]);
-points_left = ReEstimatePoints(newImg_left, points_left);
-points_right = ReEstimatePoints(newImg_right, points_right);
-
-% Apply epipolar constraint by setting y-coordinate to average
-points_left(2,:) = (points_left(2,:) + points_right(2,:))./2; 
-points_right(2,:) = points_left(2,:);
-
 %% Display points
 figure; imshow([newImg_left,newImg_right],[]); hold on;
 plot(storePoints_left(1,:,firstFrame),storePoints_left(2,:,firstFrame),'g*'); hold on;
@@ -169,7 +171,9 @@ line([storePoints_right(1,i,firstFrame)+width points_right(1,i)+width],...
 end
 
 %% Save points
-save(['points_left_' num2str(lastFrame,'% 05.f') '.mat'], 'points_left');
-save(['points_right_' num2str(lastFrame,'% 05.f') '.mat'], 'points_right');
-disp('Saved!');
+if saveon == true
+    save(['points_left_' num2str(lastFrame,'% 05.f') '.mat'], 'points_left');
+    save(['points_right_' num2str(lastFrame,'% 05.f') '.mat'], 'points_right');
+    disp('Saved!');
+end
 

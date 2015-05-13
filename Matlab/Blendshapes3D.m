@@ -11,6 +11,7 @@ if ~(exist('OBJ', 'var'))
     %       myfilename = sprintf('shapeBS/E_%d.obj', k);
     %       OBJ{k+1} = read_wobj(myfilename);
     %     end
+
 end
 
 % Use 20 blendshapes:
@@ -31,6 +32,7 @@ for i = 1:numfiles
 end
 
 %% TODO Get neutral and displacements for sparse shapes.
+% load('Emily_97');
 load('X_emily');
 sparse_neutral = X;
 
@@ -63,29 +65,140 @@ for j = 1:numfiles
     sparse_OBJ{j} = OBJ{1, j+1}.vertices(idx,:);
 end
 
+% sparse_Blend1 = Blend1.vertices(idx,:);
+
 %% Plot sparse points.
-for k = 2: 30;
-T = OBJ{1, k+1}.objects.data.vertices ;
-v = OBJ{1, k+1}.vertices;
-figure(k);
-trisurf(T, v(:, 1), v(:,2), v(:,3), ones(1,size(v,1)));
-axis equal; % axis([-15 15 -15 10 -15 15]);
-view([0 90]); alpha(1.0);
-hold on
-scatter3(sparse_OBJ{1, k}(:,1),sparse_OBJ{1, k}(:,2),sparse_OBJ{1, k}(:,3), 50, 'MarkerEdgeColor',[1 0 0],...
-    'MarkerFaceColor',[1 0 0]);
+% for k = 2: 30;
+% T = OBJ{1, k+1}.objects.data.vertices ;
+% v = OBJ{1, k+1}.vertices;
+% figure(k);
+% trisurf(T, v(:, 1), v(:,2), v(:,3), ones(1,size(v,1)));
+% axis equal; % axis([-15 15 -15 10 -15 15]);
+% view([0 90]); alpha(1.0);
+% hold on
+% scatter3(sparse_OBJ{1, k}(:,1),sparse_OBJ{1, k}(:,2),sparse_OBJ{1, k}(:,3), 50, 'MarkerEdgeColor',[1 0 0],...
+%     'MarkerFaceColor',[1 0 0]);
+% end
+% %% CHOOSE new frame/pose.
+% load('Emily_sequence');
+% numFrames = size(Emily_sequence,3);
+% weight_array = [];
+% error_store = zeros(numFrames,1);
+% 
+% % CHOOSE SOLVER: 1, 2, or 3:
+% solver = 3;
+% if solver == 3
+%     w3 = zeros(1,numfiles);
+% end
+% 
+% for i = 1:numFrames
+%     %myfilename = sprintf('Emily_blendshapes/E_new%d.obj', 2);
+%     %OBJ_new = read_wobj(myfilename);
+%     %sparse_new = OBJ_new.vertices(idx,:);
+%     sparse_new = Emily_sequence(:,:,i);
+%     
+%     % x = reshape(OBJ_new.vertices, 3*num_vertices, 1);
+%     num_sparse_vertices = size(X,1);
+%     x = reshape(sparse_new, 3*num_sparse_vertices, 1);
+%     sparse_neutral = reshape(sparse_neutral, 3*num_sparse_vertices, 1);
+%     displacement = bsxfun(@minus, x, sparse_neutral);
+%     
+%     sparse_key_poses = zeros(num_sparse_vertices*3,numfiles);
+%     sparse_key_disp = zeros(num_sparse_vertices*3,numfiles);
+%     for j = 1:numfiles
+%         sparse_key_poses(:,j) = reshape(sparse_OBJ{1,j}, 3*num_sparse_vertices, 1);
+%         sparse_key_disp(:,j) =  bsxfun(@minus, sparse_key_poses(:,j), sparse_neutral);
+%     end
+%     
+%     %  Solve for weights.
+%     switch solver
+%         case 1
+%             w1 = sparse_key_poses\x;
+%             
+%             weight_array = [weight_array; w1];
+%             bb = bsxfun(@plus, sparse_key_disp*w1, sparse_neutral);
+%             bb = reshape(bb, 97, 3);
+%             
+%         case 2
+%             options = optimset('Display','notify','TolX',1e-15);
+%             [w2,resnorm] = lsqnonneg(sparse_key_poses,x,options);
+%             
+%             weight_array = [weight_array; w2];
+%             bb = bsxfun(@plus, sparse_key_disp*w2, sparse_neutral);
+%             bb = reshape(bb, 97, 3);
+%             
+%         case 3
+%             % Aeq = ones(1, numfiles); Force sum = 1.
+%             % beq = 1;
+%             lb = 0*ones(2*num_sparse_vertices,1);
+%             ub = 1*ones(2*num_sparse_vertices,1);
+%             x0 = w3;
+%             options = optimoptions('lsqlin','MaxIter', 300, 'MaxPCGIter', 100, 'TolFun', 1e-20, 'TolPCG', 0.01);
+%             [w3,resnorm2] = lsqlin(sparse_key_disp, displacement,[], [], [],[],lb,ub,x0,options);
+%             
+%             weight_array = [weight_array; w3];
+%             bb = bsxfun(@plus, sparse_key_disp*w3, sparse_neutral);
+%             bb = reshape(bb, 97, 3);
+%             
+%     end
+%     
+%     % Plot Error.
+%     if (mod(i,200) == 0)
+%         figure;
+%         axis equal;
+%         view([0 90]); alpha(1.0);
+%         hold on
+%         scatter3(sparse_new(:,1),sparse_new(:,2),sparse_new(:,3), 50, 'MarkerEdgeColor',[1 0 0],...
+%             'MarkerFaceColor',[1 0 0]);
+%         scatter3(bb(:,1),bb(:,2),bb(:,3), 80, 'MarkerEdgeColor',[0 1 1]);
+%     end
+%     
+%     % Quantify error.
+%     temp = abs(sparse_new - bb);
+%     temp = mean(temp);
+%     error = norm(temp);
+% 
+%     error_store(i) = error;
+%     
+%     % OBJ_blend = OBJ_new;
+%     % v_temp = bsxfun(@plus, sparse_key_disp*w1, sparse_neutral);
+%     % OBJ_blend.vertices = reshape( v_temp, num_sparse_vertices,3);
+%     % OBJ_blend2 = OBJ_new;
+%     % v_temp = bsxfun(@plus, sparse_key_disp*w2, sparse_neutral);
+%     % OBJ_blend2.vertices = reshape( v_temp, num_sparse_vertices,3);
+%     % OBJ_blend3 = OBJ_new;
+%     % v_temp = bsxfun(@plus, sparse_key_disp*w3, sparse_neutral);
+%     % OBJ_blend3.vertices = reshape( v_temp, num_sparse_vertices,3);
+%     
+% end
+% average_error = mean(error_store);
+% disp(average_error);
+% 
+% %% Save data as txt.
+% % myfilename2 = sprintf('data/weights_%d.txt', k);
+% 
+% save data/weights_w2.txt weight_array -ASCII
+
+for i = 1:numfiles;
+    v = OBJ{1, i+1}.vertices;
+    figure(1);
+    trisurf(T, v(:, 1), v(:,2), v(:,3), ones(1,size(v,1)));
+    axis equal; axis([-15 15 -15 10 -15 15]); view([0 90]); hold on;
+    scatter3(sparse_OBJ{1, i}(:,1),sparse_OBJ{1, i}(:,2),sparse_OBJ{1, i}(:,3), 50, 'MarkerEdgeColor',[1 0 0],...
+        'MarkerFaceColor',[1 0 0]);
+    hold off;
+    pause(0.01);
 end
+
 %% CHOOSE new frame/pose.
+v_store = X';
 load('Emily_sequence');
 numFrames = size(Emily_sequence,3);
 weight_array = [];
 error_store = zeros(numFrames,1);
 
 % CHOOSE SOLVER: 1, 2, or 3:
-solver = 3;
-if solver == 3
-    w3 = zeros(1,numfiles);
-end
+solver = 1;
 
 for i = 1:numFrames
     %myfilename = sprintf('Emily_blendshapes/E_new%d.obj', 2);
@@ -94,7 +207,7 @@ for i = 1:numFrames
     sparse_new = Emily_sequence(:,:,i);
     
     % x = reshape(OBJ_new.vertices, 3*num_vertices, 1);
-    num_sparse_vertices = size(X,1);
+    num_sparse_vertices = size(v_store,2);
     x = reshape(sparse_new, 3*num_sparse_vertices, 1);
     sparse_neutral = reshape(sparse_neutral, 3*num_sparse_vertices, 1);
     displacement = bsxfun(@minus, x, sparse_neutral);
@@ -128,9 +241,7 @@ for i = 1:numFrames
             % beq = 1;
             lb = 0*ones(2*num_sparse_vertices,1);
             ub = 1*ones(2*num_sparse_vertices,1);
-            x0 = w3;
-            options = optimoptions('lsqlin','MaxIter', 300, 'MaxPCGIter', 100, 'TolFun', 1e-20, 'TolPCG', 0.01);
-            [w3,resnorm2] = lsqlin(sparse_key_disp, displacement,[], [], [],[],lb,ub,x0,options);
+            [w3,resnorm2] = lsqlin(sparse_key_disp, displacement,[], [], [],[],lb,ub);
             
             weight_array = [weight_array; w3];
             bb = bsxfun(@plus, sparse_key_disp*w3, sparse_neutral);
@@ -139,7 +250,9 @@ for i = 1:numFrames
     end
     
     % Plot Error.
-    if (mod(i,200) == 0)
+    
+%     if (mod(i,200) == 0)
+    if i ==1
         figure;
         axis equal;
         view([0 90]); alpha(1.0);
@@ -150,9 +263,7 @@ for i = 1:numFrames
     end
     
     % Quantify error.
-    temp = abs(sparse_new - bb);
-    temp = mean(temp);
-    error = norm(temp);
+    error = sum(sum(abs(sparse_new - bb),1),2);
 
     error_store(i) = error;
     
@@ -172,10 +283,7 @@ disp(average_error);
 
 %% Save data as txt.
 % myfilename2 = sprintf('data/weights_%d.txt', k);
-
-save data/weights_w2.txt weight_array -ASCII
-
-
+% save data/weights_w2.txt weight_array -ASCII
 
 %% Plot.
 
