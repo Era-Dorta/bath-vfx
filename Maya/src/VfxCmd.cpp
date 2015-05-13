@@ -217,9 +217,10 @@ void VfxCmd::saveWeights() {
 
 	MGlobal::displayInfo(MString("Save path: ") + path.c_str());
 
-	for (unsigned int i = 0; i < weights.length(); i++) {
+	for (unsigned int i = 0; i < weights.length() - 1; i++) {
 		myfile << weights[i] << endl;
 	}
+	myfile << weights[weights.length() - 1];
 
 	myfile.close();
 }
