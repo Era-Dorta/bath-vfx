@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-path = 'vfx/Data/skinRender/microgeometry/';
+path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry/';
 
 part = 'cheek_spec_normal';
 

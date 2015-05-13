@@ -2,11 +2,7 @@
 
 #define __COMPAT_H__
 
-
-
 #include <cassert>
-
-
 
 // turn out the visual studio warnings (identifier was truncated) 
 
@@ -16,8 +12,6 @@
 
 #endif
 
-
-
 // Windows-specific include for OpenGL and GLUT
 
 #ifdef _WIN32 
@@ -26,11 +20,7 @@
 
 #endif
 
-
-
 // currently, SGI's STL does not have the new-style iostream 
-
-
 
 #if defined(_WIN32) || defined(__GNUG__)
 //#if defined(__GNUG__)
@@ -55,17 +45,14 @@
 
 #endif
 
-
-
 // 2.8.1 gcc does not support namespaces
 
 // in other cases need this to avoid std:: prefixes
 
-namespace std {}
+namespace std {
+}
 
 using namespace std;
-
-
 
 // standard C++ does not seem to have bidirectional_iterator
 
@@ -73,7 +60,7 @@ using namespace std;
 
 #ifdef _WIN32
 
-template <class T,class dist> 
+template <class T,class dist>
 
 class bidirectional_iterator: public iterator<bidirectional_iterator_tag,T,dist>
 
@@ -81,16 +68,9 @@ class bidirectional_iterator: public iterator<bidirectional_iterator_tag,T,dist>
 
 #endif
 
-
-
 // includes min/max declaration
 
-
-
 #include <algorithm>
-
-
-
 
 // dealing with Microsoft min/max mess: 
 
@@ -108,42 +88,36 @@ class bidirectional_iterator: public iterator<bidirectional_iterator_tag,T,dist>
 
 /*
 
-#ifdef _WIN32
+ #ifdef _WIN32
 
 
 
-template<class _Ty> 
+ template<class _Ty> 
 
-inline
+ inline
 
-        const _Ty& max(const _Ty& _X, const _Ty& _Y)
+ const _Ty& max(const _Ty& _X, const _Ty& _Y)
 
-        {return (_X < _Y ? _Y : _X); }
+ {return (_X < _Y ? _Y : _X); }
 
 
 
-template<class _Ty> 
+ template<class _Ty> 
 
-inline
+ inline
 
-        const _Ty& min(const _Ty& _X, const _Ty& _Y)
+ const _Ty& min(const _Ty& _X, const _Ty& _Y)
 
-        {return (_Y < _X ? _Y : _X); }
+ {return (_Y < _X ? _Y : _X); }
 
-#endif
+ #endif
 
-*/
+ */
 
 // disable VC6.0 warning "identifier was truncated to 255 characters "
-
 // this is routine whe compiling templates
-
 // unfortunately, it does not seem to work in all cases
-
 // and the messages are still visible when compiling STL
-
-
-
 #ifdef _WIN32
 
 #pragma warning(disable:4786)
@@ -151,8 +125,6 @@ inline
 #define M_PI 3.1415926535897932384626
 
 #endif
-
-
 
 #ifdef _WIN32
 
@@ -164,25 +136,19 @@ inline
 
 #endif
 
-
-
-inline void die() { 
+inline void die() {
 
 #ifndef NDEBUG
 
-cerr << "unexpected condition, aborting, " << __FILE__  << ":" << __LINE__
+	cerr << "unexpected condition, aborting, " << __FILE__ << ":" << __LINE__
 
-     << endl;
+	<< endl;
 
 #endif
 
-} 
-
-
+}
 
 typedef unsigned int uint;
-
-
 
 #ifdef WIN32
 
@@ -192,11 +158,7 @@ typedef unsigned int uint;
 
 #endif
 
-
-
 #include <utility>
-
-
 
 #if defined(_WIN32) && defined(_DEBUG) && defined(DEBUGNEW)
 
@@ -216,16 +178,7 @@ typedef unsigned int uint;
 
 #endif //DEBUGNEW
 
-
-
 #define endlf endl
-
-
-
-
-
-
-
 
 #ifndef _WIN32
 #include <values.h>
@@ -233,15 +186,5 @@ typedef unsigned int uint;
 
 #define MAX_SHORT_VALUE   MAXSHORT
 
-
-
-
-
-
-
 #endif /* __COMPAT_H__ */
-
-
-
-
 
