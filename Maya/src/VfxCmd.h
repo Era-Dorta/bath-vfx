@@ -9,18 +9,30 @@
 #include <maya/MFnSet.h>
 #include <maya/MFnDagNode.h>
 #include <maya/MTime.h>
+#include <maya/MArgList.h>
 
 class VfxCmd: public MPxCommand {
+
+	enum Actions {
+		SAVE, LOAD
+	};
+
 public:
-	virtual MStatus doIt(const MArgList&);
+	virtual MStatus doIt(const MArgList&args);
 	virtual MStatus undoIt();
 	virtual MStatus redoIt();
 	virtual bool isUndoable() const;
 	static void *creator();
 	static MSyntax newSyntax();
 private:
+	void loadWeights(int numWeights);
+	void saveWeights();
+private:
+	Actions action;
+	int numWeights;
 	std::vector<unsigned int> attrIndices;
 	const static MString names[];
+	int file_ind;
 	MDGModifier dgMod;
 	MTime prevMinTime;
 	MTime prevMaxTime;
