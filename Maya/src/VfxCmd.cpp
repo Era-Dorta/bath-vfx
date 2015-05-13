@@ -209,13 +209,26 @@ void VfxCmd::saveWeights() {
 	MStatus stat;
 	std::string path = SAVE_WEIGHTS_PATH;
 	path = path + std::to_string(file_ind) + ".txt";
+
+	std::ifstream infile(path);
+	bool extra_endl = false;
+	if (infile.good()) {
+		extra_endl = true;
+	}
+	infile.close();
+
 	std::fstream myfile(path, std::ios_base::app | std::fstream::out);
+	myfile.precision(10);
 	MDoubleArray weights;
 
 	MString cmd("getAttr shapesBS.weight");
 	stat = MGlobal::executeCommand(cmd, weights);
 
 	MGlobal::displayInfo(MString("Save path: ") + path.c_str());
+
+	if (extra_endl) {
+		myfile << endl;
+	}
 
 	for (unsigned int i = 0; i < weights.length() - 1; i++) {
 		myfile << weights[i] << endl;
