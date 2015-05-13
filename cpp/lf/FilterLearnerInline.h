@@ -1970,42 +1970,38 @@ Point2 CFilterLearner<TSource, TFilter>::FindBestMatchLocation(Point2 targetLoc,
 
 				if (isValid && dist >= 0)
 					m_sampler->addElement(dist, srcLoc);
+
+				isValid = false;
+				dist = GetNeighborhoodDist(targetLoc, srcLoc, currLevel,
+						isValid, m_neighborhoodWidth,
+						m_samplerSource->threshold());
+
+				if (isValid && dist >= 0)
+					m_samplerSource->addElement(dist, srcLoc);
 			}
-		/*
-		 if( isValid && dist >= 0 && (bestDist < 0 || dist < bestDist ) )
-		 {
-		 bestDist = dist;
-		 bestLoc = Point2( ix, iy );
-		 }
-		 }
-		 */
-		//  assert(m_useRandom || bestDist == -1 ||(targetLoc.x() == bestLoc.x() && targetLoc.y() == bestLoc.y()));
-		//  assert(m_useRandom ||
-		//	     !(targetLoc.x() > 5 && targetLoc.y() > 5 && targetLoc.x() < 59 && targetLoc.y() < 59) ||
-		//		 bestDist == 0);
-		//printf("bestDist = %f\n",bestDist);
-		// return bestLoc;
 	}
 
-	if (m_sampler->size() == 0)
-		return Point2(-1, -1);
+	if (m_sampler->size() == 0) {
+		if (m_samplerSource->size() == 0) {
+			return Point2(-1, -1);
+		} else {
+			return m_samplerSource->UniformSample().second;
+		}
+	} else {
+		if (m_samplerSource->size() == 0) {
+			return m_sampler->UniformSample().second;
+		} else {
+			pair<float, Point2> distPair = m_sampler->UniformSample();
+			pair<float, Point2> distPairSource =
+					m_samplerSource->UniformSample();
 
-	//  const pair<float,Point2> result = sampler->GaussianSample();
-
-	// printf("pt = (%d,%d; %d), dist = %f, src=(%d,%d)\n",targetLoc.x(),targetLoc.y(),
-//	  currLevel, result.first,result.second.x(), result.second.y());
-//  assert(result.first == 0);
-
-	//if (!(result.second.x() == targetLoc.x() && result.second.y() == targetLoc.y()))
-	//  sampler.print();
-	//assert(result.second.x() == targetLoc.x() && result.second.y() == targetLoc.y());
-
-// if (result.first == 0)
-//	  return targetLoc;
-
-	// m_sample->print();
-
-	return m_sampler->UniformSample().second;
+			if (distPair.first < distPairSource.first) {
+				return distPair.second;
+			} else {
+				return distPairSource.second;
+			}
+		}
+	}
 }
 
 template<class TSource, class TFilter>
@@ -2059,11 +2055,8 @@ Point2 CFilterLearner<TSource, TFilter>::FindBestMatchLocation(Point2 targetLoc,
 			m_neighborhoodWidth, m_sampler->threshold());
 	double dSource = GetNeighborhoodDist(targetLoc, pSource, currLevel, isValid,
 			m_neighborhoodWidth, m_samplerSource->threshold());
-	if ((1 - m_alpha) * d < m_alpha * dSource) {
-		return p;
-	}
 
-	return pSource;
+	return (d < dSource) ? p : pSource;
 }
 
 template<class T>
@@ -2229,7 +2222,7 @@ double CFilterLearner<TSource, TFilter>::GetNeighborhoodDistForLevel(
 
 					double pdist = PixelDistSqr<TFilter>(feImage, srcX, srcY,
 							targetImage, targetX, targetY);
-					dist += weight * weight * pdist;
+					dist += m_alpha * weight * weight * pdist;
 
 					totalWeight += weight;
 					//		  validPixels++;
@@ -2276,7 +2269,7 @@ double CFilterLearner<TSource, TFilter>::GetNeighborhoodDistForLevel(
 					else
 						totalWeight += m_sourceFacNow;
 
-					dist += fac * pdist;
+					dist += fac * pdist * (1 - m_alpha);
 
 					//		  validPixels++;
 					hitValidPixel = true;
