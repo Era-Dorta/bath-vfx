@@ -63,6 +63,25 @@
 
 \section{Skin Rendering}
 
+Rendering realistic skin is a challenging task.
+As social beings, we interact with each other on a daily basis, humans perception is quite sensitive to skin appearance, specially with faces.
+Skin is composed of several layers with different properties, to accurately simulate skin, the light transport between this layers has to be modelled.
+The full effect of light scattering between two points on the surface can be modelled using a Bidirectional Surface-Scattering Distribution Function (BSSRDF).
+
+\cite{Weyrich2006} two layer model captured with light dome. 
+\cite{Donner2008} layered model for haemoglobin in skin.
+\cite{Jimenez2010} haemoglobin for different blendshapes.
+
+Normal maps are use to alter the normals of the scene objects during rendering.
+This technique is used to add geometric detail to an object at rendering time without actually changing the geometry.
+The error introduced with this approach is shown in Figure \ref{fig:normal_map}, a ray $r_1$ hist the geometry at point $p$ and the normal $n_p$ is used for shading, while if we had the based geometry the hitting point would be $p'$ and the normal $n'$.
+Normal maps are for skin rendering are usually captured using expensive light domes with a number of synchronized cameras. 
+
+\cite{Tian2011} Survey on super-resolution imaging.
+\cite{Jianchao2010} Super resolution with dictionary learning.
+\cite{Hertzmann2001} Image analogies paper.
+\cite{Graham2013} microgeometry and Image Analogies, the one we are implementing.
+
 \begin{figure}[htbp!]
 \centering
 \includegraphics[width=0.7\textwidth]{img/normal_map}
@@ -88,6 +107,8 @@
 
 \section{Skin Rendering}
 
+\cite{Hertzmann2001} Image analogies paper.
+
 
 %-----------------------------------------------------------------------
 \chapter{Results}
@@ -96,8 +117,6 @@
 %-----------------------------------------------------------------------
 \chapter{Conclusions}
 
-
-\nocite{*}
 \bibliographystyle{eg-alpha}
 \bibliography{baththesis}
 
