@@ -12,6 +12,10 @@ num_seg = 10;
 % 0 for richard, 1 for emily
 actor_ind = 1;
 
+use_scsr = 1;
+
+data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry';
+
 % Pixel positions known to be in the senter of each face segment
 if actor_ind == 0
     segments_centres = [2540, 556;
@@ -26,6 +30,7 @@ if actor_ind == 0
         1260, 2044];
     face_segmented_path = '/face_segmented.png';
     face_tex_path = '~/workspaces/matlab/vfx/Data/skinRender/3dscans/vfx_richard3_face_simplified_0.png';
+    name = '/richard';
 else
     segments_centres = [194, 346;
         502, 202;
@@ -37,14 +42,20 @@ else
         772, 523;
         320, 711;
         523, 689];
-    face_segmented_path = '/face_segmented_emily.png';
-    face_tex_path = '~/workspaces/github/vfx/Maya/sourceimages/Textures/Head_Diff.jpg';
+    name = '/emily';
+    if use_scsr
+        segments_centres = segments_centres .* 2;
+        face_segmented_path = '/face_segmented_emily_double.png';
+        face_tex_path = [data_path '/synthesized' name '/emily_tex_2_bicubic.png'];
+    else
+        face_segmented_path = '/face_segmented_emily.png';
+        face_tex_path = '~/workspaces/github/vfx/Maya/sourceimages/Textures/Head_Diff.jpg';
+    end
 end
 
 % Switch x,y for matlab indexing
 segments_centres = [segments_centres(:,2), segments_centres(:,1)];
 
-data_path = '~/workspaces/matlab/vfx/Data/skinRender/microgeometry';
 face_segmented = imread([data_path face_segmented_path]);
 face_tex = imread(face_tex_path);
 
@@ -63,10 +74,10 @@ if create_disp_map
     % Create a displacement map by taking the texture to gray and doing a
     % histogrami equalization
     disp_map = histeq(rgb2gray(face_tex));
-    imwrite(disp_map, [data_path '/synthesized/disp_map.png']);
+    imwrite(disp_map, [data_path '/synthesized' name '/disp_map.png']);
     imshow(disp_map);
 else
-    disp_map = imread([data_path '/synthesized/disp_map.png']);
+    disp_map = imread([data_path '/synthesized' name '/disp_map.png']);
 end
 
 if do_texture
@@ -103,7 +114,7 @@ for i = 1:num_seg
         region_pixels{i}(:,:,2) = region_pixels{i}(:,:,1);
         region_pixels{i}(:,:,3) = region_pixels{i}(:,:,1);
     end
-    
+        
     if save_files
         x = [max_indx(i), min_indx(i), min_indx(i), max_indx(i), max_indx(i)];
         y = [max_indy(i), max_indy(i), min_indy(i), min_indy(i), max_indy(i)];
@@ -127,13 +138,31 @@ end
 %TODO Execute the script here rather than outside
 
 %% Read the generated textures
+if use_scsr
+    extra_off = [4,-4,5,-4;
+        3,-3,4,-3;
+        2,-3,4,-3;
+        5,-3,4,-3;
+        5,-3,4,-3;
+        3,-3,4,-4;
+        3,-4,4,-4;
+        3,-3,4,-3;
+        3,-3,3,-3;
+        3,-4,5,-4];
+else
+    extra_off = ones(10,4);
+    extra_off = bsxfun(@times, extra_off, [3,-2,3,-2]);
+end
+
 new_disp_seg = cell(num_seg,1);
 for i = 1:num_seg
-    path_b1 = [data_path '/synthesized/B1_' int2str(i) tex_extra '.png'];
+    path_b1 = [data_path '/synthesized' name '/B1_' int2str(i) tex_extra '.png'];
     new_disp_seg{i} = imread(path_b1);
     % Take out the two extra pixels for the borders
-    new_disp_seg{i} = new_disp_seg{i}(3:end-2,3:end-2,:);
+    new_disp_seg{i} = new_disp_seg{i}(extra_off(i,1):end+extra_off(i,2), ...
+        extra_off(i,3):end+extra_off(i,4),:);
 end
+
 
 %% Compose the generated textures
 new_disp_map = double(disp_map);
@@ -169,7 +198,7 @@ while( sum(index_fill) > 0)
         end
     end
     % Uncomment to show the reamining pixels to be interpolated
-    %disp(sum(index_fill));
+    disp(sum(index_fill));
 end
 
 %% Save the generated texture map
