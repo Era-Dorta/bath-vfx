@@ -64,13 +64,13 @@
 \section{Skin Rendering}
 
 Rendering realistic skin is a challenging task.
-As social beings, we interact with each other on a daily basis, humans perception is quite sensitive to skin appearance, specially with faces.
-Skin is composed of several layers with different properties, to accurately simulate skin, the light transport between this layers has to be modelled.
+As social beings we interact with interact with other individuals on a daily basis, which has made human perception quite sensitive to skin appearance, even more so with human faces.
+Skin is composed of several layers with different properties, to accurately simulate skin the light transport between this layers has to be simulated.
 The full effect of light scattering between two points on the surface can be modelled using a Bidirectional Surface-Scattering Distribution Function (BSSRDF).
 
 Weyrich et al~\cite{Weyrich2006} proposed a two-layer model for skin rendering, the outer layer simulates the air-oil interface and the inner layer models the subsurface scattering in the skin.
-The authors scattering to be homogeneous, with this assumption they measured the skin BRDF of several subjects with a light dome, while the scattering was sampled at three points in the face with a sensor head with a linear fiber array.
-The BRDF data was fitted to a Blinn-Phong and a Torrance-Sparrow isotropic models, while the scattering was fitted with a single transport coefficient.
+The authors considered the scattering to be homogeneous, with this assumption they measured the skin BRDF of several subjects in a light dome, while the scattering was sampled at three points in the face with a custom made sensor.
+The BRDF data was fitted to a Blinn-Phong and a Torrance-Sparrow isotropic models, and the scattering was fitted with a single transport coefficient.
 Donner et al~\cite{Donner2008} also proposed a two-layer model, however the authors allow for the layers to be heterogeneous.
 With this addition they are able to introduce the effects of haemoglobin, veins and tattoos.
 Emotional induced haemoglobin variations have also been explored ~\cite{Jimenez2010}.
@@ -83,11 +83,13 @@ This technique is used to add geometric detail to an object at rendering time wi
 %The error introduced with this approach is shown in Figure \ref{fig:normal_map}, a ray $r_1$ hist the geometry at point $p$ and the normal $n_p$ is used for shading, while if we had the based geometry the hitting point would be $p'$ and the normal $n'$.
 Normal maps for skin rendering are usually captured using expensive light domes with a number of synchronized cameras ~\cite{Graham2013, Weyrich2006}. 
 
-Another techniques to increase the quality of a face render is to the resolution of the textures being used.
-Hertzmann et al~\cite{Hertzmann2001} proposed a filter to synthesize images based on a neighbour search given a pair of samples images.
-Al alternative technique using a dictionary of samples was presented by Jianchao et al~\cite{Jianchao2010}, the authors was limited to generation of increased resolution images.
-Graham et al~\cite{Graham2013} applied Hertzmann et al~\cite{Hertzmann2001} example based filter to generate higher quality bump maps for skin rendering.
-For an in depth analysis of super-resolution techniques, we refer the reader to Tian et al \cite{Tian2011} survey.
+Another technique to increase the quality of a face render is to scale the resolution of the textures being used.
+Ashikhmin et al \cite{Ashikhmin2001} presented a method to generate new textures using a goal image by greedily extending existing patches whenever possible.
+Hertzmann et al~\cite{Hertzmann2001} extended Ashikhmin et al \cite{Ashikhmin2001} method by adding a second example image and using more complex distance metric to choose the next synthesized pixel.
+Graham et al~\cite{Graham2013} applied Hertzmann et al~\cite{Hertzmann2001} example-based filter to generate bump maps with increased quality for skin rendering.
+An alternative approach using a dictionary of samples was presented by Jianchao et al~\cite{Jianchao2010}.
+This method is restricted to generating super-resolution images, however, the previous methods support a wide variety of filter effects.
+For an in depth analysis of super-resolution techniques, we refer the readers to Tian et al \cite{Tian2011} survey.
 
 %\begin{figure}[htbp!]
 %\centering
