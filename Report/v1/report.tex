@@ -80,8 +80,8 @@ Haemoglobin, collagen and fat changes with age are modelled using the different 
 
 Normal maps are use to alter the normals of the scene objects during rendering.
 This technique is used to add geometric detail to an object at rendering time without actually changing the geometry.
-The error introduced with this approach is shown in Figure \ref{fig:normal_map}, a ray $r_1$ hist the geometry at point $p$ and the normal $n_p$ is used for shading, while if we had the based geometry the hitting point would be $p'$ and the normal $n'$.
-Normal maps are for skin rendering are usually captured using expensive light domes with a number of synchronized cameras ~\cite{Graham2013, Weyrich2006}. 
+%The error introduced with this approach is shown in Figure \ref{fig:normal_map}, a ray $r_1$ hist the geometry at point $p$ and the normal $n_p$ is used for shading, while if we had the based geometry the hitting point would be $p'$ and the normal $n'$.
+Normal maps for skin rendering are usually captured using expensive light domes with a number of synchronized cameras ~\cite{Graham2013, Weyrich2006}. 
 
 Another techniques to increase the quality of a face render is to the resolution of the textures being used.
 Hertzmann et al~\cite{Hertzmann2001} proposed a filter to synthesize images based on a neighbour search given a pair of samples images.
@@ -89,12 +89,12 @@ Al alternative technique using a dictionary of samples was presented by Jianchao
 Graham et al~\cite{Graham2013} applied Hertzmann et al~\cite{Hertzmann2001} example based filter to generate higher quality bump maps for skin rendering.
 For an in depth analysis of super-resolution techniques, we refer the reader to Tian et al \cite{Tian2011} survey.
 
-\begin{figure}[htbp!]
-\centering
-\includegraphics[width=0.7\textwidth]{img/normal_map}
-	\caption{ Using normal maps to simplify a given geometry, image taken from \cite{ganovelli2014}.}
-	\label{fig:normal_map}
-\end{figure}
+%\begin{figure}[htbp!]
+%\centering
+%\includegraphics[width=0.7\textwidth]{img/normal_map}
+%	\caption{ Using normal maps to simplify a given geometry, image taken from \cite{ganovelli2014}.}
+%	\label{fig:normal_map}
+%\end{figure}
 
 
 
