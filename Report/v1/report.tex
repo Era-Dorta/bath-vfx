@@ -122,7 +122,7 @@ For this task we will mainly look at the techniques presented by Hertzmann et al
 
 Before we begin, lets explain the Image Analogies framework~\cite{Hertzmann2001} in more detail.
 Given three images $A$, $A'$ and $B$, where $A$ is an unfiltered example, $A'$ is a filtered example, and $B$ is an input image, the algorithm will generate an output image $B'$ such that $B'$ relates in the same way to $B$ as $A'$ does to $A$, as shown in Figure~\ref{fig:ia_diagram}.
-A k-d tree for an Approximate Neighbour Search is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
+A k-d tree for an Approximate Nearest-Neighbour Search (ANN) is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
 The closest match for a neighbourhood in pixel $q$ in $B$ and $B'$ is located in the tree.
 Following Ashikhmin et al~\cite{Ashikhmin2001} method, a match that is coherent to what has been already synthesized is computed as well.
 These two candidates are weighted and the best one is chosen.
@@ -140,32 +140,59 @@ The whole process is carried in a multiresolution pyramid, as shown in Figure~\r
 \centering
 \includegraphics[width=\textwidth]{img/texture_synthesis_parts}
 	\caption{ Texture segmentation in common coloured areas, image taken from~\cite{Graham2013}.}
-	\label{fig:ia_diagram}	
+	\label{fig:texture_synthesis_parts}	
 \end{minipage}
 \end{figure}
 
-A first approach we tried to use the Image Analogies filter to create increase quality textures.
+As a first approach we tried to reproduce the results in bump mapping quality increase by Graham et al~\cite{Graham2013}.
+The authors add am extra $alpha \in \left\lbrace 0, \ldots, 1 \right\rbrace$ parameter to control Hertzmann's image synthesis process.
+In more detail, a match between $A$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $1 - \alpha$, while a match between $A'$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $\alpha$.
+The logic behind this addition is to encourage more details of $A'$ to be included in $B'$.
+The modifications include building two separated k-d trees for $A$ and $A'$ and then doing the appropriate weighting when choosing the pixel position.
+Also in the coherence match two searches will be done and weighted accordingly, and the final pixel will be chosen without further adjustments.
+ADD BUMP MAP IMAGE OR NOT IF THERE IS NOT ENOUGH SPACE
+
+Another approach we tried was to use the Image Analogies filter to create increase quality textures.
 We found three implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
 The second one was done with CUDA, however the author's single threaded code gave better results.
 The idea in this approach is to use a low quality texture from a 3D scan and improve using pictures of the texture at a closer range.
 To achieve this we took a close up high quality sample $A'$, which was blurred using a Gaussian kernel until it look qualitative similar to the 3D scan texture $B$.
 The blurred image is $A$ and then we generated a picture $B'$ of higher quality.
 Since faces have differentiated areas, this process was done separately for each of them, the generated patches are then stitched together using linear interpolation.
-The texture segmentation is shown in Figure and results are shown in Figure .  
+The texture segmentation is shown in Figure~\ref{fig:texture_synthesis_parts} and results are shown in Figure~\ref{fig:texture_synthesis}.
 
 \begin{figure}[htbp!]
 \centering
 \includegraphics[width=\textwidth]{img/texture_synthesis}
 	\caption{ Texture quality increase using image analogies, the texture is false-coloured to highlight the differences.}
-	\label{fig:ia_diagram}
+	\label{fig:texture_synthesis}
+\end{figure}
+
+Another option for increasing the quality of the texture is to use image super-resolution, we used Jianchao et al~\cite{Jianchao2010} work for this purpose.
+The idea is that by doubling the resolution of the original texture adding information from a dictionary of high resolution images we will be able to increase the final rendering quality of the face.
+Results for this are shown in Figure~\ref{fig:emily_super_resolution}.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.6\textwidth]{img/emily_super_resolution}
+	\caption{ Super resolution example, top-left original texture, top-right face rendered with original texture, bottom-left super-resolution texture, bottom-right face rendered with super-resolution texture, original data from CITE EMILY DATA.}
+	\label{fig:emily_super_resolution}
+\end{figure}
+
+Generating normals maps using Image Analogies is another interesting area, as it could provide a way to avoid he costly standard capture methods.
+For this we tried to generate a normal map from an albedo images and from bump maps generated from the previous 3D scan texture.
+Results for this are shown in Figure~\ref{fig:normal_synthesis}.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/normal_generation}
+	\caption{ Normal synthesis from albedo image.}
+	\label{fig:normal_synthesis}
 \end{figure}
 
 % Things that we tried
-% Their original code, the matlab one, the c++ one, and the cuda one
 % Replicate Graham2013, bump map synthesis
 % Bump maps from texture and then bump map increase
-% Texture resolution increase
-% Normal generation
 % Jianchao work for super resolution
 % Adding the alpha to parameter as Graham2013 for the bump maps
 
