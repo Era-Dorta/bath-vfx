@@ -84,12 +84,12 @@ This technique is used to add geometric detail to an object at rendering time wi
 Normal maps for skin rendering are usually captured using expensive light domes with a number of synchronized cameras ~\cite{Graham2013, Weyrich2006}. 
 
 Another technique to increase the quality of a face render is to scale the resolution of the textures being used.
-Ashikhmin et al \cite{Ashikhmin2001} presented a method to generate new textures using a goal image by greedily extending existing patches whenever possible.
-Hertzmann et al~\cite{Hertzmann2001} extended Ashikhmin et al \cite{Ashikhmin2001} method by adding a second example image and using more complex distance metric to choose the next synthesized pixel.
+Ashikhmin et al~\cite{Ashikhmin2001} presented a method to generate new textures using a goal image by greedily extending existing patches whenever possible.
+Hertzmann et al~\cite{Hertzmann2001} extended Ashikhmin et al~\cite{Ashikhmin2001} method by adding a second example image and using more complex distance metric to choose the next synthesized pixel.
 Graham et al~\cite{Graham2013} applied Hertzmann et al~\cite{Hertzmann2001} example-based filter to generate bump maps with increased quality for skin rendering.
 An alternative approach using a dictionary of samples was presented by Jianchao et al~\cite{Jianchao2010}.
 This method is restricted to generating super-resolution images, however, the previous methods support a wide variety of filter effects.
-For an in depth analysis of super-resolution techniques, we refer the readers to Tian et al \cite{Tian2011} survey.
+For an in depth analysis of super-resolution techniques, we refer the readers to Tian et al~\cite{Tian2011} survey.
 
 %\begin{figure}[htbp!]
 %\centering
@@ -116,7 +116,26 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 
 \section{Skin Rendering}
 
-\cite{Hertzmann2001} Image analogies paper.
+Our objective in skin rendering is to generate a face that would indistinguishable from a real one.
+To be more specific, we have have taken a 3D scan of a subject and our aim is to improve the realism of it.
+For this task we will mainly look at the techniques presented by Hertzmann et al~\cite{Hertzmann2001} and Graham et al~\cite{Graham2013}.
+
+Before we begin, lets explain the Image Analogies framework~\cite{Hertzmann2001} in more detail.
+Given three images $A$, $A'$ and $B$, where $A$ is an unfiltered example, $A'$ is a filtered example, and $B$ is an input image, the algorithm will generate an output image $B'$ such that $B'$ relates in the same way to $B$ as $A'$ does to $A$, as shown in Figure~\ref{fig:ia_diagram}.
+A k-d tree for an Approximate Neighbour Search is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
+The closest match for a neighbourhood in pixel $q$ in $B$ and $B'$ is located in the tree.
+Following Ashikhmin et al~\cite{Ashikhmin2001} method, a match that is coherent to what has been already synthesized is computed as well.
+These two candidates are weighted and the best one is chosen.
+The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence what this means is that the neighbourhoods also include the previous level in the search.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.5\textwidth]{img/ia_diagram}
+	\caption{ Neighbourhood matching for the Image Analogies framework, image taken from~\cite{Ashikhmin2001}.}
+	\label{fig:ia_diagram}
+\end{figure}
+
+A first approach is to see how far can the  be pushed.
 
 
 %-----------------------------------------------------------------------
