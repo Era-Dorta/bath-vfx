@@ -141,14 +141,14 @@ end
 if use_scsr
     extra_off = [4,-4,5,-4;
         3,-3,4,-3;
-        2,-3,4,-3;
+        3,-2,4,-3;
         5,-3,4,-3;
         5,-3,4,-3;
         3,-3,4,-4;
         3,-4,4,-4;
         3,-3,4,-3;
         3,-3,3,-3;
-        3,-4,5,-4];
+        4,-3,5,-4];
 else
     extra_off = ones(10,4);
     extra_off = bsxfun(@times, extra_off, [3,-2,3,-2]);
@@ -198,7 +198,7 @@ while( sum(index_fill) > 0)
         end
     end
     % Uncomment to show the reamining pixels to be interpolated
-    disp(sum(index_fill));
+    %disp(sum(index_fill));
 end
 
 %% Save the generated texture map
