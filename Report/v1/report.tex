@@ -129,15 +129,37 @@ These two candidates are weighted and the best one is chosen.
 The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence what this means is that the neighbourhoods also include the previous level in the search.
 
 \begin{figure}[htbp!]
+\begin{minipage}[b]{.55\textwidth}
 \centering
-\includegraphics[width=0.5\textwidth]{img/ia_diagram}
+\includegraphics[width=\textwidth]{img/ia_diagram}
 	\caption{ Neighbourhood matching for the Image Analogies framework, image taken from~\cite{Ashikhmin2001}.}
 	\label{fig:ia_diagram}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{.4\textwidth}
+\centering
+\includegraphics[width=\textwidth]{img/texture_synthesis_parts}
+	\caption{ Texture segmentation in common coloured areas, image taken from~\cite{Graham2013}.}
+	\label{fig:ia_diagram}	
+\end{minipage}
 \end{figure}
 
 A first approach we tried to use the Image Analogies filter to create increase quality textures.
 We found three implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
- 
+The second one was done with CUDA, however the author's single threaded code gave better results.
+The idea in this approach is to use a low quality texture from a 3D scan and improve using pictures of the texture at a closer range.
+To achieve this we took a close up high quality sample $A'$, which was blurred using a Gaussian kernel until it look qualitative similar to the 3D scan texture $B$.
+The blurred image is $A$ and then we generated a picture $B'$ of higher quality.
+Since faces have differentiated areas, this process was done separately for each of them, the generated patches are then stitched together using linear interpolation.
+The texture segmentation is shown in Figure and results are shown in Figure .  
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/texture_synthesis}
+	\caption{ Texture quality increase using image analogies, the texture is false-coloured to highlight the differences.}
+	\label{fig:ia_diagram}
+\end{figure}
+
 % Things that we tried
 % Their original code, the matlab one, the c++ one, and the cuda one
 % Replicate Graham2013, bump map synthesis
