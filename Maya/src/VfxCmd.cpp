@@ -48,6 +48,9 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 		"mouth_upperLipRaise_r", "nose_wrinkle_l", "nose_wrinkle_r",
 		"smoothCompensated" };
 
+std::vector<unsigned int> VfxCmd::blinkFrames { 20, 70, 100 };
+unsigned int VfxCmd::blinkTime = 5;
+
 #ifdef _WIN32
 #define LOAD_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
 #define SAVE_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_out"
@@ -185,15 +188,19 @@ void VfxCmd::loadWeights(int numWeights) {
 		cmd = cmd + (i + 1);
 		dgMod.commandToExecute(cmd);
 		for (unsigned int j = 0; j < weights.at(i).size(); j++) {
-			cmd = "setAttr shapesBS.weight[";
-			cmd = cmd + j;
-			cmd = cmd + "] ";
-			cmd = cmd + weights.at(i).at(j);
-			dgMod.commandToExecute(cmd);
-			cmd = "setKeyframe { \"shapesBS.w[";
-			cmd = cmd + j;
-			cmd = cmd + "]\" }";
-			dgMod.commandToExecute(cmd);
+			if (j != 13 && j != 14) {
+
+				cmd = "setAttr shapesBS.weight[";
+				cmd = cmd + j;
+				cmd = cmd + "] ";
+				cmd = cmd + weights.at(i).at(j);
+
+				dgMod.commandToExecute(cmd);
+				cmd = "setKeyframe { \"shapesBS.w[";
+				cmd = cmd + j;
+				cmd = cmd + "]\" }";
+				dgMod.commandToExecute(cmd);
+			}
 		}
 		// Set the teeth movement for this frame, interpolates between the two
 		// blend shapes that can open the mouth
@@ -202,6 +209,13 @@ void VfxCmd::loadWeights(int numWeights) {
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
 		dgMod.commandToExecute(cmd);
+	}
+
+	// Set keyframes for blinking
+	for (unsigned int i = 0; i < blinkFrames.size(); i++) {
+		setBlinkAt(blinkFrames.at(i) - blinkTime, 0.0);
+		setBlinkAt(blinkFrames.at(i), 1.0);
+		setBlinkAt(blinkFrames.at(i) + blinkTime, 0.0);
 	}
 }
 
@@ -236,4 +250,25 @@ void VfxCmd::saveWeights() {
 	myfile << weights[weights.length() - 1];
 
 	myfile.close();
+}
+
+void VfxCmd::setBlinkAt(int frameNum, int blinkVal) {
+	MString cmd;
+	cmd = "currentTime ";
+	cmd = cmd + frameNum;
+	dgMod.commandToExecute(cmd);
+
+	cmd = "setAttr \"shapesBS.eye_blink2_l\"";
+	cmd = cmd + blinkVal;
+	dgMod.commandToExecute(cmd);
+
+	cmd = "setAttr \"shapesBS.eye_blink2_r\"";
+	cmd = cmd + blinkVal;
+	dgMod.commandToExecute(cmd);
+
+	cmd = "setKeyframe \"shapesBS.w[13]\"";
+	dgMod.commandToExecute(cmd);
+
+	cmd = "setKeyframe \"shapesBS.w[14]\"";
+	dgMod.commandToExecute(cmd);
 }
