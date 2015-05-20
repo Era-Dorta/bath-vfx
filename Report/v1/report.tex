@@ -1,4 +1,4 @@
-\documentclass[11pt]{report}
+\documentclass[11pt]{article}
 % packages
 % Fran Burstall's Bath thesis package
 \usepackage{baththesis}
@@ -45,28 +45,28 @@
 \begin{document}
 \maketitle
 
-\chapter{Introduction}
+\section{Introduction}
 \label{ch:intro}
 \begin{center}
 \textquote[~\cite{Attenborough:1998}]{\textit{Birds are the most accomplished aeronauts the world has ever seen. They fly high and low, at great speed, and very slowly. And always with extraordinary precision and control}.}
 \end{center}
 
 
-\chapter{Previous Work}
+\section{Previous Work}
 \label{sec:previous}
 
-\section{Data Capture}
+\subsection{Data Capture}
 
 %-----------------------------------------------------------------------
-\section{Sparse Reconstruction}
+\subsection{Sparse Reconstruction}
 
 
 %-----------------------------------------------------------------------
-\section{Blendshape Optimisation}
+\subsection{Blendshape Optimisation}
 In this section we introduce the techniques used to warping the meshes and the optimisation methods.
 
-\subsection{Thin Plate Splines}
-Thin plate theory deals with problems that commonly arise in areas of natural sciences and engineering when trying to model the behaviour of a thin sheet of some material. The possible processes include but are not limited to stretching, bending, crumpling, buckling, shrinking, straining and tearing. The corresponding mathematical model is based on ideas from differential geometry, and the set of equations describing the aforementioned phenomena are often notoriously difficult to solve. Therefore, in Computer Graphics, as well as other fields, a number of simplifying assumptions are made when constructing a thin plate model. \\
+\subsubsection{Thin Plate Splines}
+Thin plate theory deals with problems that commonly arise in areas of natural sciences and engineering when trying to model the behaviour of a thin sheet of some material. The possible processes include but are not limited to stretching, bending, crumpling, buckling, shrinking, straining and tearing. The corresponding mathematical model is based on ideas from differential geometry, and the set of equations describing the aforementioned phenomena are often notoriously difficult to solve. Therefore, in Computer Graphics, as well as other fields, a number of simplifying assumptions are made when constructing a thin plate model. 
 
 A thin plate is considered to be a two dimensional object, i.e. it is assumed that the thickness is infinitesimal. The geometry of the object is often simplified to reduce the computational cost. Thin plate splines (TPS) are a two-dimensional counterpart of the cubic spline. TPS are a deformation method based on the assumption that a thin surface deforms in a way that minimises the surface bending energy. The bending energy is proportional to the change in the second fundamental form. Specifically, given two corresponding sets of point $\{\y_i\}_i^N$ and $\{\x_i\}_i^N$ there exists a height field mapping between the two, $f: \mathbb{R}^2 \to \mathbb{R}$. The bending energy corresponding to this mapping is proportional to the second order derivatives of the mapping:
 \begin{equation}
@@ -76,19 +76,22 @@ A thin plate is considered to be a two dimensional object, i.e. it is assumed th
 \end{equation} where $\lambda$ is smoothing parameter, which balances the quality of fit and the amount of bending, i.e. the wiggliness of the function. TPS finds the transformation that fits the data while minimising the bending energy. Note that TPS may also be defined in terms of the radial basis functions that are used for smooth scattered data fitting. The RBF solution for thin plate splines is:
 \begin{equation}
 \begin{aligned}
-	f(x) = \sum_{i=1}^N \alpha_i \: \phi(\|\x - \x_i\|), \: \text{ where} \: \phi(r) = r^2 \log(r).
+	f(x,y) = \sum_{i=1}^N \alpha_i \: \phi(\|(x,y) - (x_i,y_i)\|), \: \text{ where} \: \phi(r) = r^2 \log(r).
 \end{aligned}
-\end{equation} 
+\end{equation} To ensure that the function $f$ has square-integrable second derivatives, the following conditions are imposed:
+\begin{equation}
+	\sum_{i=1}^N \alpha_i = \sum_{i=1}^N \alpha_i x_i = \sum_{i=1}^N \alpha_i y_i = 0.
+\end{equation}
 
-\subsection{Non-Rigid ICP}
+\subsubsection{Non-Rigid ICP}
 
 
-\subsection{Numerical Solvers}
+\subsubsection{Numerical Solvers}
 
 
 
 %-----------------------------------------------------------------------
-\section{Skin Rendering}
+\subsection{Skin Rendering}
 
 Rendering realistic skin is a challenging task.
 As social beings we interact with interact with other individuals on a daily basis, which has made human perception quite sensitive to skin appearance, even more so with human faces.
@@ -128,22 +131,22 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 
 
 %-----------------------------------------------------------------------
-\chapter{Methodology}
+\section{Methodology}
 \label{sec:methods}
 
 
-\section{Data Capture}
+\subsection{Data Capture}
 
 
-\section{Sparse Reconstruction}
+\subsection{Sparse Reconstruction}
 
 
-\section{Blendshape Optimisation}
+\subsection{Blendshape Optimisation}
 
 
-\section{Skin Rendering}
+\subsection{Skin Rendering}
 
-\section{Skin Rendering}
+\subsection{Skin Rendering}
 
 Our objective in skin rendering is to generate a face that would indistinguishable from a real one.
 To be more specific, we have have taken a 3D scan of a subject and our aim is to improve the realism of it.
@@ -227,11 +230,11 @@ Results for this are shown in Figure~\ref{fig:normal_synthesis}.
 
 
 %-----------------------------------------------------------------------
-\chapter{Results}
+\section{Results}
 
 
 %-----------------------------------------------------------------------
-\chapter{Conclusions}
+\section{Conclusions}
 
 \bibliographystyle{eg-alpha}
 \bibliography{baththesis}
