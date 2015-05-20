@@ -184,7 +184,7 @@ The aim of this project is to used captured data of a face to animate a given mo
 
 A number of different numerical optimisation methods where tested when solving for the blendshape  weights.
 
-
+\subsection{Skin Rendering}
 
 Our objective in skin rendering is to generate a face that would be indistinguishable from a real one.
 In our case, we have have taken a 3D scan of a subject and our aim is to improve the realism when rendering it.
@@ -194,11 +194,41 @@ Before we begin, lets explain the Image Analogies framework~\cite{Hertzmann2001}
 Given three images $A$, $A'$ and $B$, where $A$ is an unfiltered example, $A'$ is a filtered example, and $B$ is an input image, the algorithm will generate an output image $B'$ such that $B'$ relates in the same way to $B$, as $A'$ does to $A$.
 A k-d tree for an Approximate Nearest-Neighbour Search (ANN) is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
 The closest match for a neighbourhood in pixel $q$ in $B$ and $B'$ is located in the tree.
+A detailed description of the algorithm in pseudo code is shown in Algorithm~\ref{alg:image_analogies}, where $F$ is computed a weighted distance over the feature vectors using a Gaussian kernel and $s$ is a data structure such that $s(q) = p$.
 Following Ashikhmin et al~\cite{Ashikhmin2001} method, a match that is coherent to what has been already synthesized is computed as well.
 These two candidates are weighted and the best one is chosen.
 The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence this means that the neighbourhoods also include the previous level in the search.
 We found three Image Analogies implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
 The first one is a simple single threaded implementation, the second one was done with CUDA, however the author's single threaded code produced overall better results.
+
+\begin{algorithm}[htbp!] 
+	\caption{Image Analogies}
+	\label{alg:image_analogies}
+	\KwData{$A$ unfiltered example, $A'$ filtered example, $B$ unfiltered source, $L$ number of levels, $k$ coherence parameter, $t$ neighbourhood size.}
+	\KwResult{$B'$ filtered source image.}
+	
+	Compute Gaussian pyramids for $A$, $A'$ and $B$\;
+	Compute features for $A$, $A'$ and $B$\;
+	Build k-d tree for $\left\lbrace A, A' \right\rbrace$\;
+
+	\For{$l$ = 0 to $L$}{
+		\For{each pixel $q \in B'_l$}{
+			$p_{app} =$ ANN search of $q$ neighbourhood from $\left\lbrace B, B' \right\rbrace$\;
+			$r^* = \mbox{arg}\min\limits_{r \in N(q)} \left \| F_l(s(r) + q - r) - F_l(q) \right \|^2$\;
+			$p_{coh} = s(r^*) + (q - r^*)$\;
+			$d_{app} = \left \| F_l(p_{app}) - F_l(q) \right \|^2$\;
+			$d_{coh} = \left \| F_l(p_{coh}) - F_l(q) \right \|^2$\;
+			\eIf{$d_{coh} < d_{app}(1 + k2^{l-L})$}{
+				$p = p_{coh}$
+			}{
+				$p = p_{app}$
+			}
+			$B'_l(q) = A'_l(p)$\;
+			$s_l(q) = p$\;
+		 }
+	}
+	\KwRet{$B'_L$}
+\end{algorithm}
 
 \begin{figure}[htbp!]
 \begin{minipage}[b]{.55\textwidth}
@@ -265,6 +295,11 @@ In order to improve the quality of the bump maps, we also applied the Image Anal
 	\caption{ Normal synthesis from albedo image.}
 	\label{fig:normal_synthesis}
 \end{figure}
+
+\section{Implementation details}
+\label{sec:implementation_details}
+
+Talk about Maya plugins and any other implementation stuff worth talking about. 
 
 %-----------------------------------------------------------------------
 \section{Results}
