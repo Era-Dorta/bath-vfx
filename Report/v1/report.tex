@@ -155,15 +155,17 @@ Before we begin, lets explain the Image Analogies framework~\cite{Hertzmann2001}
 Given three images $A$, $A'$ and $B$, where $A$ is an unfiltered example, $A'$ is a filtered example, and $B$ is an input image, the algorithm will generate an output image $B'$ such that $B'$ relates in the same way to $B$, as $A'$ does to $A$.
 A k-d tree for an Approximate Nearest-Neighbour Search (ANN) is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
 The closest match for a neighbourhood in pixel $q$ in $B$ and $B'$ is located in the tree.
+A detailed description of the algorithm in pseudo code is shown in Algorithm~\ref{alg:image_analogies}, where $F$ is computed a weighted distance over the feature vectors using a Gaussian kernel and $s$ is a data structure such that $s(q) = p$.
 Following Ashikhmin et al~\cite{Ashikhmin2001} method, a match that is coherent to what has been already synthesized is computed as well.
 These two candidates are weighted and the best one is chosen.
 The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence this means that the neighbourhoods also include the previous level in the search.
 We found three Image Analogies implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
 The first one is a simple single threaded implementation, the second one was done with CUDA, however the author's single threaded code produced overall better results.
 
-\begin{algorithm}[htbp!] \label{alg:image_analogies}
+\begin{algorithm}[htbp!] 
 	\caption{Image Analogies}
-	\KwData{$A$ unfiltered example, $A'$ filtered example, $B$ unfiltered source, $L$ number of levels, $k$ coherence parameter, $k$ neighbourhood size.}
+	\label{alg:image_analogies}
+	\KwData{$A$ unfiltered example, $A'$ filtered example, $B$ unfiltered source, $L$ number of levels, $k$ coherence parameter, $t$ neighbourhood size.}
 	\KwResult{$B'$ filtered source image.}
 	
 	Compute Gaussian pyramids for $A$, $A'$ and $B$\;
