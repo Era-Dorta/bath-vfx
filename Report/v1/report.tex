@@ -18,10 +18,13 @@
 \newcommand{\phim}{\mathbf{\phi}}
 \newcommand{\X}{\mathbf{X}}
 \newcommand{\x}{\mathbf{x}}
+\newcommand{\Y}{\mathbf{Y}}
+\newcommand{\y}{\mathbf{y}}
 \newcommand{\w}{\mathbf{w}}
 \newcommand{\Z}{\mathbf{Z}}
 \newcommand{\z}{\mathbf{z}}
 \newcommand{\h}{\mathbf{h}}
+\newcommand{\dd}{\: \mathrm{d}}
 
 %\usepackage[hidelinks]{hyperref} % Adds references links without color
 \usepackage{hyperref} % Adds references links with color
@@ -54,13 +57,37 @@
 
 \section{Data Capture}
 
-
+%-----------------------------------------------------------------------
 \section{Sparse Reconstruction}
 
 
+%-----------------------------------------------------------------------
 \section{Blendshape Optimisation}
+In this section we introduce the techniques used to warping the meshes and the optimisation methods.
+
+\subsection{Thin Plate Splines}
+Thin plate theory deals with problems that commonly arise in areas of natural sciences and engineering when trying to model the behaviour of a thin sheet of some material. The possible processes include but are not limited to stretching, bending, crumpling, buckling, shrinking, straining and tearing. The corresponding mathematical model is based on ideas from differential geometry, and the set of equations describing the aforementioned phenomena are often notoriously difficult to solve. Therefore, in Computer Graphics, as well as other fields, a number of simplifying assumptions are made when constructing a thin plate model. \\
+
+A thin plate is considered to be a two dimensional object, i.e. it is assumed that the thickness is infinitesimal. The geometry of the object is often simplified to reduce the computational cost. Thin plate splines (TPS) are a two-dimensional counterpart of the cubic spline. TPS are a deformation method based on the assumption that a thin surface deforms in a way that minimises the surface bending energy. The bending energy is proportional to the change in the second fundamental form. Specifically, given two corresponding sets of point $\{\y_i\}_i^N$ and $\{\x_i\}_i^N$ there exists a height field mapping between the two, $f: \mathbb{R}^2 \to \mathbb{R}$. The bending energy corresponding to this mapping is proportional to the second order derivatives of the mapping:
+\begin{equation}
+\begin{aligned}
+	E_{bend}(f) = \lambda \iint \left( \left( \dfrac{\delta^2f}{\delta x^2} \right)^2 +  2 \left( \dfrac{\delta^2f}{\delta x y} \right)^2 +  \left( \dfrac{\delta^2f}{\delta y^2} \right)^2 \right) \dd x \dd y,
+\end{aligned}
+\end{equation} where $\lambda$ is smoothing parameter, which balances the quality of fit and the amount of bending, i.e. the wiggliness of the function. TPS finds the transformation that fits the data while minimising the bending energy. Note that TPS may also be defined in terms of the radial basis functions that are used for smooth scattered data fitting. The RBF solution for thin plate splines is:
+\begin{equation}
+\begin{aligned}
+	f(x) = \sum_{i=1}^N \alpha_i \: \phi(\|\x - \x_i\|), \: \text{ where} \: \phi(r) = r^2 \log(r).
+\end{aligned}
+\end{equation} 
+
+\subsection{Non-Rigid ICP}
 
 
+\subsection{Numerical Solvers}
+
+
+
+%-----------------------------------------------------------------------
 \section{Skin Rendering}
 
 Rendering realistic skin is a challenging task.
@@ -113,6 +140,8 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 
 \section{Blendshape Optimisation}
 
+
+\section{Skin Rendering}
 
 \section{Skin Rendering}
 
