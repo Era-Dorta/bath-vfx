@@ -27,14 +27,15 @@ public:
 private:
 	void loadWeights(int numWeights);
 	void saveWeights();
-	void setBlinkAt(int blinkFrame, int blinkVal);
+	void setBlinkAt(int blinkFrame, float blinkVal);
 
 private:
 	Actions action;
 	int numWeights;
 	std::vector<unsigned int> attrIndices;
 	static std::vector<unsigned int> blinkFrames;
-	static unsigned int blinkTime;
+	static std::vector<unsigned int> blinkTime;
+	static std::vector<float> blinkWeight;
 	const static MString names[];
 	int file_ind;
 	MDGModifier dgMod;

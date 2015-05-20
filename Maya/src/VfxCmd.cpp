@@ -48,8 +48,9 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 		"mouth_upperLipRaise_r", "nose_wrinkle_l", "nose_wrinkle_r",
 		"smoothCompensated" };
 
-std::vector<unsigned int> VfxCmd::blinkFrames { 20, 70, 100 };
-unsigned int VfxCmd::blinkTime = 5;
+std::vector<unsigned int> VfxCmd::blinkFrames { 48, 322, 474, 575, 588 };
+std::vector<unsigned int> VfxCmd::blinkTime = { 7, 10, 8, 8, 6 };
+std::vector<float> VfxCmd::blinkWeight = { 0.9, 1, 0.5, 0.4, 0.5 };
 
 #ifdef _WIN32
 #define LOAD_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
@@ -209,14 +210,28 @@ void VfxCmd::loadWeights(int numWeights) {
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
 		dgMod.commandToExecute(cmd);
+
+		cmd = "setAttr shapesBS.mouth_lipCornerPull_l 0.35";
+		dgMod.commandToExecute(cmd);
+		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_l";
+		dgMod.commandToExecute(cmd);
+
+		cmd = "setAttr shapesBS.mouth_lipCornerPull_r 0.35";
+		dgMod.commandToExecute(cmd);
+		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_r";
+		dgMod.commandToExecute(cmd);
 	}
 
 	// Set keyframes for blinking
 	for (unsigned int i = 0; i < blinkFrames.size(); i++) {
-		setBlinkAt(blinkFrames.at(i) - blinkTime, 0.0);
-		setBlinkAt(blinkFrames.at(i), 1.0);
-		setBlinkAt(blinkFrames.at(i) + blinkTime, 0.0);
+		setBlinkAt(blinkFrames.at(i) - blinkTime.at(i), 0.0);
+		setBlinkAt(blinkFrames.at(i), blinkWeight.at(i));
+		setBlinkAt(blinkFrames.at(i) + blinkTime.at(i), 0.0);
 	}
+
+	// Reset current time to 0
+	cmd = "currentTime 0";
+	dgMod.commandToExecute(cmd);
 }
 
 void VfxCmd::saveWeights() {
@@ -252,7 +267,7 @@ void VfxCmd::saveWeights() {
 	myfile.close();
 }
 
-void VfxCmd::setBlinkAt(int frameNum, int blinkVal) {
+void VfxCmd::setBlinkAt(int frameNum, float blinkVal) {
 	MString cmd;
 	cmd = "currentTime ";
 	cmd = cmd + frameNum;
