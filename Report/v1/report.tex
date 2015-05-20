@@ -176,13 +176,19 @@ The first one is a simple single threaded implementation, the second one was don
 \end{minipage}
 \end{figure}
 
-As a first approach we tried to reproduce the results for bump mapping quality increase by Graham et al~\cite{Graham2013}.
+As a first approach we tried to reproduce the results for bump mapping quality increase by Graham et al~\cite{Graham2013}, results are shown in Figure~\ref{fig:bump_maps}.
 The authors add an extra parameter $\alpha \in \left\lbrace 0, \ldots, 1 \right\rbrace$ to control Hertzmann's image synthesis process.
 To be more precise, a match between $A$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $1 - \alpha$, and a match between $A'$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $\alpha$.
 The logic behind this addition is to encourage more details of $A'$ to be included in $B'$.
 The modifications required to include this addition begin by building two separated k-d trees for $A$ and $A'$, when choosing the best match both distances will be weighted as explained above and the smaller one will be chosen.
 Also in the coherence match two searches will be done and weighted accordingly, and the final pixel will be chosen without further adjustments.
-ADD BUMP MAP IMAGE OR NOT IF THERE IS NOT ENOUGH SPACE
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/bump_maps}
+	\caption{ Bum map deblurring, $A$, $A'$, $B$ and ground truth images images taken from~\cite{Graham2013}.}
+	\label{fig:bump_maps}
+\end{figure}
 
 Another approach we tried was to use the Image Analogies filter to create increased quality textures.
 The idea is to improve a low quality texture from a 3D scan using pictures of the texture taken at a closer range.
@@ -209,10 +215,9 @@ Results for this approach are shown in Figure~\ref{fig:emily_super_resolution}.
 \end{figure}
 
 Generating normals maps using Image Analogies is another interesting area, as it could provide an alternative to the costly standard capture methods.
-For this we tried to generate a normal maps from albedo images and from bump maps generated from the previous 3D scan texture.
+For this we tried to generate a normal maps from albedo images and from bump maps generated from the previous 3D scan texture, results are shown in Figure~\ref{fig:normal_synthesis}. 
 To create the bump maps, the textures were transformed to gray scale and a histogram equalization was applied.
-In order to improve the quality of the bump maps, we also applied the Image Analogies filter to them using a known good bump map as a filtered example, however the quality did not improve significantly. 
-Results for this are shown in Figure~\ref{fig:normal_synthesis}.
+In order to improve the quality of the bump maps, we also applied the Image Analogies filter to them using a known good bump map as a filtered example, however the quality did not improve significantly.
 
 \begin{figure}[htbp!]
 \centering
@@ -220,13 +225,6 @@ Results for this are shown in Figure~\ref{fig:normal_synthesis}.
 	\caption{ Normal synthesis from albedo image.}
 	\label{fig:normal_synthesis}
 \end{figure}
-
-% Things that we tried
-% Replicate Graham2013, bump map synthesis
-% Bump maps from texture and then bump map increase
-% Jianchao work for super resolution
-% Adding the alpha to parameter as Graham2013 for the bump maps
-
 
 %-----------------------------------------------------------------------
 \section{Results}
