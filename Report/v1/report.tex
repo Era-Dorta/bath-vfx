@@ -13,6 +13,7 @@
 \usepackage{pgfgantt}
 \usepackage{cite}
 \usepackage{csquotes}
+\usepackage[ruled]{algorithm2e} % Algorithms 
 \renewcommand*{\mkcitation}[1]{ #1}
 
 \newcommand{\phim}{\mathbf{\phi}}
@@ -63,31 +64,6 @@
 
 %-----------------------------------------------------------------------
 \subsection{Blendshape Optimisation}
-In this section we introduce the techniques used to warping the meshes and the optimisation methods.
-
-\subsubsection{Thin Plate Splines}
-Thin plate theory deals with problems that commonly arise in areas of natural sciences and engineering when trying to model the behaviour of a thin sheet of some material. The possible processes include but are not limited to stretching, bending, crumpling, buckling, shrinking, straining and tearing. The corresponding mathematical model is based on ideas from differential geometry, and the set of equations describing the aforementioned phenomena are often notoriously difficult to solve. Therefore, in Computer Graphics, as well as other fields, a number of simplifying assumptions are made when constructing a thin plate model. 
-
-A thin plate is considered to be a two dimensional object, i.e. it is assumed that the thickness is infinitesimal. The geometry of the object is often simplified to reduce the computational cost. Thin plate splines (TPS) are a two-dimensional counterpart of the cubic spline. TPS are a deformation method based on the assumption that a thin surface deforms in a way that minimises the surface bending energy. The bending energy is proportional to the change in the second fundamental form. Specifically, given two corresponding sets of point $\{\y_i\}_i^N$ and $\{\x_i\}_i^N$ there exists a height field mapping between the two, $f: \mathbb{R}^2 \to \mathbb{R}$. The bending energy corresponding to this mapping is proportional to the second order derivatives of the mapping:
-\begin{equation}
-\begin{aligned}
-	E_{bend}(f) = \lambda \iint \left( \left( \dfrac{\delta^2f}{\delta x^2} \right)^2 +  2 \left( \dfrac{\delta^2f}{\delta x y} \right)^2 +  \left( \dfrac{\delta^2f}{\delta y^2} \right)^2 \right) \dd x \dd y,
-\end{aligned}
-\end{equation} where $\lambda$ is smoothing parameter, which balances the quality of fit and the amount of bending, i.e. the wiggliness of the function. TPS finds the transformation that fits the data while minimising the bending energy. Note that TPS may also be defined in terms of the radial basis functions that are used for smooth scattered data fitting. The RBF solution for thin plate splines is:
-\begin{equation}
-\begin{aligned}
-	f(x,y) = \sum_{i=1}^N \alpha_i \: \phi(\|(x,y) - (x_i,y_i)\|), \: \text{ where} \: \phi(r) = r^2 \log(r).
-\end{aligned}
-\end{equation} To ensure that the function $f$ has square-integrable second derivatives, the following conditions are imposed:
-\begin{equation}
-	\sum_{i=1}^N \alpha_i = \sum_{i=1}^N \alpha_i x_i = \sum_{i=1}^N \alpha_i y_i = 0.
-\end{equation}
-
-\subsubsection{Non-Rigid ICP}
-
-
-\subsubsection{Numerical Solvers}
-
 
 
 %-----------------------------------------------------------------------
@@ -142,9 +118,73 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 
 
 \subsection{Blendshape Optimisation}
+In this section we introduce the techniques used to warp the meshes, and the optimisation methods.
+
+\subsubsection{Thin Plate Splines}
+Thin plate theory deals with problems that commonly arise in areas of natural sciences and engineering when trying to model the behaviour of a thin sheet of some material. The possible processes include but are not limited to stretching, bending, crumpling, buckling, shrinking, straining and tearing. The corresponding mathematical model is based on ideas from differential geometry, and the set of equations describing the aforementioned phenomena are often notoriously difficult to solve. Therefore, in Computer Graphics, as well as other fields, a number of simplifying assumptions are made when constructing a thin plate model. 
+
+A thin plate is considered to be a two dimensional object, i.e. it is assumed that the thickness is infinitesimal. The geometry of the object is often simplified to reduce the computational cost. Thin plate splines (TPS) are a two-dimensional counterpart of the cubic spline~\cite{Sibson:1991}. TPS are a deformation method based on the assumption that a thin surface deforms in a way that minimises the surface bending energy. The bending energy is proportional to the change in the second fundamental form. Specifically, given two corresponding sets of point $\{(x_i, y_i\}_i^N$ and $\{v_i\}_i^N$ there exists a height field mapping between the two, $f: \mathbb{R}^2 \to \mathbb{R}$. The bending energy corresponding to this mapping is proportional to the second order derivatives of the mapping:
+\begin{equation}
+\begin{aligned}
+	E_{bend}(f) = \lambda \iint \left( \left( \dfrac{\delta^2f}{\delta x^2} \right)^2 +  2 \left( \dfrac{\delta^2f}{\delta x y} \right)^2 +  \left( \dfrac{\delta^2f}{\delta y^2} \right)^2 \right) \dd x \dd y,
+\end{aligned}
+\end{equation} where $\lambda$ is smoothing parameter, which balances the quality of fit and the amount of bending, i.e. the wiggliness of the function. TPS finds the transformation that fits the data while minimising the bending energy. Note that TPS may also be defined in terms of the radial basis functions that are used for smooth scattered data fitting. The RBF solution for thin plate splines is:
+\begin{equation}
+\begin{aligned}
+	f(x,y) = \sum_{i=1}^N \omega_i \: \phi(\|(x,y) - (x_i,y_i)\|), \: \text{ where} \: \phi(r) = r^2 \log(r).
+\end{aligned}
+\end{equation} To ensure that the function $f$ has square-integrable second derivatives, the following conditions are imposed:
+\begin{equation}
+	\sum_{i=1}^N \omega_i = \sum_{i=1}^N \omega_i x_i = \sum_{i=1}^N \omega_i y_i = 0.\label{eq:TPSrestrictions}
+\end{equation} These conditions and the data fitting requirement may be combined into a linear system of equations:
+\begin{equation}
+\begin{bmatrix}
+	K & P \\
+	P^T & 0 
+\end{bmatrix} 
+\begin{bmatrix}
+	\omega \\
+	o
+\end{bmatrix} = 
+\begin{bmatrix}
+	v \\
+	o
+\end{bmatrix}, 
+\end{equation} where $K$ encodes the relation between the data points, i.e. $K_{ij} = \phi(\|(x_i,y_i) - (x_j,y_j)\|)$, $P_{i\cdot} = (1, x_i, y_i)$ contains the variables from Eq.~\ref{eq:TPSrestrictions}, $\omega$ contains the values of $\omega_i$, and $v$ contains the target function values $v_i$. The variables $0$ and $o$ denote the zero matrix and the zero column vector respectively. Solving this linear system of equations gives the desired transformation in two dimensions. The method extends naturally to three-dimensional problems by including a dependence on an additional variable in the calculations described above.
+
+\subsubsection{Non-Rigid ICP}
+Iterative Closest Point (ICP) is an algorithm used to align two partially overlapping point clouds by minimising the square error between corresponding points. The quality of the results produced by this algorithm is sensitive to the initial guess at a solution, i.e. ICP only refines the initial estimation. See Alg.~\ref{alg:icp} for the outline of the algorithm. Mean square error algorithm is used to calculate the average of the squared errors between the target and the transformed source points. Thus the objective function is a function of rotations and translations. The output of the algorithm is a transformation matrix that provides the optimal mapping between the two point clouds within a given threshold. The transformation matrix may be split into rotation and translation. The algorithm solves a linear system of equations where the unknowns are the coefficients in the rotation matrix and the translation vector and the known point cloud values are used as coefficients. The method is often used to find a transformation between a point cloud and a surface; in that case the surface normals are used as additional input.
+
+\begin{algorithm}[H]   \caption{Iterative Closest Point.}
+\KwData{source point cloud \\
+\hspace{0.9cm} target point cloud\;
+\hspace{0.9cm} initial guess\;
+\hspace{0.9cm} error threshold\;
+ }
+\BlankLine
+\While{error $>$ threshold}{
+\For{point in source}{
+  find closest point in target\;
+  }
+use mean squared error to find best transformation that aligns source to target \;
+apply transformations\;
+}
+ \label{alg:icp}
+\end{algorithm} 
+The original ICP algorithm is limited to rigid transformations, i.e. rotation and translation, which have only $6$ degrees of freedom. However, in order to capture scaling, shearing and other more complicated transformation, an affine mapping should be used. Thus an extension of the ICP algorithm, called non-rigid ICP is used when additional degrees of freedom are present. Allen et al. proposed a non-rigid registration method that uses a numerically non-linear solver to find a smooth affine mapping~\cite{Allen:2003}. Additional constrained are imposed by manually matching some known marker locations in the two datasets. The method exhibits slow convergence and often leads to local minima; consequently, the authors use a multi-resolution approach where the optimisation is first performed on a low resolution mesh, and then optimised on the high resolution mesh. Amberg et al. combined the ICP algorithm with the method of Allen et al. to overcome the issues with convergence~\cite{Amberg:2007}.
+
+\subsubsection{Blendshape model}
+The aim of this project is to used captured data of a face to animate a given model. We use the digital Emily model that comes with $68$ controllable blendshapes ranging from simple eyebrow movements to complicated lip corner pulls. Each blendshape has a weight $w_i$ associated with it, and $w_i \in [0,1]$. The model includes eyes and teeth. The aim is to find a combination of these blendshapes that produce a specified facial expression. In particular, we are interested in reproducing the captured sequence of expressions. 
+
+\textbf{First attempt}. We manually construct a sparse set of points that corresponds to the sparse source mesh. Then the neutral expression of the subject is matched with the neutral expression of Emily by transforming the sparse source mesh to the sparse target mesh. The transformation is then stored, and it is used to map all the expressions in the captured sequence. This produces a sparse Emily sequence; using TPS again we warp the dense Emily mesh according to the positions of the sparse points. The quality of the resulting animation is poor for a number of reasons, see Fig.\ref{}. Firstly, the sparse points are not able to constrain the dense mesh, especially since parts of the face, for example the eyelids and the lips are not tracked in the sparse mesh. Consequently, numerous artefacts appear on the dense mesh, and they are particularly noticeable around the lips as no boundary conditions are imposed. Secondly, though there is a clear correspondence between the generated Emily sequence and the source sequence, the generated expressions look unnatural. This may be explained by the differences in the geometry and anatomy of the two faces; for instance, the source may be able to pull expressions that may not be mimicked by the model. In addition, the errors in tracking, reconstruction, and manual selection of sparse points on Emily further reduce the quality of the animation.
+
+\textbf{Simplified mesh}. Our initial attempt to improve the method involved simplifying the dense Emily model by removing the part of the mesh that corresponds to the lips. Though the simpler mesh exhibited slightly better behaviour, i.e. there were fewer visible artefacts, the sparse point cloud was still unable to constrain the dense mesh well enough to produce realistic results, see Fig.~\ref{}. 
+
+\textbf{Introduction of blenshapes}. In an attempt to improve the visual appeal of the generated animation, we decided to use a set of Emily key-shapes, that were readily available to us. The main argument for using these 
+
+A number of different numerical optimisation methods where tested when solving for the blendshape  weights.
 
 
-\subsection{Skin Rendering}
 
 Our objective in skin rendering is to generate a face that would be indistinguishable from a real one.
 In our case, we have have taken a 3D scan of a subject and our aim is to improve the realism when rendering it.
