@@ -13,6 +13,7 @@
 \usepackage{pgfgantt}
 \usepackage{cite}
 \usepackage{csquotes}
+\usepackage[ruled]{algorithm2e} % Algorithms 
 \renewcommand*{\mkcitation}[1]{ #1}
 
 \newcommand{\phim}{\mathbf{\phi}}
@@ -159,6 +160,34 @@ These two candidates are weighted and the best one is chosen.
 The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence this means that the neighbourhoods also include the previous level in the search.
 We found three Image Analogies implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
 The first one is a simple single threaded implementation, the second one was done with CUDA, however the author's single threaded code produced overall better results.
+
+\begin{algorithm}[htbp!] \label{alg:image_analogies}
+	\caption{Image Analogies}
+	\KwData{$A$ unfiltered example, $A'$ filtered example, $B$ unfiltered source, $L$ number of levels, $k$ coherence parameter, $k$ neighbourhood size.}
+	\KwResult{$B'$ filtered source image.}
+	
+	Compute Gaussian pyramids for $A$, $A'$ and $B$\;
+	Compute features for $A$, $A'$ and $B$\;
+	Build k-d tree for $\left\lbrace A, A' \right\rbrace$\;
+
+	\For{$l$ = 0 to $L$}{
+		\For{each pixel $q \in B'_l$}{
+			$p_{app} =$ ANN search of $q$ neighbourhood from $\left\lbrace B, B' \right\rbrace$\;
+			$r^* = \mbox{arg}\min\limits_{r \in N(q)} \left \| F_l(s(r) + q - r) - F_l(q) \right \|^2$\;
+			$p_{coh} = s(r^*) + (q - r^*)$\;
+			$d_{app} = \left \| F_l(p_{app}) - F_l(q) \right \|^2$\;
+			$d_{coh} = \left \| F_l(p_{coh}) - F_l(q) \right \|^2$\;
+			\eIf{$d_{coh} < d_{app}(1 + k2^{l-L})$}{
+				$p = p_{coh}$
+			}{
+				$p = p_{app}$
+			}
+			$B'_l(q) = A'_l(p)$\;
+			$s_l(q) = p$\;
+		 }
+	}
+	\KwRet{$B'_L$}
+\end{algorithm}
 
 \begin{figure}[htbp!]
 \begin{minipage}[b]{.55\textwidth}
