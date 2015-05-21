@@ -182,6 +182,10 @@ void VfxCmd::loadWeights(int numWeights) {
 	prevEndTime = anim.animationEndTime();
 	anim.setMinMaxTime(MTime(1.0), MTime((double) (numFrames)));
 	anim.setAnimationStartEndTime(MTime(1.0), MTime((double) (numFrames)));
+
+	cmd = "select -r geoGroup";
+	dgMod.commandToExecute(cmd);
+
 	//Set numFrames to start at 0 for c++ indexing
 	numFrames -= 1;
 	for (unsigned int i = 0; i < weights.size(); i++) {
@@ -206,11 +210,12 @@ void VfxCmd::loadWeights(int numWeights) {
 		// Set the teeth movement for this frame, interpolates between the two
 		// blend shapes that can open the mouth
 		cmd = "setAttr con_jaw_c.translateY ";
-		cmd += -3 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
+		cmd += -3.2 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
 		dgMod.commandToExecute(cmd);
 
+		// Force a subtle smile on Emily
 		cmd = "setAttr shapesBS.mouth_lipCornerPull_l 0.35";
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_l";
@@ -220,6 +225,11 @@ void VfxCmd::loadWeights(int numWeights) {
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_r";
 		dgMod.commandToExecute(cmd);
+
+		cmd = "xform -r -m 1 0 0 0 0 1 0 0 0 0 1 0 0 0 ";
+		cmd += -i * 0.0001;
+		cmd += " 1";
+		dgMod.commandToExecute(cmd);
 	}
 
 	// Set keyframes for blinking
@@ -228,6 +238,10 @@ void VfxCmd::loadWeights(int numWeights) {
 		setBlinkAt(blinkFrames.at(i), blinkWeight.at(i));
 		setBlinkAt(blinkFrames.at(i) + blinkTime.at(i), 0.0);
 	}
+
+	// Reset selection to none
+	cmd = "select -cl";
+	dgMod.commandToExecute(cmd);
 
 	// Reset current time to 0
 	cmd = "currentTime 0";
