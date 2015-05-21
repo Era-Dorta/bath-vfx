@@ -52,7 +52,13 @@
 \textquote[~\cite{Attenborough:1998}]{\textit{Birds are the most accomplished aeronauts the world has ever seen. They fly high and low, at great speed, and very slowly. And always with extraordinary precision and control}.}
 \end{center}
 
+A talented painter or sculptor is able to imagine and reproduce the subtle details of a human face. Hours of training and endless manual adjustments are required before an arbitrary shape resembles a facial expression. Furthermore, a human eye is trained to notice subtle changes in the expression of another human being, which also applies to animated humans, thus even the smallest discrepancies in an animated model are easily detected. Though artists are able to produce good quality and appealing results, the limitations in budget and time so prominent in the entertainment industry motivate the development of more automated, faster and cheaper models.
 
+The naive approach that allows for faster performance is the keyframe animation; though it is still based on manual input, keyframe animation requires fewer frames as the intermediate expressions are interpolated over. However, this approach is still very laborious and time consuming. With the emergence of software and systems for motion capture, development of mathods for performance-driven animation has received significant attention from both the industry as well as the academia.
+
+
+
+%-----------------------------------------------------------------------
 \section{Previous Work}
 \label{sec:previous}
 
@@ -63,7 +69,12 @@
 
 
 %-----------------------------------------------------------------------
-\subsection{Blendshape Optimisation}
+\subsection{Facial Animation}
+The first attempts at using performance-driven facial animation in academia date back to late $20^{th}$ century while in industry was first used for guidance rather than production, i.e. the facial motion of Gollum in the \textit{Lord of the Rings} was based on the motion capture data of the performance of the role actor Andy Serkis~\cite{Pighin:2002}. Another notable example is the pipeline used in the making of \textit{the Polar Express}; the motion capture data was used to construct a multilayer facial rig that was used by an artist to create the final animation~\cite{Bennett:2005}. Though many other examples exist, often the exact technology and methods used in production are not disclosed.
+
+In the last two decades, nearly two hundred academic papers that include words \textit{face}, \textit{animation} and \textit{motion capture} were published in computer graphics and vision journals ~\cite{Scopus}. The increase in the quality of the results is explained by the advancements in both the capturing technology and the computational methods. We shall concentrate on the latter; for a brief discussion of the capturing methods see Sec.~\ref{sec:datacapture}. 
+
+The work of Guenter et al. provides the first detailed and unified system for capturing and reconstructing facial performance~\cite{Guenter:1998}. Their work is mostly focused on motion tracking and production of labelled three-dimensional motion of the dots on the actors face. Once a sequence of  moving dots is acquired, the authors scan the actors face to get a polygonal mesh that corresponds to the geometry of the face. The motion of the sparse dots is described in terms of offsets from the neutral position. Then the vertices in the mesh are moved by calculating a linear combination of the offsets of the nearest dots, i.e. in each frame a weighted sum of the change in the dot position is calculated and added to the neutral position of the given vertex. The weights are chosen to be zero everywhere except in the one-ring neighbourhood where the weights depend on the distance of the vertex to the dots; the weights must sum to one. An additional stationary ring of dots is added on the edge of the face to ensure there is no motion outside the face. The algorithm suffers from noise introduced during in the tracking, the reconstruction and the three-dimensional scanning. Moreover, the choice of the nearest dots for each vertex in the mesh is not trivial due to the irregular distribution of the tracked dots. The method that assigns the blends has a number of manually adjusted parameters and does not guarantee to find the best set of reference dots. Additionally, the areas around the eyes and lips require a special treatment; the dots above and below the problematic areas are marked and are not allowed to be blended. The authors point out that a number of artefacts are visible in the resulting animation; some of these flaws attributed to the poor quality of the facial scan, and the fact that the reconstruction method is not robust to jitter and  incorrect placement of the tracked data.
 
 
 %-----------------------------------------------------------------------
@@ -111,7 +122,7 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 \label{sec:methods}
 
 
-\subsection{Data Capture}
+\subsection{Data Capture} \label{sec:datacapture}
 
 
 \subsection{Sparse Reconstruction}
