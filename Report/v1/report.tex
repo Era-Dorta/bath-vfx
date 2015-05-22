@@ -68,6 +68,8 @@ The naive approach that allows for faster performance is the keyframe animation;
 
 \section{Data Capture}
 
+
+
 %-----------------------------------------------------------------------
 \section{Sparse Reconstruction}
 
@@ -153,9 +155,22 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 \chapter{Methodology}
 \label{sec:methods}
 
+\section{Pipeline}
+
+The proposed pipeline is shown below...
 
 \section{Data Capture} \label{sec:datacapture}
 
+Two DSLR cameras were positioned in a stereo configuration to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. The facial performance was recorded on video at 60fps, and the cameras were roughly synchronised by aligning the two separate audio signals. Fixing the cameras close to one another at approximately 10cm separation, and about 1m distance from the subject, meant that the images from both views would be quite similar, allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for 3D reconstruction of points on the face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees. 
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/setup1}
+	\caption{The stereo camera setup used to capture the facial performance.}
+	\label{fig:setup1}
+\end{figure}
+
+\section{Camera Calibration}
 
 \section{Sparse Reconstruction}
 
