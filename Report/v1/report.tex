@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[11pt]{report}
 % packages
 % Fran Burstall's Bath thesis package
 \usepackage{baththesis}
@@ -26,6 +26,9 @@
 \newcommand{\z}{\mathbf{z}}
 \newcommand{\h}{\mathbf{h}}
 \newcommand{\dd}{\: \mathrm{d}}
+\newcommand{\B}{\mathbf{B}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\bb}{\mathbf{b}}
 
 %\usepackage[hidelinks]{hyperref} % Adds references links without color
 \usepackage{hyperref} % Adds references links with color
@@ -37,16 +40,17 @@
     urlcolor={blue!80!black}
 }
 
-\title{Visual Effects} \author{Ieva Kazlauskaite, Garoe Dorta-Perez, Richard Shaw}
+\title{Performance-driven Facial Animation} \author{Garoe Dorta-Perez, Ieva Kazlauskaite, Richard Shaw}
 %\degree{Doctor of Philosophy}
-\unit{ unit }
-\department{Department of Computer Sciences} \degreemonthyear{May 2015}
+\unit{ CM50247 - Visual Effects }
+\department{} 
+\degreemonthyear{May 2015}
 \norestrictions
 
 \begin{document}
 \maketitle
 
-\section{Introduction}
+\chapter{Introduction}
 \label{ch:intro}
 \begin{center}
 \textquote[~\cite{Attenborough:1998}]{\textit{Birds are the most accomplished aeronauts the world has ever seen. They fly high and low, at great speed, and very slowly. And always with extraordinary precision and control}.}
@@ -59,22 +63,22 @@ The naive approach that allows for faster performance is the keyframe animation;
 
 
 %-----------------------------------------------------------------------
-\section{Previous Work}
+\chapter{Previous Work}
 \label{sec:previous}
 
-\subsection{Data Capture}
+\section{Data Capture}
 
 %-----------------------------------------------------------------------
-\subsection{Sparse Reconstruction}
+\section{Sparse Reconstruction}
 
 
 %-----------------------------------------------------------------------
-\subsection{Facial Animation}
+\section{Facial Animation}
 
 
 % INTRO TO JOSHI 2013 PAPER.
 
-The first attempts at using performance-driven facial animation in academia date back to late $20^{th}$ century while in industry was first used for guidance rather than production, i.e. the facial motion of Gollum in the \textit{Lord of the Rings} was based on the motion capture data of the performance of the role actor Andy Serkis~\cite{Pighin:2002}. Another notable example is the pipeline used in the making of \textit{the Polar Express}; the motion capture data was used to construct a multilayer facial rig that was used by an artist to create the final animation~\cite{Bennett:2005}. Though many other examples exist, often the exact technology and methods used in production are not disclosed.
+The first attempts at using performance-driven facial animation in academia date back to late $20^{th}$ century while in industry was first used for guidance rather than production, i.e. the facial motion of Gollum in the \textit{Lord of the Rings} was based on the motion capture data of the performance of the role actor Andy Serkis~\cite{Pighin:2002}. Another notable example is the pipeline used in the making of \textit{the Polar Express}; the motion capture data was used to construct a multilayer facial rig that was used by an artist to create the final animation~\cite{Bennett:2005}. Though many other examples exist, often the exact technology and methods used in production are not disclosed. % ADD MORE INDUSTRY EXAMPLES FROM DIGITAL EMILY PAPER.
 
 In the last two decades, nearly two hundred academic papers that include words \textit{face}, \textit{animation} and \textit{motion capture} were published in computer graphics and vision journals ~\cite{Scopus}. The increase in the quality of the results is explained by the advancements in both the capturing technology and the computational methods. We shall concentrate on the latter; for a brief discussion of the capturing methods see Sec.~\ref{sec:datacapture}. 
 
@@ -90,18 +94,23 @@ In some situations the sets of blend shapes is only available for the target mod
 
 Vlasic et al. proposed an novel approach to facial animation that is based on a multilinear model~\cite{Vlasic:2005}. The work offers an alternative approach to blend shape models, that involves creating a large dataset that encodes various features, for instance the identities, expressions and location of vertices. Each dimension of the data tensor corresponds to a unique feature, and due to the independence of modes, each feature may be varied without affecting the others. Such model can be extended to include an arbitrary number of features, and may be used for motion retargeting or actor replacement, when a database of three-dimensional scans is available. Moreover, the probabilistic interpretation of the model is related to probabilistic principal component analysis, and is able to deal with missing data. 
 
-A number of dimensionality reduction techniques have been used to produce facial animation; for example Blanz and Vetter used principal component analysis (PCA) to create a controllable low dimensional model~\cite{Blanz:1999}. Deng et al. use PCA to find a correspondence between the motion capture data are the manually tuned blend shape models~\cite{Deng:2006}. An extension to nonlinear dimensionality reduction framework was presented by Wang et al.~\cite{Wang:2004}. The proposed method separates the time-varying facial expression and the indivisual style associated with the performer. Then the locally linear embedding (LLE) framework is used to find a nonlinear mapping from the high dimensional space onto a low dimensional manifold. The 
-LLE method is based on an assumption that small neighbourhoods around each data point may be treated as linear patches. Using the resulting generative model, new expressions or an animation may be produced by sampling from the low dimensional manifold.
+A number of dimensionality reduction techniques have been used to produce facial animation; for example Blanz and Vetter apply principal component analysis (PCA) to create a controllable low dimensional model~\cite{Blanz:1999}. Deng et al. use PCA to find a correspondence between the motion capture data are the manually tuned blend shape models~\cite{Deng:2006}. An extension to nonlinear dimensionality reduction techniques was presented by Wang et al.~\cite{Wang:2004}. The proposed method separates the time-varying facial expression and the individual style associated with the performer. Then the locally linear embedding (LLE) framework is used to find a nonlinear mapping from the high dimensional space onto a low dimensional manifold. The LLE method is based on an assumption that small neighbourhoods around each data point may be treated as linear patches. Using the resulting generative model, new expressions or an animation may be produced by sampling from the low dimensional manifold.
+Dimensionality reduction is used when no blend shape model is available, or when different features of the data need to be extracted.
 
+Most of the previously described methods are unable to capture and reproduce the fine details on the actor's face; Bicket et al. introduced a method that is able to create detailed wrinkles on the target model~\cite{Bickel:2007}. The approach is based on decomposition of the model into coarse features from the motion capture sequence, and fine features from the accompanying video. The novel part of their method relies on capturing, analysing and reproducing the wrinkled surface. In the tracking stage, uniform B-Splines are fitted to each fold of the skin. Then the shape of each fold is estimated by exploiting the self-shadowing effect, and finding the gradient that describes the shape of each fold. Moreover, the coupling behaviour is modelled separately. New wrinkles are synthesised by minimising the associated non-linear shell energy; the geometrical model, proposed by Grinspun et al. estimates the local curvature of a surface, and is able to capture the behaviour of thin flexible structures~\cite{Grinspun:2003}. The facial model with detailed wrinkles relies on the quality of the captured data; in particular, the areas that are prone to small-scale deformations have to be painted in a way that minimises diffuse reflection.
 
-~\cite{Alexander:2009}
-~\cite{Bickel:2007}
-Online Modeling For Realtime Facial Animation
+One of the most successful attempts to produce a photo-realistic facial animation is known as the Digital Emily project~\cite{Alexander:2009}. The proposed method involves collecting high resolution data, building a detailed facial rig of the actor's face, producing an animation from the video data, and reproducing the high quality results. The blend shape model was created using approximately $30$ three-dimensional scans; since each scan contained more than one discrete shape, a splitting algorithm had to be used to obtain larger set of controllable shapes. Additional subtle effects, such as the motion of the deformation of the eyelid when the eyes are closed were included to increase the realism of the results. The animation is produced using a number of example poses, and generating predictions for the required pose of the digital model. The entire production process is very time consuming and requires manual input from skilful artists and animators. The authors do not provide a detailed description of the method but their controllable facial rig is publicly available.
 
-it is clear that there exist a trade-off between the effort 
+One recent development was proposed by Bouaziz et al., who develop a method for real-time facial animation~\cite{Bouaziz:2013}. The new method does not rely on the construction of a three-dimensional expression model  associated with the actor prior to the face animation stage. The presented method uses a consumer-level device that captures both the intensity and the depth; previous research by Baltru\v{s}aitis et al. indicates that the use of multimodal data improves the quality of feature tracking~\cite{Baltrusaitis:2012}. To achieve real-time results, Bouaziz et al. use a template blend shape model that is constantly updated to better match the face of the performer. This update includes two steps. Firstly, PCA is used to construct a low dimensional representation of a large set of different facial meshes, then any new face is constructed by merging the average face with a linear combination of the orthonormal basis vectors produced by PCA. Secondly, surface deformation field is used to further refinement the blend shape model. Then the tracking, retargeting and production of an animation is performed in parallel with the optimisation algorithm that aims to personalise the blend shape model. 
+
+Concurrently, Li et al. combined blend shape models with facial tracking to animate a target character face~\cite{Li:2013}. The authors employ per frame correctives to achieve run time shape correction. The data is captured using RGB-D (intensity and depth) cameras. The initial state of this method consists of capturing a three-dimensional model of an actor's face, and PCA  and a large database of captured facial data is used to construct a generic face. Then a blend shape model is constructed using the deformation transfer algorithm, proposed by Sumner and Popovi\'{c}~\cite{Sumner:2004}. Then the motion is produced using blend shapes, and it is refined using an orthogonal adaptive basis. This basis is constructed using PCA, and it contains the initial blend shapes as well as a set of corrective shapes; these additional basis elements correspond to expressions that are not contained in the original shape set. The corrective shapes capture the fine-scale details. Due to the non-linear nature of the resulting blend shape model, Laplacian deformations are used to align the tracked data to the three-dimensional model. Then the expectation-maximisation algorithm is used in the adaptive PCA space to iterative improve the space of the corrective shapes. Specifically, given a number of sufficiently diverse input samples and the initial guess of the corrective space, the algorithm estimates the coefficients of the corrective space. Then, the algorithm finds the model that best explains the samples given the corrective coefficients. After each two cycles of the algorithm, the newly acquired corrective space is orthonormalised, and used to decrease the error during the tracking. This method is capable of producing appealing visual results in real-time. However, it requires a scan of the actors face, and the corrective shapes are not directly used during the retargeting.
+
+A different direction was chosen by Garrido et al., who aim to reconstruct high quality three-dimensional models using data only from a monocular video~\cite{Garrido:2013}. The method relies on a pre-designed blend shape model, and uses optical flow to produce three-dimensional motion. Meanwhile, Xu et al. improved the retargeting of facial animation from an actor onto a digital model~\cite{Xu:2014}. The authors use a multi-scale approach, where a targeted optimisation algorithm is used to achieve best results at the course and the fine scale. Moreover, the proposed method provides the user with a set of control tools that are used to alter the automatically produced results. This blend shape model produces high-quality visual results but it still requires significant input from the user.
+
+%there exist a trade-off between the effort 
 
 %-----------------------------------------------------------------------
-\subsection{Skin Rendering}
+\section{Skin Rendering}
 
 Rendering realistic skin is a challenging task.
 As social beings we interact with interact with other individuals on a daily basis, which has made human perception quite sensitive to skin appearance, even more so with human faces.
@@ -141,20 +150,20 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 
 
 %-----------------------------------------------------------------------
-\section{Methodology}
+\chapter{Methodology}
 \label{sec:methods}
 
 
-\subsection{Data Capture} \label{sec:datacapture}
+\section{Data Capture} \label{sec:datacapture}
 
 
-\subsection{Sparse Reconstruction}
+\section{Sparse Reconstruction}
 
 
-\subsection{Blendshape Optimisation}
+\section{Blendshape Optimisation}
 In this section we introduce the techniques used to warp the meshes, and the optimisation methods.
 
-\subsubsection{Thin Plate Splines}
+\subsection{Thin Plate Splines}
 Thin plate theory addresses problems that commonly arise in areas of natural sciences and engineering when trying to model the behaviour of a thin sheet of some material. The possible processes include but are not limited to stretching, bending, crumpling, buckling, shrinking, straining and tearing. The corresponding mathematical model is based on ideas from differential geometry as well as continuum mechanics, and the set of equations describing the aforementioned phenomena are often notoriously difficult to solve. Therefore, in Computer Graphics, as well as other fields, a number of simplifying assumptions are made when constructing a thin plate model. 
 
 A thin plate is considered to be a two dimensional object, i.e. it is assumed that the thickness is infinitesimal. The geometry of the object is often simplified to reduce the computational cost. Thin plate splines (TPS) are a two-dimensional counterpart of the cubic spline~\cite{Sibson:1991}. TPS are a deformation method based on the assumption that a thin surface deforms in a way that minimises the surface bending energy. The bending energy is proportional to the change in the second fundamental form. Specifically, given two corresponding sets of point $\{(x_i, y_i\}_i^N$ and $\{v_i\}_i^N$ there exists a height field mapping between the two, $f: \mathbb{R}^2 \to \mathbb{R}$. The bending energy corresponding to this mapping is proportional to the second order derivatives of the mapping:
@@ -186,7 +195,7 @@ A thin plate is considered to be a two dimensional object, i.e. it is assumed th
 \end{bmatrix}, 
 \end{equation} where $K$ encodes the relation between the data points, i.e. $K_{ij} = \phi(\|(x_i,y_i) - (x_j,y_j)\|)$, $P_{i\cdot} = (1, x_i, y_i)$ contains the variables from Eq.~\ref{eq:TPSrestrictions}, $\omega$ contains the values of $\omega_i$, and $v$ contains the target function values $v_i$. The variables $0$ and $o$ denote the zero matrix and the zero column vector respectively. Solving this linear system of equations gives the desired transformation in two dimensions. The method extends naturally to three-dimensional problems by including a dependence on an additional variable in the calculations described above. Radial basis functions are commonly used in the field of performance-driven animation~\cite{Joshi:2003}.
 
-\subsubsection{Non-Rigid ICP}
+\subsection{Non-Rigid ICP}
 Iterative Closest Point (ICP) is an algorithm used to align two partially overlapping point clouds by minimising the square error between corresponding points. The quality of the results produced by this algorithm is sensitive to the initial guess at a solution, i.e. ICP only refines the initial estimation. See Alg.~\ref{alg:icp} for the outline of the algorithm. Mean square error algorithm is used to calculate the average of the squared errors between the target and the transformed source points. Thus the objective function is a function of rotations and translations. The output of the algorithm is a transformation matrix that provides the optimal mapping between the two point clouds within a given threshold. The transformation matrix may be split into rotation and translation. The algorithm solves a linear system of equations where the unknowns are the coefficients in the rotation matrix and the translation vector and the known point cloud values are used as coefficients. The method is often used to find a transformation between a point cloud and a surface; in that case the surface normals are used as additional input.
 
 \begin{algorithm}[H]   \caption{Iterative Closest Point.}
@@ -207,27 +216,41 @@ apply transformations\;
 \end{algorithm} 
 The original ICP algorithm is limited to rigid transformations, i.e. rotation and translation, which have only $6$ degrees of freedom. However, in order to capture scaling, shearing and other more complicated transformation, an affine mapping should be used. Thus an extension of the ICP algorithm, called non-rigid ICP is used when additional degrees of freedom are present. Allen et al. proposed a non-rigid registration method that uses a numerically non-linear solver to find a smooth affine mapping~\cite{Allen:2003}. Additional constrained are imposed by manually matching some known marker locations in the two datasets. The method exhibits slow convergence and often leads to local minima; consequently, the authors use a multi-resolution approach where the optimisation is first performed on a low resolution mesh, and then optimised on the high resolution mesh. Amberg et al. combined the ICP algorithm with the method of Allen et al. to overcome the issues with convergence~\cite{Amberg:2007}.
 
-\subsubsection{Blendshape model}
+\subsection{Blendshape model}
 The aim of this project is to used captured data of a face to animate a given model. We use the digital Emily model that comes with $68$ controllable blendshapes ranging from simple eyebrow movements to complicated lip corner pulls. Each blendshape has a weight $w_i$ associated with it, and $w_i \in [0,1]$. The model includes eyes and teeth. The aim is to find a combination of these blendshapes that produce a specified facial expression. In particular, we are interested in reproducing the captured sequence of expressions. 
 
-\textbf{First attempt}. We manually construct a sparse set of points that corresponds to the sparse source mesh. Then the neutral expression of the subject is matched with the neutral expression of Emily by transforming the sparse source mesh to the sparse target mesh. The transformation is then stored, and it is used to map all the expressions in the captured sequence. This produces a sparse Emily sequence; using TPS again we warp the dense Emily mesh according to the positions of the sparse points. The quality of the resulting animation is poor for a number of reasons, see Fig.\ref{}. Firstly, the sparse points are not able to constrain the dense mesh, especially since parts of the face, for example the eyelids and the lips are not tracked in the sparse mesh. Consequently, numerous artefacts appear on the dense mesh, and they are particularly noticeable around the lips as no boundary conditions are imposed. Secondly, though there is a clear correspondence between the generated Emily sequence and the source sequence, the generated expressions look unnatural. This may be explained by the differences in the geometry and anatomy of the two faces; for instance, the source may be able to pull expressions that may not be mimicked by the model. In addition, the errors in tracking, reconstruction, and manual selection of sparse points on Emily further reduce the quality of the animation.
+\textbf{First attempt}. We manually construct a sparse set of points that corresponds to the sparse source mesh Fig.~\ref{}???. Then the neutral expression of the subject is matched with the neutral expression of Emily by transforming the sparse source mesh to the sparse target mesh. The transformation is then stored, and it is used to map all the expressions in the captured sequence. This produces a sparse Emily sequence; using TPS again we warp the dense Emily mesh according to the positions of the sparse points. The quality of the resulting animation is poor for a number of reasons, see Fig.\ref{}. Firstly, the sparse points are not able to constrain the dense mesh, especially since parts of the face, for example the eyelids and the lips are not tracked in the sparse mesh. Consequently, numerous artefacts appear on the dense mesh, and they are particularly noticeable around the lips as no boundary conditions are imposed. Secondly, though there is a clear correspondence between the generated Emily sequence and the source sequence, the generated expressions look unnatural. This may be explained by the differences in the geometry and anatomy of the two faces; for instance, the source may be able to pull expressions that may not be mimicked by the model. In addition, the errors in tracking, reconstruction, and manual selection of sparse points on Emily further reduce the quality of the animation.
 % USING LINEAR ELASTICITY
 
 \textbf{Simplified mesh}. Our initial attempt to improve the method involved simplifying the dense Emily model by removing the part of the mesh that corresponds to the lips. Though the simpler mesh exhibited slightly better behaviour, i.e. there were fewer visible artefacts, the sparse point cloud was still unable to constrain the dense mesh well enough to produce realistic results, see Fig.~\ref{}. 
 
-\textbf{Introduction of blenshapes}. In an attempt to improve the visual appeal of the generated animation, we decided to use a set of Emily key-shapes, that were readily available to us. The main argument for using these 
+\textbf{Blend shapes}. In an attempt to improve the visual quality of the generated animation, we decided to use a set of Emily key-shapes, that were readily available to us. The main argument for using these blend shapes is that in most situations a simple linear relation exists between an arbitrary facial expression and the set of key-shapes. There exist a number of different options for create a set of shapes; the shape may encode the entire geometry of the case, the displacement from the neutral face, or the local features of a face. Alternatively, a set of blend shapes may be producing using a dimensionality reduction technique. Such set of blend shapes is orthogonal, thus the features encoded by each shape are controlled independently; however, such shapes do not allow for intuitive facial transformations making it difficult to perform manual post-process editing.
 
-A number of different numerical optimisation methods where tested when solving for the blendshape  weights.
+Let us define a set of blend shapes $\mathbf{B} = [\bb_0, \ldots, \bb_n]$ where $\bb_0$ is the mesh of a neutral face, and each of the $\bb_i$ correspond to a basic facial expression, for example the raise of an eyebrow. Unless stated otherwise, we shall use $68$ shapes provided with the digital Emily model. Then a new facial expression $\mathbf{F(\w)}$ may be constructed by finding an appropriate linear combination of the basic shapes:
+\begin{equation}
+	\F(\w) = \bb_0 + \sum_{i=1}^N w_i \: |\bb_i - \bb_0|, \label{eq:blendshapes}
+\end{equation} where $\w = [w_1, \ldots, w_n]$ is a set of weights that describe how much each of the basic shapes affect the new expression $\mathbf{F(\w)}$. Typically, a convexity constraint is imposed on the weights; in our case the choice of constraints is influenced by the constraints present in our blend shape model, i.e. $w_i \in [0,1]$. Eq.~\ref{eq:blendshapes} may be written as a linear system of equations as follows:
+\begin{equation}
+	\F(\w) - \bb_0 = \hat{\mathbf{B}} \w, \label{eq:linsyst}
+\end{equation} where $\hat{\mathbf{B}}$ is the original set of blend shapes without the neutral expression. 
+
+A number of different numerical optimisation methods where tested when solving for the blend shape weights. An unconstrained solution may be calculated by inverting matrix $\hat{\mathbf{B}}$, and multiplying it from the left with the left hand side of Eq.~\ref{eq:linsyst}. Instead we use Matlab's constrained non-negative least-squares solver (\texttt{lsqnonneg}) and constrained linear least-squares solver (\texttt{lsqlin})~\cite{Matlab}. For the non-negative least-squares solver we formulate our problem as follows:
+\begin{equation}
+	\min_\w \| \hat{\mathbf{B}} \w - (\F(\w) - \bb_0) \|_2^2, \: \w_i \geq 0, \: i = 1, \ldots, n. \label{eq:lsqnonneg}
+\end{equation} The solver uses an active set method, and iterative improves the active set of basis vectors; it converges in finite time. The same formulation is used for the linear least squares solver though it includes an additional upper limit on the argument. This solver uses a reflexive Newton method which is able to accurately locate the local minimisers of large systems, and exhibits global convergence. It is also able to maintain sparsity of matrices but is generally slower.
+
 
 % Constructing Rich blendshapes. Cf. ~\cite{Choe:2005}. Say tht we do not use actuation of muscles because the basis is really hard to construct.
 % Compare with ~\cite{Deng:2006}. No. . Meanwhile, based on the selected reference video frames (face snapshots), animators manually tune the weights of the blendshape face model to perceptually match the model and the reference images, which creates surpervised correspondences between the PCA coefficients of motion capture frames and the weights of the blendshape face model (referred to as mocap-weight pairs). 
 
+% We don't impose temporal smoothness.~\cite{Bouaziz:2013} Compare with diagrams from this paper.
+% We could improve our model by adding wrinkles.
 % SEE JOSHI for Blend Shape Face Model
 % INCLUDE COMBINATION OF BLENDSHAPES EXAMPLES (page 33 of notes).
 
 % uncanny valley
 
-\subsection{Skin Rendering}
+\section{Skin Rendering}
 
 Our objective in skin rendering is to generate a face that would be indistinguishable from a real one.
 In our case, we have have taken a 3D scan of a subject and our aim is to improve the realism when rendering it.
@@ -339,17 +362,17 @@ In order to improve the quality of the bump maps, we also applied the Image Anal
 	\label{fig:normal_synthesis}
 \end{figure}
 
-\section{Implementation details}
+\chapter{Implementation details}
 \label{sec:implementation_details}
 
 Talk about Maya plugins and any other implementation stuff worth talking about. 
 
 %-----------------------------------------------------------------------
-\section{Results}
+\chapter{Results}
 
 
 %-----------------------------------------------------------------------
-\section{Conclusions}
+\chapter{Conclusions}
 
 
 \newpage
