@@ -55,9 +55,11 @@ std::vector<float> VfxCmd::blinkWeight = { 0.9, 1, 0.5, 0.4, 0.5 };
 #ifdef _WIN32
 #define LOAD_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
 #define SAVE_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_out"
+#define ROTATION_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\invRotation.txt"
 #else
-#define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_w2.txt"
+#define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights2.txt"
 #define SAVE_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_out"
+#define ROTATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/invRotation.txt"
 #endif
 
 MStatus VfxCmd::doIt(const MArgList &args) {
@@ -133,26 +135,14 @@ void *VfxCmd::creator() {
 
 void VfxCmd::loadWeights(int numWeights) {
 	MString cmd;
-	// Read the data from a text file into an array.
-	std::fstream myfile( LOAD_WEIGHTS_PATH, std::ios_base::in);
+
 	std::vector<std::vector<float> > weights;
-	unsigned int numFrames = 0;
-	std::string line;
-	unsigned int weightNum = 0;
-	std::vector<float> currentWeights(numWeights, 0.0);
-	while (std::getline(myfile, line)) {
-		// Save current weight
-		currentWeights.at(weightNum) = std::stof(line);
-		weightNum++;
-		if (weightNum == (unsigned int) ((numWeights))) {
-			// Save weights for current frame in weights vector
-			weights.push_back(currentWeights);
-			std::fill(currentWeights.begin(), currentWeights.end(), 0);
-			weightNum = 0;
-			numFrames++;
-		}
-	}
-	myfile.close();
+	// Read all the weights from the weights file
+	unsigned int numFrames = readWeigths(numWeights, weights);
+
+	// Read the rotation matrix from the rotation file
+	readRot(numFrames);
+
 	// Ignore the last weight
 	numWeights--;
 	// Break connections.
@@ -182,12 +172,31 @@ void VfxCmd::loadWeights(int numWeights) {
 	prevEndTime = anim.animationEndTime();
 	anim.setMinMaxTime(MTime(1.0), MTime((double) (numFrames)));
 	anim.setAnimationStartEndTime(MTime(1.0), MTime((double) (numFrames)));
+
+	cmd = "select -r geoGroup";
+	dgMod.commandToExecute(cmd);
+
 	//Set numFrames to start at 0 for c++ indexing
 	numFrames -= 1;
 	for (unsigned int i = 0; i < weights.size(); i++) {
 		cmd = "currentTime ";
 		cmd = cmd + (i + 1);
 		dgMod.commandToExecute(cmd);
+
+		// Set head movement
+		cmd = "xform -m ";
+		for (unsigned int j = 0; j < 3; j++) {
+			cmd += " ";
+			cmd += invRot.at(i).at(j * 3);
+			cmd += " ";
+			cmd += invRot.at(i).at(j * 3 + 1);
+			cmd += " ";
+			cmd += invRot.at(i).at(j * 3 + 2);
+			cmd += " 0";
+		}
+		cmd += " 0 0 0 1";
+		dgMod.commandToExecute(cmd);
+
 		for (unsigned int j = 0; j < weights.at(i).size(); j++) {
 			if (j != 13 && j != 14) {
 
@@ -206,11 +215,12 @@ void VfxCmd::loadWeights(int numWeights) {
 		// Set the teeth movement for this frame, interpolates between the two
 		// blend shapes that can open the mouth
 		cmd = "setAttr con_jaw_c.translateY ";
-		cmd += -3 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
+		cmd += -3.2 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe  \"con_jaw_c.translateY\"";
 		dgMod.commandToExecute(cmd);
 
+		// Force a subtle smile on Emily
 		cmd = "setAttr shapesBS.mouth_lipCornerPull_l 0.35";
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_l";
@@ -220,6 +230,10 @@ void VfxCmd::loadWeights(int numWeights) {
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_r";
 		dgMod.commandToExecute(cmd);
+
+		// Set keyframe for head movement
+		cmd = "setKeyframe";
+		dgMod.commandToExecute(cmd);
 	}
 
 	// Set keyframes for blinking
@@ -228,6 +242,10 @@ void VfxCmd::loadWeights(int numWeights) {
 		setBlinkAt(blinkFrames.at(i), blinkWeight.at(i));
 		setBlinkAt(blinkFrames.at(i) + blinkTime.at(i), 0.0);
 	}
+
+	// Reset selection to none
+	cmd = "select -cl";
+	dgMod.commandToExecute(cmd);
 
 	// Reset current time to 0
 	cmd = "currentTime 0";
@@ -286,4 +304,45 @@ void VfxCmd::setBlinkAt(int frameNum, float blinkVal) {
 
 	cmd = "setKeyframe \"shapesBS.w[14]\"";
 	dgMod.commandToExecute(cmd);
+}
+
+unsigned int VfxCmd::readWeigths(int numWeights,
+		std::vector<std::vector<float> >& weights) {
+	unsigned int numFrames = 0;
+	std::string line;
+	unsigned int weightNum = 0;
+	std::vector<float> currentWeights(numWeights, 0.0);
+	std::fstream myfile( LOAD_WEIGHTS_PATH, std::ios_base::in);
+	while (std::getline(myfile, line)) {
+		// Save current weight
+		currentWeights.at(weightNum) = std::stof(line);
+		weightNum++;
+		if (weightNum == (unsigned int) (((numWeights)))) {
+			// Save weights for current frame in weights vector
+			weights.push_back(currentWeights);
+			std::fill(currentWeights.begin(), currentWeights.end(), 0);
+			weightNum = 0;
+			numFrames++;
+		}
+	}
+	myfile.close();
+	return numFrames;
+}
+
+void VfxCmd::readRot(unsigned int numFrames) {
+	std::string line;
+	std::vector<double> emptymatrix(9, 0);
+	emptymatrix.at(0) = 1;
+	emptymatrix.at(4) = 1;
+	emptymatrix.at(8) = 1;
+
+	invRot.resize(numFrames, emptymatrix);
+	std::fstream myfile( ROTATION_PATH, std::ios_base::in);
+	for (unsigned int i = 0; i < numFrames; i++) {
+		for (unsigned int j = 0; j < 9; j++) {
+			std::getline(myfile, line);
+			invRot.at(i).at(j) = std::stod(line);
+		}
+	}
+	myfile.close();
 }

@@ -28,11 +28,15 @@ private:
 	void loadWeights(int numWeights);
 	void saveWeights();
 	void setBlinkAt(int blinkFrame, float blinkVal);
+	unsigned int readWeigths(int numWeights,
+			std::vector<std::vector<float> >& weights);
+	void readRot(unsigned int numFrames);
 
 private:
 	Actions action;
 	int numWeights;
 	std::vector<unsigned int> attrIndices;
+	std::vector<std::vector<double>> invRot;
 	static std::vector<unsigned int> blinkFrames;
 	static std::vector<unsigned int> blinkTime;
 	static std::vector<float> blinkWeight;
