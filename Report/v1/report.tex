@@ -270,7 +270,31 @@ Given the estimated camera projection matrices, we can then rectify the stereo i
 	\label{fig:epipolarlines}
 \end{figure}
 
-\section{Marker Detection}
+\section{Initial Marker Detection}
+
+The facial markers are detected in the first frame of a captured image sequence and then are tracked throughout the length of the sequence. The initial marker detection is achieved by detecting SIFT features in the image. We employ the open source Matlab implementation VLFeat \cite{vedaldi08vlfeat} to do this. 
+
+The marker detection process for the first frame of a given stereo image sequence is carried out as follows. First the user defines a region of interest in the left image around the face of the actor to be tracked, by drawing a contour in the image. We make use of the Matlab function \texttt{roipoly} for this. Then, SIFT features are detected within the selected image region, choosing the appropriate SIFT parameters to pick out features of around 5 pixels in diameter - this may take a few tries to get right. Once reasonable SIFT features have been detected, additional feature points can then be added manually, and also wrongly detected points can be removed, by interactively selecting certain points the user wishes to change. Once the user has successfully detected all 97 facial markers in the left image, the corresponding marker positions are found in the right image by searching along the corresponding epipolar lines; simply the same row of pixels in the right image since the images have been stereo rectified beforehand. The matching points in the right image are found by computing the normalised cross-correlation between image patches:
+
+\begin{equation}
+\begin{aligned}
+	C_{NCC} = \sum_{i=1}^N \frac{(I_i^L - \mu^L)(I_i^R - \mu^R)}{\sigma^L \sigma^R}
+\end{aligned}
+\end{equation}
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/detection}
+	\caption{Facial markers are detected by first selecting a region of interest, detecting SIFT features, and then removing unwanted points or adding additional points.}
+	\label{fig:detection}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/matching}
+	\caption{Detected facial markers in the left image are matched to markers in the right image pair by computing the normalised cross-correlation between image patches around the points.}
+	\label{fig:matching}
+\end{figure}
 
 \section{Marker Tracking}
 
