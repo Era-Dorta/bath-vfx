@@ -161,7 +161,7 @@ The proposed pipeline is shown below...
 
 \section{Data Capture} \label{sec:datacapture}
 
-Two DSLR cameras were positioned in a stereo configuration to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. The facial performance was recorded on video at 60fps, and the cameras were roughly synchronised by aligning the two separate audio signals. Fixing the cameras close to one another at approximately 10cm separation, and about 1m distance from the subject, meant that the images from both views would be quite similar, allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for 3D reconstruction of points on the face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees. 
+Two DSLR cameras were positioned in a stereo configuration to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. The facial performance was recorded on video with a resolution of $640 \times 480$ at 60fps, and the cameras were roughly synchronised by aligning the two separate audio signals. Fixing the cameras close to one another at approximately 10cm separation, and about 1m distance from the subject, meant that the images from both views would be quite similar, allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for triangulation of points on the face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees. 
 
 \begin{figure}[htbp!]
 \centering
@@ -169,6 +169,25 @@ Two DSLR cameras were positioned in a stereo configuration to capture the actor'
 	\caption{The stereo camera setup used to capture the facial performance.}
 	\label{fig:setup1}
 \end{figure}
+
+Markers used to track the facial performance were placed on the face in the configuration shown in Figure \ref{fig:facemarkers}. 97 markers were used in total, and were drawn onto the actor's face with a makeup pencil so as to be easily removed after the capture session. The positions of the markers were roughly based on those used in the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}, as shown in Figure \ref{fig:surreydata}, although they use fewer markers with 60 in total. In hindsight, using slightly fewer number of markers might have been preferable, as consistently detecting and tracking a large number of markers became quite time-consuming and labour intensive. Furthermore, rather than simply using a black pencil, it might have advantageous to use markers of a significantly different colour to the tones of the human face in order to aid marker detection and tracking, perhaps even using retro-reflective markers as in many commercial motion capture systems ~\cite{Vicon}.
+
+\begin{figure}[htbp!]
+\begin{minipage}[b]{0.47\textwidth}
+\centering
+\includegraphics[width=\textwidth]{img/facemarkers}
+	\caption{ The configuration of markers used for tracking the facial performance of the actor.}
+	\label{fig:facemarkers}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.5\textwidth}
+\centering
+\includegraphics[width=\textwidth]{img/surreydata}
+	\caption{ Images from the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}.}
+	\label{fig:surreydata}	
+\end{minipage}
+\end{figure}
+
 
 \section{Camera Calibration}
 
