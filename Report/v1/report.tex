@@ -29,6 +29,7 @@
 \newcommand{\B}{\mathbf{B}}
 \newcommand{\F}{\mathbf{F}}
 \newcommand{\bb}{\mathbf{b}}
+\newcommand{\vect}[1]{\mathbf{#1}}
 
 %\usepackage[hidelinks]{hyperref} % Adds references links without color
 \usepackage{hyperref} % Adds references links with color
@@ -190,6 +191,88 @@ Markers used to track the facial performance were placed on the face in the conf
 
 
 \section{Camera Calibration}
+
+In order to obtain the 3D coordinates of the markers on the face, the cameras first needed to be calibrated. This was achieved using a checkerboard pattern held in a number of different positions in front of both cameras simultaneously, as shown in Figure \ref{fig:checkerboard}. We made use of the Camera Calibration Toolbox for Matlab \cite{Calib} provided by Jean-Yves Bouguet. It was important to ensure that the checkboard remained within the frame of both cameras during the entire calibration process. 
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.6\textwidth]{img/checkerboard}
+	\caption{A checkerboard pattern was used to calibrate the pair of stereo cameras.}
+	\label{fig:checkerboard}
+\end{figure}
+
+As a result of the stereo calibration, we obtain an estimate of the intrinsic and external parameters of the two cameras, from which we can compute the camera projection matrices using the perspective projection equation:
+
+\begin{equation*}
+\label{qrdecomp}
+	\left(\!
+    \begin{array}{c}
+      su \\
+      sv \\
+      s
+    \end{array}
+  	\!\right) =
+  \vect{K}[\vect{R}|\vect{t}]
+    \left(\!
+    \begin{array}{c}
+      X \\
+      Y \\
+      Z \\
+      1
+    \end{array}
+    \!\right) 		 
+\end{equation*}
+
+\begin{equation*}
+\left(\!
+    \begin{array}{c}
+      su \\
+      sv \\
+      s
+    \end{array}
+  	\!\right) =
+  \begin{bmatrix}
+       fk_u & 0 & u_0 \\[0.3em]
+       0 & fk_v & v_0 \\[0.3em]
+       0 & 0 & 1
+  \end{bmatrix}
+    \begin{bmatrix}
+       r_{11} & r_{12} & r_{13} & t_x \\[0.3em]
+       r_{21} & r_{22} & r_{23} & t_y \\[0.3em]
+       r_{31} & r_{32} & r_{33} & t_z
+  \end{bmatrix}
+    \left(\!
+    \begin{array}{c}
+      X \\
+      Y \\
+      Z \\
+      1
+    \end{array}
+    \!\right)
+\end{equation*}
+
+
+The resulting extrinsic parameters, describing the rotation and translation between the views, are visualised in Figure \ref{fig:calib}.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/calib}
+	\caption{The resulting extrinsic parameters of the calibrated stereo camera setup.}
+	\label{fig:calib}
+\end{figure}
+
+Given the estimated camera projection matrices, we can then rectify the stereo images for every frame from a captured image sequence, so that the eipolar lines are horizontal. This reduces the stereo matching problem to a 1D search problem, as the same 3D is constrained to lie on the same pixel row in each pair of images. A pair of rectified images and corresponding epipolar lines are shown in Figure \ref{fig:epipolarlines}.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/epipolarlines}
+	\caption{Using the stereo calibration results, each pair of images in a captured image sequence is rectified so that corresponding epipolar lines lie on the same pixel row. This reduces the stereo correspondence problem to a 1D search along the epipolar lines.}
+	\label{fig:epipolarlines}
+\end{figure}
+
+\section{Marker Detection}
+
+\section{Marker Tracking}
 
 \section{Sparse Reconstruction}
 
