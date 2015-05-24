@@ -308,7 +308,77 @@ With the facial markers detected in the first frame, the next task was to track 
 
 \subsection{Kalman Filter}
 
-\section{Sparse Reconstruction}
+\section{Sparse Facial Reconstruction}
+
+Once we have obtained the 2D image coordinates of the facial markers for every frame in a stereo image sequence, we then compute the sparse 3D reconstruction over the sequence. In one frame, given a pair of image correspondences $\vect{w} = (u,v,1)^T$ and $\vect{w}' = (u',v',1)^T$ of the same 3D point $\vect{X} = (X,Y,Z,1)^T$, we can write two equations using the projection matrices $\vect{P}$ and $\vect{P'}$:
+
+\begin{equation}
+\left(\!
+    \begin{array}{c}
+      su \\
+      sv \\
+      s
+    \end{array}
+  	\!\right) = \vect{P}
+  	\left(\!
+    \begin{array}{c}
+      X \\
+      Y \\
+      Z \\
+      1
+    \end{array}
+  	\!\right) 
+  	\ \ \ \ \ \ \ \ 
+\left(\!
+    \begin{array}{c}
+      su' \\
+      sv' \\
+      s
+    \end{array}
+  	\!\right) = \vect{P'}
+  	\left(\!
+    \begin{array}{c}
+      X \\
+      Y \\
+      Z \\
+      1
+    \end{array}
+  	\!\right).
+\end{equation}
+For each pair of image points, two equations can be written:
+
+\begin{align*}
+u &= \frac{p_{11}X + p_{12}Y + p_{13}Z + p_{14}}{p_{31}X + p_{32}Y + p_{33}Z + p_{34}} \ \  
+u' = \frac{p'_{11}X + p'_{12}Y + p'_{13}Z + p'_{14}}{p'_{31}X + p'_{32}Y + p'_{33}Z + p'_{34}}\\ 
+v &= \frac{p_{21}X + p_{22}Y + p_{23}Z + p_{24}}{p_{31}X + p_{32}Y + p_{33}Z + p_{34}} \ \ 
+v' = \frac{p'_{21}X + p'_{22}Y + p'_{23}Z + p'_{24}}{p'_{31}X + p'_{32}Y + p'_{33}Z + p'_{34}}
+\end{align*}
+Rearranging, these can be written in the form $\vect{AX} = 0$ as follows, where $\vect{p}_i$ denotes the $ith$ row of the projection matrix $\vect{P}$
+
+\begin{equation}
+\begin{bmatrix}
+       u\vect{p}_3^T - \vect{p}_1 \\[0.3em]
+       v\vect{p}_3^T - \vect{p}_2 \\[0.3em]
+       u' \vect{p'}_3^T - \vect{p'}_1 \\[0.3em]
+       v' \vect{p'}_3^T - \vect{p'}_2
+\end{bmatrix}
+\left(\!
+    \begin{array}{c}
+      X \\
+      Y \\
+      Z \\
+      1
+    \end{array}
+  	\!\right) = 0.
+\end{equation}
+Two equations are acquired from each image point in the two views, giving a total of four equations with three unknowns - the problem is over-constrained. A linear least-squares solution can be found by performing Singular Value Decomposition on the matrix $\vect{A}$. The 3D coordinates of the point $\vect{X}$ are the singular vector corresponding to the smallest singular value of $\vect{A}$, i.e. the last column of the matrix $\vect{V}$, where $\vect{A} = \vect{UDV}^T$. This is implemented in Matlab in the function \texttt{Reconstruct.m}, which takes in the two camera projection matrices for a pair of stereo cameras and the matching 2D image points, and returns an array of corresponding 3D points.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/faces}
+	\caption{A sparse 3D reconstruction is computed for every frame of an image sequence using the detected marker positions and the calibrated camera projection matrices. A sample of image frames and the corresponding 3D reconstructions are shown above.}
+	\label{fig:faces}
+\end{figure}
 
 \subsection{Stabilising Head Movement}
 
