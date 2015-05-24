@@ -298,8 +298,32 @@ The marker detection process for the first frame of a given stereo image sequenc
 
 \section{Marker Tracking}
 
+With the facial markers detected in the first frame, the next task was to track the positions of the markers as they move throughout the image sequence. 
+
+\subsection{Optical Flow}
+
+\subsection{KLT Tracker}
+
+\cite{Shi:1994}
+
+\subsection{Kalman Filter}
+
 \section{Sparse Reconstruction}
 
+\subsection{Stabilising Head Movement}
+
+It is important for the actor's head to remain still throughout the sequence so that the reconstructed facial expressions are expressed as true non-rigid deviations from the neutral facial expression. Proper stabilisation of the head is required to avoid artefacts in the resulting blendshape facial animation and retargeting process \cite{Beeler:2014}. If the rigid head movement is not removed, then the expression shapes will contain this 'baked-in' rigid motion, and any facial animation constructed from the expressions will also contain this unwanted rigid head motion. In industry, face-stabilisation is still usually performed manually; Weise \textit{et al}. \cite{Weise:2009} aim to remove the rigid motion component of multiple expressions using ICP registration and Vlasic \textit{et al}. \cite{Vlasic:2005} use Procrustes alignment.
+
+In our implementation, we attempt to remove the majority of the actor's rigid head motion by performing a Procrustes analysis \cite{Gower:1975} using a number of approximately rigid points. At least four points are required for the Procrustes alignment. The rigid points were chosen to be the tops of the ears, the tip and bridge of the nose, and the centre point on the top of the forehead, as shown by the dots in Figure \ref{fig:procrustes}. However, none of these points are actually truly rigid, so this is just an approximation to the true stabilisation. In a future implementation, it would be better to actually track a few points known to be practically rigid, for example by placing markers on the top of the head. 
+
+The Procrustes analysis computes a least-squares fit of each facial expression in a given frame to the neutral face, given the rigid vertex correspondences. In Figure \ref{fig:procrustes}, the rigid correspondences are plotted in red for the neutral face, and blue for a particular frame. We do this for the entire image sequence so that in every frame the head pose is aligned to the neutral position. We have found that the average error over an image sequence is usually around the order of $10^{-3}$. However, it is not simply the case that the smaller the error means the better the alignment of the expression to the neutral face, because the head can be orientated in such a way that can make the error in the rigid vertex correspondences small, but can result in an unnatural head pose. Through experimentation, we have found that choosing points that span the entire face and are placed the extremities of the face, such as the ears, generally results in a better alignment than rather selecting a few points close together around the centre of the face, such as around the mostly rigid nose region. This makes sense because a small deviation in points around the centre of mass will lead to larger displacements in the other points, whereas small deviations in points at the edges will have much less of an impact on points in the centre of the face. 
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/procrustes}
+	\caption{The head pose in each frame of an image sequence is aligned to the neutral face position using Procrustes analysis. The rigid vertex correspondences are shown in red for the neutral pose, and blue for a given frame.}
+	\label{fig:procrustes}
+\end{figure}
 
 \section{Blendshape Optimisation}
 In this section we introduce the techniques used to warp the meshes, and the optimisation methods.
