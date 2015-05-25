@@ -514,7 +514,7 @@ To compare the results with a different number of blend shapes, we calculate the
 \textbf{3D model.} Next, we shall consider the animation of a three dimensional motion sequence introduced in Sec.~\ref{}. This sequence is obtained using a linear elasticity method, as previously described. We analyse the results from a talking sequence that contains $371$ frames. As in the two-dimensional case, at each frame of the sequence, the chosen optimisation method calculates the best possible combination of blend shape weights given the Emily motion sequence. In particular, the input sequence is a sparse sequence of the motion that was transformed from the capture space to the digital model space. 
 
 We start by manually marking the three-dimensional face of Emily; the try to replicate the pattern we used when capturing the actor's face, see Fig.~\ref{fig:facemarkers}. The markers are placed at the vertices of the mesh, and the indices of these vertices are used to find the location of the corresponding markers on the meshes of blend shapes; Fig.~\ref{fig:Emarked} illustrates the locations of markers on a number of blend shape meshes. Then the optimisation methods are used to extract the best linear combination of shapes together with the corresponding weights. The average reconstruction error for the non-negative least-squares solver is approximately $0.26$ centimetres, compared to $0.23$ for the constrained linear least-squares solver, see Fig.~\ref{fig:errorw2w3}. A number of factors may increase the error. Firstly, the expressions captured in Emily blend shapes are fairly mild, i.e. the shapes do not capture the most extreme motion of the face. Consequently, the estimated facial movements may not be expressed as a linear combination of the blend shapes. Secondly, as the blend shapes are not orthogonal, they may combine in unexpected ways, for example cancel each other. This behaviours may be avoided if a set of PCA-produced shapes is used. Also, note that the mesh used is not symmetrical, i.e. the left side of the face does not match the right side. This may lead to a sideways motion that cannot be captured by the blend shapes.
-\begin{figure}
+\begin{figure}[htbp!]
         \centering
         \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[trim = 160mm 20mm 160mm 10mm, clip,width=0.7\textwidth]{img/weights/3D/Emily_marked/neutralE_marked.png}
@@ -545,7 +545,7 @@ We start by manually marking the three-dimensional face of Emily; the try to rep
         \caption{Examples of marked blend shapes.}\label{fig:Emarked}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp!]
         \centering
         \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[width=\textwidth]{img/weights/3D/w2/w2_frame200_blends68.png}
@@ -576,9 +576,9 @@ We start by manually marking the three-dimensional face of Emily; the try to rep
         \caption{The red dots mark the position of the markers in the motion sequence while the black cirles correspond to the reconstructed position of the markers. The top results were produced using the non-negative least-squares solver while the bottom results were produced by the linear least-squares solver. }\label{fig:errorw2w3}
 \end{figure}
 
-The use of blend shapes greatly improves the visual quality of the resulting animation. However, the animation still lacks realism and expressiveness, thus we implement a number of changes to the original model. First, a reduced set of key expressions is used in the solver; this leads to a smaller system of equations to be optimised. The reduced set contains $19$ shapes included in the visual set of controls in the original blend shape model. The smaller set of shapes leads to a slight increased (of approximately $0.03$ centimetres) in reconstruction error. There is no noticeable effect on the visual quality of the resulting animation, see Fig.~\ref{fig:19blends}. Thus the only notable advantage of using fewer blend shapes is the acceleration of the  optimisation step. However, if the performance of the algorithm is the main objective, then a PCA basis is a better choice than a reduced non-orthogonal set of shapes.
+The use of blend shapes greatly improves the visual quality of the resulting animation. However, the animation still lacks realism and expressiveness, thus we implement a number of changes to the original model. Firstly, a reduced set of key expressions is used in the solver; this leads to a smaller system of equations to be optimised. The reduced set contains $19$ shapes included in the visual set of controls in the original blend shape model. The smaller set of shapes leads to a slight increased (of approximately $0.03$ centimetres) in reconstruction error. There is no noticeable effect on the visual quality of the resulting animation, see Fig.~\ref{fig:19blends}. Thus the only notable advantage of using fewer blend shapes is the acceleration of the  optimisation step. However, if the performance of the algorithm is the main objective, then a PCA basis is a better choice than a reduced non-orthogonal set of shapes.
 
-\begin{figure}
+\begin{figure}[htbp!]
         \centering
         \begin{subfigure}[b]{0.3\textwidth}
                 \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/19blends/w2_frame200_blends19.png}
@@ -609,7 +609,33 @@ The use of blend shapes greatly improves the visual quality of the resulting ani
         \caption{The reconstruction error for a model with $19$ blend shapes. The top results were produced using the non-negative least-squares solver while the bottom results were produced by the linear least-squares solver. Colours as in Fig.~\ref{fig:errorw2w3}.}\label{fig:19blends}
 \end{figure}
 
-\begin{figure}
+We then attempt an opposite approach, i.e. we include extra bend shapes to account for the features that are not present in the original set. This approach was inspired by the research of Li et al., who introduced corrective shapes to systematically extend the initial set of shapes~\cite{Li:2013}. The authors start by using linear combinations of PCA principal components to construct new facial expressions. They then extract a number of samples that cannot be explained by the original set of principal components. An iterative procedure is used to produce corrective shapes that are orthogonal to the member of the original set, and that improve the fitting accuracy. Unfortunately, such corrective method cannot be applied to a manually constructed set of blend shapes since it relies on vector orthogonality. Instead, we manually construct a set of new shapes that are more extreme than our original blend shapes; we then include these new shapes in the solver. The criteria for choosing the new expressions are, (a) the likelihood of that or similar expressions, and (b) the dissimilarity between the new and the existing expressions. The four extra blend shapes are shown in Fig.~\ref{fig:extrafaces}; they were constructed by increasing the weights on the original blendshapes beyond the predefined limit. 
+\begin{figure}[htbp!]
+        \centering
+        \begin{subfigure}[b]{0.23\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/lipcorners15.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.23\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/eyebrowsin2.png}
+        \end{subfigure} 
+        \begin{subfigure}[b]{0.23\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/nosewrinkle2.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.23\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/mouthsuck.png}
+        \end{subfigure}
+        \caption{Additional blend shapes. }\label{fig:extrafaces}
+\end{figure}
+
+Fig.~\ref{fig:usage} shows the activation of the extra blend shapes throughout the motion sequence. Both of the optimisation methods favour the first additional blendshape that corresponds to the smile in Fig.~\ref{fig:extrafaces} while the other shapes are only used with low weights. Despite the extension to the set of shapes, the reconstruction error decreased by less then $0.01$ centimetres for both methods. This is explained by the fact that the extra blenshapes are closely related to the original ones, as they are in fact a linear combination of the original blendshapes. A more systematic approach needs to be used to produce more diverse shapes. For example, an additional optimisation step may be included that randomly alters the existing blendshapes, and used a small subset of the altered shapes to find the extension that minimises the reconstruction error. In particular, we choose a set of new shapes that are constructed by adding a small random quantity to the average blend shape. Then these shapes are included in the optimisation algorithm. The new shapes are stored if they reduce the reconstruction error, and new blend shapes are suggested until the error decreases below a chosen threshold. 
+
+% 10,50 shapes: min 0.2326.
+
+\begin{figure}[htbp!]
         \centering
         \begin{subfigure}[b]{0.47\textwidth}
                 \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/w2_72_usage.png}
@@ -619,18 +645,11 @@ The use of blend shapes greatly improves the visual quality of the resulting ani
         \begin{subfigure}[b]{0.47\textwidth}
                 \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/w3_72_usage.png}
         \end{subfigure}
-        \caption{. }\label{fig:usage}
+        \caption{The weights associated with the extra blend shapes as a function of frames in the sequence. The left diagram corresponds to the constrained non-negative least-squares solver while the right one gives he results for the linear least-squares solver.}\label{fig:usage}
 \end{figure}
 
 The constrained non-negative least-squares solver 
 
-% TEST TALKING SEQUENCE
-% For w2, 5 out of 371 frames use the new blends with weights of less than 3*10^-3. The one that stands out is frame 284, the weight there is 0.03. 
-% For w2, the error decreases from 0.2622 to 0.2575. 
-% For w3, the error decreases from 0.2333 to 0.2307. the first exta face is used 
-
-% w2: 19 blends. Error is 0.3048.
-% w3: 19 blends. Error is 0.2610.
 
 % w2: dense E with not mouth. 68 blends. Error 0.3006. 
 % w3: dense E with not mouth. 68 blends. Error 0.2801.
@@ -641,8 +660,6 @@ The constrained non-negative least-squares solver
 
 % We don't impose temporal smoothness.~\cite{Bouaziz:2013} Compare with diagrams from this paper.
 % We could improve our model by adding wrinkles.
-% SEE JOSHI for Blend Shape Face Model
-% INCLUDE COMBINATION OF BLENDSHAPES EXAMPLES (page 33 of notes).
 
 % uncanny valley
 
