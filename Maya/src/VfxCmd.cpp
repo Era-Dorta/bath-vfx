@@ -341,6 +341,8 @@ unsigned int VfxCmd::readWeights(int numWeights,
 		MGlobal::displayWarning(
 				"VfxCMD: could not read file " LOAD_WEIGHTS_PATH);
 	}
+	line = "VfxCMD: Read " + std::to_string(numFrames) + " frames";
+	MGlobal::displayInfo(line.c_str());
 	return numFrames;
 }
 
