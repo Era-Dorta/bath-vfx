@@ -476,7 +476,7 @@ A number of different numerical optimisation methods where tested when solving f
 
 Our initial tests of the optimisation algorithms were carried out on a two-dimensional sequence of facial motion. Approximately $90$ points on a sequence were marked and tracked to produce a sparse motion sequence. Then a set of key frames were hand-picked to represent the extreme cases of the facial motion, see Fig.~\ref{fig:2Dblends}. The sparse points from these frames are then used as blend shapes. The two solvers were tested on the entire motion sequence. We shall compare the results by estimating the average error between the pixels in the original sequence and the weighted sequence.
 
-Fig.~\ref{fig:frame10} and Fig.~\ref{fig:frame400} illustrate the concept of blend shapes. Frame $10$ is very close to one of the blend shapes, and both optimisation methods are able to represent this expression well; the average error associated with the constrained non-negative least-squares solver is less than $0.29$, which corresponds to approximately $0.01$ millimetres, while the average error for the second solver is less than $0.21$ (approximately 0.09 millimetres). Note that as expected both methods use frame $9$ with a large weight. However, the other blend shapes are different for the two methods. This suggests that none of the blend shapes is able to capture the subtle change between frames $9$ and $10$. In comparison, frame $400$ is twelve frames away from a frame that was chosen as a blend shape, resulting in an increase in average error for he two methods (approximately 0.49 in both cases). As expected, both methods use the two blend shapes that are the nearest to frame $400$ in terms of timing. The weights used for these two shapes are the same to three significant digits, and the extra shape used by the first method is has a low weight assigned to it. Note that the first method does not obey the restriction of $\sum_{i=1}^N w_i = 1$. Though the second method is able to produce slightly more accurate results, the difference does not seem significant. 
+Fig.~\ref{fig:frame10} and Fig.~\ref{fig:frame400} illustrate the concept of blend shapes. Frame $10$ is very close to one of the blend shapes, and both optimisation methods are able to represent this expression well; the average error associated with the constrained non-negative least-squares solver is less than $0.29$, which corresponds to approximately $0.01$ centimetres, while the average error for the second solver is less than $0.21$ (approximately $0.09$ centimetres). Note that as expected both methods use frame $9$ with a large weight. However, the other blend shapes are different for the two methods. This suggests that none of the blend shapes is able to capture the subtle change between frames $9$ and $10$. In comparison, frame $400$ is twelve frames away from a frame that was chosen as a blend shape, resulting in an increase in average error for he two methods (approximately 0.49 in both cases). As expected, both methods use the two blend shapes that are the nearest to frame $400$ in terms of timing. The weights used for these two shapes are the same to three significant digits, and the extra shape used by the first method is has a low weight assigned to it. Note that the first method does not obey the restriction of $\sum_{i=1}^N w_i = 1$. Though the second method is able to produce slightly more accurate results, the difference does not seem significant. 
 
 \begin{figure}[htbp!]
 \centering
@@ -498,7 +498,46 @@ Fig.~\ref{fig:frame10} and Fig.~\ref{fig:frame400} illustrate the concept of ble
 	\label{fig:frame400}
 \end{figure}
 
-talking sequence that contains $371$ frames. We used the $68$ blend shapes provided with the digital Emily model.  At each frame of the sequence, the chosen optimisation method calculates the best possible combination of blend shapes weights given the Emily motion sequence. This sequence is obtained using a linear elasticity method as previously described. 
+\textbf{PCA.} An alternative set of key shapes may be constructed by applying Principal Component Analysis (PCA) to the observed high-dimensional data. Generally, PCA is used to transform a set of correlated observations into a set of values of linearly uncorrelated principal components. If the number of principal components is smaller than the number of original variables, then the method may be used for dimensionality reduction. PCA tries to find a set of orthonormal axes which under projection preserve the highest variance. When formulated as an eigenvalue problem, it finds the eigenvectors of the covariance matrix with the largest eigenvalues. 
+
+PCA has been used in facial animation as an automatic way of constructing a set of blend shapes. The main advantages of using such blend shapes is that he construction does not require artistic skills, and the set of shapes are guaranteed to be orthogonal. The second argument is particularly important in compression algorithms, i.e. when the aim is to find the smallest possible set of blend shapes that is able to represent the data while minimising the squared reconstruction error. We use the Matlab implementation of PCA to find a set of PCA eigenvectors that represent the directions with highest variance in our data. Given this new set of shapes, we use the same optimisation algorithm as previously described, replacing the neutral expression with the mean of the data.
+
+To compare the results with a different number of blend shapes, we calculate the average reconstruction error for a $500$ frame sequence. When the first $3$ shapes are used, the error is approximately $0.16$ centimetres and $0.25$ centimetres for the two optimisation methods respectively. Introduction of five additional shapes reduces the error by approximately $0.02$ centimetres. Thus PCA does not outperform the model with manually designed set of key shapes. An additional drawback of the PCA basis is that it is not intuitive, i.e. the key shapes do not correspond to recognisable facial expressions. As a consequence, manual editing of the resulting animation is very complicated. Throughout the rest of the project we use the standard set of $68$ blend shapes from the Digital Emily project~\cite{Alexander:2009}.
+
+\textbf{3D model.} Next, we shall consider the three dimensional motion sequence introduced in Sec.~\ref{}. This sequence is obtained using a linear elasticity method, as previously described. We analyse the results from a talking sequence that contains $371$ frames. As in the two-dimensional case, at each frame of the sequence, the chosen optimisation method calculates the best possible combination of blend shape weights given the Emily motion sequence. 
+
+We start by manually marking the three-dimensional face of Emily; the try to replicate the pattern we used when capturing the actor's face, see Fig.~\ref{fig:facemarkers}. The markers are placed at the vertices of the mesh, and the indices of these vertices are used to find the location of the corresponding markers on the meshes of blend shapes; Fig.~\ref{fig:Emarkers} illustrates the locations of markers on a number of meshes.
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 160mm 20mm 160mm 10mm, clip,width=0.7\textwidth]{img/weights/3D/Emily_marked/neutralE_marked.png}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 160mm 20mm 160mm 10mm, clip,width=0.7\textwidth]{img/weights/3D/Emily_marked/blendshapeE_marked_50.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 160mm 20mm 160mm 10mm,clip,width=0.7\textwidth]{img/weights/3D/Emily_marked/blendshapeE_marked_56.png} 
+        \end{subfigure} \\
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 160mm 20mm 160mm 10mm,clip,width=0.7\textwidth]{img/weights/3D/Emily_marked/blendshapeE_marked_61.png}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 160mm 20mm 160mm 10mm,clip,width=0.7\textwidth]{img/weights/3D/Emily_marked/blendshapeE_marked_67.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 120mm 20mm 120mm 10mm, clip, width=0.7\textwidth]{img/weights/3D/Emily_marked/neutralE_marked_rot.png}
+        \end{subfigure}
+        \caption{Examples of marked blend shapes.}\label{fig:Emarked}
+\end{figure}
 
 The constrained non-negative least-squares solver 
 
@@ -506,8 +545,6 @@ The constrained non-negative least-squares solver
 % For w2, 5 out of 371 frames use the new blends with weights of less than 3*10^-3. The one that stands out is frame 284, the weight there is 0.03. 
 % For w2, the error decreases from 0.2622 to 0.2575. 
 % For w3, the error decreases from 0.2333 to 0.2307. the first exta face is used 
-
-% w3: with 68 shapes. Increase upper limit in solver to 1.2. NOthing changes.
 
 % w2: 19 blends. Error is 0.3048.
 % w3: 19 blends. Error is 0.2610.
