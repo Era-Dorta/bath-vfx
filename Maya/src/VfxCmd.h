@@ -40,7 +40,7 @@ private:
 	std::vector<unsigned int> attrIndices;
 	std::vector<std::vector<double>> invTransform;
 	double translationScale;
-	double eyeRotScale;
+	float eyeRotScale;
 	MFloatVectorArray leftEyeRotation;
 	MFloatVectorArray rightEyeRotation;
 	static std::vector<unsigned int> blinkFrames;

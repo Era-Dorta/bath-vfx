@@ -78,7 +78,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	action = SAVE;
 	file_ind = 0;
 	translationScale = 0.1;
-	eyeRotScale = 10;
+	eyeRotScale = 2;
 
 	// Get state parameter
 	MString paramVal;
@@ -197,7 +197,17 @@ void VfxCmd::loadWeights(int numWeights) {
 		dgMod.commandToExecute(cmd);
 
 		// Set head movement
-		cmd = "xform -m ";
+		cmd = "xform -m 1 0 0 0 0 1 0 0 0 0 1 0";
+		// Translation
+		for (unsigned int j = 9; j < 12; j++) {
+			cmd += " ";
+			cmd += invTransform.at(i).at(j);
+		}
+		// Homogeneus scale value in the matrix
+		cmd += " 1";
+		dgMod.commandToExecute(cmd);
+
+		cmd = "xform -r -m ";
 		// Rotation part
 		for (unsigned int j = 0; j < 3; j++) {
 			cmd += " ";
@@ -208,13 +218,7 @@ void VfxCmd::loadWeights(int numWeights) {
 			cmd += invTransform.at(i).at(j * 3 + 2);
 			cmd += " 0";
 		}
-		// Translation
-		for (unsigned int j = 9; j < 12; j++) {
-			cmd += " ";
-			cmd += invTransform.at(i).at(j);
-		}
-		// Homogeneus scale value in the matrix
-		cmd += " 1";
+		cmd += " 0 0 0 1";
 		dgMod.commandToExecute(cmd);
 
 		for (unsigned int j = 0; j < weights.at(i).size(); j++) {
@@ -251,22 +255,14 @@ void VfxCmd::loadWeights(int numWeights) {
 		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_r";
 		dgMod.commandToExecute(cmd);
 
-		cmd = "setAttr leftEyeInner.rx ";
+		cmd = "setAttr con_lookAt_c.t ";
 		cmd += leftEyeRotation[i].x;
-		dgMod.commandToExecute(cmd);
-		cmd = "setAttr leftEyeInner.ry ";
+		cmd += " ";
 		cmd += leftEyeRotation[i].y;
-		dgMod.commandToExecute(cmd);
-		cmd = "setKeyframe leftEyeInner";
+		cmd += " 0";
 		dgMod.commandToExecute(cmd);
 
-		cmd = "setAttr rightEyeInner.rx ";
-		cmd += rightEyeRotation[i].x;
-		dgMod.commandToExecute(cmd);
-		cmd = "setAttr rightEyeInner.ry ";
-		cmd += rightEyeRotation[i].y;
-		dgMod.commandToExecute(cmd);
-		cmd = "setKeyframe rightEyeInner";
+		cmd = "setKeyframe con_lookAt_c";
 		dgMod.commandToExecute(cmd);
 
 		// Set keyframe for head movement
@@ -427,9 +423,6 @@ void VfxCmd::readEyeRotationFile(unsigned int numFrames) {
 				std::getline(rightEyeFile, line);
 				rightOrigin[j] = std::stof(line);
 			}
-			// Normalize to get vectors instead of positions
-			leftOrigin.normalize();
-			rightOrigin.normalize();
 
 			// Read the rest
 			for (unsigned int i = 1; i < numFrames; i++) {
@@ -440,22 +433,14 @@ void VfxCmd::readEyeRotationFile(unsigned int numFrames) {
 					std::getline(rightEyeFile, line);
 					rightCurrentPos[j] = std::stof(line);
 				}
-				leftCurrentPos.normalize();
-				rightCurrentPos.normalize();
 
 				// Sin of the angle is current - origin
 				leftCurrentPos = leftCurrentPos - leftOrigin;
 				rightCurrentPos = rightCurrentPos - rightOrigin;
 
-				leftEyeRotation[i].x = -std::asin(leftCurrentPos.y) * TO_DEG
-						* eyeRotScale;
-				leftEyeRotation[i].y = std::asin(leftCurrentPos.x) * TO_DEG
-						* eyeRotScale;
+				leftEyeRotation[i] = leftCurrentPos * eyeRotScale;
 
-				leftEyeRotation[i].x = -std::asin(rightCurrentPos.y) * TO_DEG
-						* eyeRotScale;
-				rightEyeRotation[i].y = std::asin(rightCurrentPos.x) * TO_DEG
-						* eyeRotScale;
+				leftEyeRotation[i] = rightCurrentPos * eyeRotScale;
 
 				// It looks weird to have both eyes moving differently, do the
 				// mean and make them move together
