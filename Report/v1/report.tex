@@ -511,10 +511,9 @@ PCA has been used in facial animation as an automatic way of constructing a set 
 
 To compare the results with a different number of blend shapes, we calculate the average reconstruction error for a $500$ frame sequence. When the first $3$ shapes are used, the error is approximately $0.16$ centimetres and $0.25$ centimetres for the two optimisation methods respectively. Introduction of five additional shapes reduces the error by approximately $0.02$ centimetres. Thus PCA does not outperform the model with manually designed set of key shapes. An additional drawback of the PCA basis is that it is not intuitive, i.e. the key shapes do not correspond to recognisable facial expressions. As a consequence, manual editing of the resulting animation is very complicated. Throughout the rest of the project we use the standard set of $68$ blend shapes from the Digital Emily project~\cite{Alexander:2009}.
 
-\textbf{3D model.} Next, we shall consider the three dimensional motion sequence introduced in Sec.~\ref{}. This sequence is obtained using a linear elasticity method, as previously described. We analyse the results from a talking sequence that contains $371$ frames. As in the two-dimensional case, at each frame of the sequence, the chosen optimisation method calculates the best possible combination of blend shape weights given the Emily motion sequence. 
+\textbf{3D model.} Next, we shall consider the animation of a three dimensional motion sequence introduced in Sec.~\ref{}. This sequence is obtained using a linear elasticity method, as previously described. We analyse the results from a talking sequence that contains $371$ frames. As in the two-dimensional case, at each frame of the sequence, the chosen optimisation method calculates the best possible combination of blend shape weights given the Emily motion sequence. In particular, the input sequence is a sparse sequence of the motion that was transformed from the capture space to the digital model space. 
 
-We start by manually marking the three-dimensional face of Emily; the try to replicate the pattern we used when capturing the actor's face, see Fig.~\ref{fig:facemarkers}. The markers are placed at the vertices of the mesh, and the indices of these vertices are used to find the location of the corresponding markers on the meshes of blend shapes; Fig.~\ref{fig:Emarkers} illustrates the locations of markers on a number of meshes.
-
+We start by manually marking the three-dimensional face of Emily; the try to replicate the pattern we used when capturing the actor's face, see Fig.~\ref{fig:facemarkers}. The markers are placed at the vertices of the mesh, and the indices of these vertices are used to find the location of the corresponding markers on the meshes of blend shapes; Fig.~\ref{fig:Emarked} illustrates the locations of markers on a number of blend shape meshes. Then the optimisation methods are used to extract the best linear combination of shapes together with the corresponding weights. The average reconstruction error for the non-negative least-squares solver is approximately $0.26$ centimetres, compared to $0.23$ for the constrained linear least-squares solver, see Fig.~\ref{fig:errorw2w3}. A number of factors may increase the error. Firstly, the expressions captured in Emily blend shapes are fairly mild, i.e. the shapes do not capture the most extreme motion of the face. Consequently, the estimated facial movements may not be expressed as a linear combination of the blend shapes. Secondly, as the blend shapes are not orthogonal, they may combine in unexpected ways, for example cancel each other. This behaviours may be avoided if a set of PCA-produced shapes is used. Also, note that the mesh used is not symmetrical, i.e. the left side of the face does not match the right side. This may lead to a sideways motion that cannot be captured by the blend shapes.
 \begin{figure}
         \centering
         \begin{subfigure}[b]{0.3\textwidth}
@@ -544,6 +543,83 @@ We start by manually marking the three-dimensional face of Emily; the try to rep
                 \includegraphics[trim = 120mm 20mm 120mm 10mm, clip, width=0.7\textwidth]{img/weights/3D/Emily_marked/neutralE_marked_rot.png}
         \end{subfigure}
         \caption{Examples of marked blend shapes.}\label{fig:Emarked}
+\end{figure}
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/weights/3D/w2/w2_frame200_blends68.png}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/weights/3D/w2/w2_frame400_blends68.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/weights/3D/w2/w2_frame600_blends68.png} 
+        \end{subfigure} \\
+                \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/weights/3D/w3/w3_200.png}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/weights/3D/w3/w3_400.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/weights/3D/w3/w3_600.png} 
+        \end{subfigure}
+        \caption{The red dots mark the position of the markers in the motion sequence while the black cirles correspond to the reconstructed position of the markers. The top results were produced using the non-negative least-squares solver while the bottom results were produced by the linear least-squares solver. }\label{fig:errorw2w3}
+\end{figure}
+
+The use of blend shapes greatly improves the visual quality of the resulting animation. However, the animation still lacks realism and expressiveness, thus we implement a number of changes to the original model. First, a reduced set of key expressions is used in the solver; this leads to a smaller system of equations to be optimised. The reduced set contains $19$ shapes included in the visual set of controls in the original blend shape model. The smaller set of shapes leads to a slight increased (of approximately $0.03$ centimetres) in reconstruction error. There is no noticeable effect on the visual quality of the resulting animation, see Fig.~\ref{fig:19blends}. Thus the only notable advantage of using fewer blend shapes is the acceleration of the  optimisation step. However, if the performance of the algorithm is the main objective, then a PCA basis is a better choice than a reduced non-orthogonal set of shapes.
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/19blends/w2_frame200_blends19.png}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/19blends/w2_frame400_blends19.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/19blends/w2_frame600_blends19.png} 
+        \end{subfigure} \\
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/19blends/w3_frame200_blends19.png}
+        \end{subfigure}%
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/19blends/w3_frame400_blends19.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/19blends/w3_frame600_blends19.png} 
+        \end{subfigure}
+        \caption{The reconstruction error for a model with $19$ blend shapes. The top results were produced using the non-negative least-squares solver while the bottom results were produced by the linear least-squares solver. Colours as in Fig.~\ref{fig:errorw2w3}.}\label{fig:19blends}
+\end{figure}
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.47\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/w2_72_usage.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.47\textwidth}
+                \includegraphics[trim = 10mm 0mm 10mm 0mm,clip,width=\textwidth]{img/weights/3D/Extrafaces/w3_72_usage.png}
+        \end{subfigure}
+        \caption{. }\label{fig:usage}
 \end{figure}
 
 The constrained non-negative least-squares solver 
