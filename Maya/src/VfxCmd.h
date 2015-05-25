@@ -11,6 +11,7 @@
 #include <maya/MTime.h>
 #include <maya/MArgList.h>
 #include <maya/MFloatVectorArray.h>
+#include <maya/MFloatMatrix.h>
 
 class VfxCmd: public MPxCommand {
 
@@ -38,8 +39,8 @@ private:
 	Actions action;
 	int numWeights;
 	std::vector<unsigned int> attrIndices;
-	std::vector<std::vector<double>> invTransform;
-	double translationScale;
+	std::vector<MFloatMatrix> invTransform;
+	float translationScale;
 	float eyeOrientationScale;
 	MFloatVectorArray eyeOrientation;
 	static std::vector<unsigned int> blinkFrames;

@@ -199,9 +199,9 @@ void VfxCmd::loadWeights(int numWeights) {
 		// Set head movement
 		cmd = "xform -m 1 0 0 0 0 1 0 0 0 0 1 0";
 		// Translation
-		for (unsigned int j = 9; j < 12; j++) {
+		for (unsigned int j = 0; j < 3; j++) {
 			cmd += " ";
-			cmd += invTransform.at(i).at(j);
+			cmd += invTransform.at(i)(3, j);
 		}
 		// Homogeneus scale value in the matrix
 		cmd += " 1";
@@ -209,13 +209,13 @@ void VfxCmd::loadWeights(int numWeights) {
 
 		cmd = "xform -r -m ";
 		// Rotation part
-		for (unsigned int j = 0; j < 3; j++) {
+		for (unsigned int row = 0; row < 3; row++) {
 			cmd += " ";
-			cmd += invTransform.at(i).at(j * 3);
+			cmd += invTransform.at(i)(row, 0);
 			cmd += " ";
-			cmd += invTransform.at(i).at(j * 3 + 1);
+			cmd += invTransform.at(i)(row, 1);
 			cmd += " ";
-			cmd += invTransform.at(i).at(j * 3 + 2);
+			cmd += invTransform.at(i)(row, 2);
 			cmd += " 0";
 		}
 		cmd += " 0 0 0 1";
@@ -372,26 +372,28 @@ unsigned int VfxCmd::readWeights(int numWeights,
 
 void VfxCmd::readTransMatrixFile(unsigned int numFrames) {
 	std::string line;
-	std::vector<double> emptymatrix(12, 0);
-	emptymatrix.at(0) = 1;
-	emptymatrix.at(4) = 1;
-	emptymatrix.at(8) = 1;
 
-	invTransform.resize(numFrames, emptymatrix);
+	invTransform.resize(numFrames);
 	std::fstream rotationFile( ROTATION_PATH, std::ios_base::in);
 	std::fstream translationFile( TRANSLATION_PATH, std::ios_base::in);
 	if (rotationFile.is_open()) {
 		if (translationFile.is_open()) {
 			for (unsigned int i = 0; i < numFrames; i++) {
-				for (unsigned int j = 0; j < 9; j++) {
-					std::getline(rotationFile, line);
-					invTransform.at(i).at(j) = std::stod(line);
+
+				// Read them transpose, because Maya is vector row and Matlab
+				// is vector column
+				for (unsigned int row = 0; row < 3; row++) {
+					for (unsigned int col = 0; col < 3; col++) {
+						std::getline(rotationFile, line);
+						invTransform.at(i)(row, col) = std::stof(line);
+					}
 				}
-				for (unsigned int j = 9; j < 12; j++) {
+
+				for (unsigned int j = 0; j < 3; j++) {
 					std::getline(translationFile, line);
 					// Negative of the translation since we are replicating the movement
 					// not correcting it
-					invTransform.at(i).at(j) = -std::stod(line)
+					invTransform.at(i)(3, j) = -std::stof(line)
 							* translationScale;
 				}
 			}
