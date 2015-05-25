@@ -136,8 +136,10 @@ This technique is used to add geometric detail to an object at rendering time wi
 Normal maps for skin rendering are usually captured using expensive light domes with a number of synchronized cameras ~\cite{Graham2013, Weyrich2006}. 
 
 Another technique to increase the quality of a face render is to scale the resolution of the textures being used.
+Wie et al.~\cite{Wei:2000} proposed a technique to synthesized new textures based on a sample image and a random noise.
+The main idea of the authors work was to maximize the local similarity when choosing a new pixel in the synthesized texture image, based on the already built neighbourhood in the new image.
 Ashikhmin et al~\cite{Ashikhmin2001} presented a method to generate new textures using a goal image by greedily extending existing patches whenever possible.
-Hertzmann et al~\cite{Hertzmann2001} extended Ashikhmin et al~\cite{Ashikhmin2001} method by adding a second example image and using more complex distance metric to choose the next synthesized pixel.
+Hertzmann et al~\cite{Hertzmann2001} combined and extended Ashikhmin et al~\cite{Ashikhmin2001} and Wie et al.~\cite{Wei:2000} methods by adding a second example image and using more complex distance metric to choose the next synthesized pixel.
 Graham et al~\cite{Graham2013} applied Hertzmann et al~\cite{Hertzmann2001} example-based filter to generate bump maps with increased quality for skin rendering.
 An alternative approach using a dictionary of samples was presented by Jianchao et al~\cite{Jianchao2010}.
 This method is restricted to generating super-resolution images, however, the previous methods support a wide variety of filter effects.
