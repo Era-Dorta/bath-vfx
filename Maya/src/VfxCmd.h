@@ -37,6 +37,7 @@ private:
 	int numWeights;
 	std::vector<unsigned int> attrIndices;
 	std::vector<std::vector<double>> invTransform;
+	double translationScale;
 	static std::vector<unsigned int> blinkFrames;
 	static std::vector<unsigned int> blinkTime;
 	static std::vector<float> blinkWeight;

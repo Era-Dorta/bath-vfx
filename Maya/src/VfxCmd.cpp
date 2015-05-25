@@ -70,6 +70,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 
 	action = SAVE;
 	file_ind = 0;
+	translationScale = 0.1;
 
 	// Get state parameter
 	MString paramVal;
@@ -364,7 +365,8 @@ void VfxCmd::readTransMatrixFile(unsigned int numFrames) {
 					std::getline(translationFile, line);
 					// Negative of the translation since we are replicating the movement
 					// not correcting it
-					invTransform.at(i).at(j) = -std::stod(line);
+					invTransform.at(i).at(j) = -std::stod(line)
+							* translationScale;
 				}
 			}
 			translationFile.close();
