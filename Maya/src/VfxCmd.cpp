@@ -78,7 +78,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	action = SAVE;
 	file_ind = 0;
 	translationScale = 0.1;
-	eyeRotScale = 2;
+	eyeOrientationScale = 2;
 
 	// Get state parameter
 	MString paramVal;
@@ -154,7 +154,7 @@ void VfxCmd::loadWeights(int numWeights) {
 	// Read the rotation matrix from the rotation file
 	readTransMatrixFile(numFrames);
 
-	readEyeRotationFile(numFrames);
+	readOrientationFile(numFrames);
 
 	// Ignore the last weight
 	numWeights--;
@@ -256,9 +256,9 @@ void VfxCmd::loadWeights(int numWeights) {
 		dgMod.commandToExecute(cmd);
 
 		cmd = "setAttr con_lookAt_c.t ";
-		cmd += leftEyeRotation[i].x;
+		cmd += eyeOrientation[i].x;
 		cmd += " ";
-		cmd += leftEyeRotation[i].y;
+		cmd += eyeOrientation[i].y;
 		cmd += " 0";
 		dgMod.commandToExecute(cmd);
 
@@ -406,11 +406,10 @@ void VfxCmd::readTransMatrixFile(unsigned int numFrames) {
 	}
 }
 
-void VfxCmd::readEyeRotationFile(unsigned int numFrames) {
+void VfxCmd::readOrientationFile(unsigned int numFrames) {
 	std::string line;
 
-	leftEyeRotation = MFloatVectorArray(numFrames);
-	rightEyeRotation = MFloatVectorArray(numFrames);
+	eyeOrientation = MFloatVectorArray(numFrames);
 	std::fstream leftEyeFile( LEFT_EYE_PATH, std::ios_base::in);
 	std::fstream rightEyeFile( RIGHT_EYE_PATH, std::ios_base::in);
 	MFloatVector leftOrigin, rightOrigin, leftCurrentPos, rightCurrentPos;
@@ -438,15 +437,10 @@ void VfxCmd::readEyeRotationFile(unsigned int numFrames) {
 				leftCurrentPos = leftCurrentPos - leftOrigin;
 				rightCurrentPos = rightCurrentPos - rightOrigin;
 
-				leftEyeRotation[i] = leftCurrentPos * eyeRotScale;
-
-				leftEyeRotation[i] = rightCurrentPos * eyeRotScale;
-
 				// It looks weird to have both eyes moving differently, do the
 				// mean and make them move together
-				leftEyeRotation[i] = (leftEyeRotation[i] + rightEyeRotation[i])
-						* 0.5;
-				rightEyeRotation[i] = leftEyeRotation[i];
+				eyeOrientation[i] = (leftCurrentPos + rightCurrentPos) * 0.5
+						* eyeOrientationScale;
 			}
 			rightEyeFile.close();
 			leftEyeFile.close();

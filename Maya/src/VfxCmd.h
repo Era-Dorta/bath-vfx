@@ -32,7 +32,7 @@ private:
 	unsigned int readWeights(int numWeights,
 			std::vector<std::vector<float> >& weights);
 	void readTransMatrixFile(unsigned int numFrames);
-	void readEyeRotationFile(unsigned int numFrames);
+	void readOrientationFile(unsigned int numFrames);
 
 private:
 	Actions action;
@@ -40,9 +40,8 @@ private:
 	std::vector<unsigned int> attrIndices;
 	std::vector<std::vector<double>> invTransform;
 	double translationScale;
-	float eyeRotScale;
-	MFloatVectorArray leftEyeRotation;
-	MFloatVectorArray rightEyeRotation;
+	float eyeOrientationScale;
+	MFloatVectorArray eyeOrientation;
 	static std::vector<unsigned int> blinkFrames;
 	static std::vector<unsigned int> blinkTime;
 	static std::vector<float> blinkWeight;
