@@ -136,7 +136,12 @@ This technique is used to add geometric detail to an object at rendering time wi
 Normal maps for skin rendering are usually captured using expensive light domes with a number of synchronized cameras ~\cite{Graham2013, Weyrich2006}. 
 
 Another technique to increase the quality of a face render is to scale the resolution of the textures being used.
-Wie et al.~\cite{Wei:2000} proposed a technique to synthesized new textures based on a sample image and a random noise.
+According to cite{Tian2011} super-resolution techniques can be classified into four classes: \textit{frequency-domain}-based,	\textit{interpolation}-based, \textit{regularization}-based and \textit{learning }-based.
+
+\textit{Frequency-domain}-based super-resolution methods started with the seminal work of ~\cite{Tsai:1984}, the authors transformed the image using the discrete Fourier transform, where it is possible to formulate a system of equations relating the discrete and the continuous Fourier transform coefficients.
+The system is solved, the new coefficients are apply in the Fourier domain and a new image of higher resolution is retrieved by performing the inverse transformation.
+
+In the \textit{learning}-based area, Wie et al.~\cite{Wei:2000} proposed a technique to synthesized new textures based on a sample image and a random noise.
 The main idea of the authors work was to maximize the local similarity when choosing a new pixel in the synthesized texture image, based on the already built neighbourhood in the new image.
 Ashikhmin et al~\cite{Ashikhmin2001} presented a method to generate new textures using a goal image by greedily extending existing patches whenever possible.
 Hertzmann et al~\cite{Hertzmann2001} combined and extended Ashikhmin et al~\cite{Ashikhmin2001} and Wie et al.~\cite{Wei:2000} methods by adding a second example image and using more complex distance metric to choose the next synthesized pixel.
