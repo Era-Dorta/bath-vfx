@@ -18,6 +18,9 @@
 #include "ErrorCheck.h"
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>
+#include <cmath>
+
+#define TO_DEG 180.0 / M_PI
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -57,11 +60,15 @@ std::vector<float> VfxCmd::blinkWeight = { 0.9, 1, 0.5, 0.4, 0.5 };
 #define SAVE_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_out"
 #define ROTATION_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\invRotation.txt"
 #define TRANSLATION_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\translation.txt"
+#define LEFT_EYE_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\left_eye.txt"
+#define RIGHT_EYE_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\right_eye.txt"
 #else
 #define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights2.txt"
 #define SAVE_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_out"
 #define ROTATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/invRotation.txt"
 #define TRANSLATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/translation.txt"
+#define LEFT_EYE_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/left_eye.txt"
+#define RIGHT_EYE_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/right_eye.txt"
 #endif
 
 MStatus VfxCmd::doIt(const MArgList &args) {
@@ -71,6 +78,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	action = SAVE;
 	file_ind = 0;
 	translationScale = 0.1;
+	eyeRotScale = 10;
 
 	// Get state parameter
 	MString paramVal;
@@ -145,6 +153,8 @@ void VfxCmd::loadWeights(int numWeights) {
 
 	// Read the rotation matrix from the rotation file
 	readTransMatrixFile(numFrames);
+
+	readEyeRotationFile(numFrames);
 
 	// Ignore the last weight
 	numWeights--;
@@ -239,6 +249,24 @@ void VfxCmd::loadWeights(int numWeights) {
 		cmd = "setAttr shapesBS.mouth_lipCornerPull_r 0.35";
 		dgMod.commandToExecute(cmd);
 		cmd = "setKeyframe shapesBS.mouth_lipCornerPull_r";
+		dgMod.commandToExecute(cmd);
+
+		cmd = "setAttr leftEyeInner.rx ";
+		cmd += leftEyeRotation[i].x;
+		dgMod.commandToExecute(cmd);
+		cmd = "setAttr leftEyeInner.ry ";
+		cmd += leftEyeRotation[i].y;
+		dgMod.commandToExecute(cmd);
+		cmd = "setKeyframe leftEyeInner";
+		dgMod.commandToExecute(cmd);
+
+		cmd = "setAttr rightEyeInner.rx ";
+		cmd += rightEyeRotation[i].x;
+		dgMod.commandToExecute(cmd);
+		cmd = "setAttr rightEyeInner.ry ";
+		cmd += rightEyeRotation[i].y;
+		dgMod.commandToExecute(cmd);
+		cmd = "setKeyframe rightEyeInner";
 		dgMod.commandToExecute(cmd);
 
 		// Set keyframe for head movement
@@ -373,6 +401,70 @@ void VfxCmd::readTransMatrixFile(unsigned int numFrames) {
 			}
 			translationFile.close();
 			rotationFile.close();
+		} else {
+			MGlobal::displayWarning(
+					"VfxCMD: could not read file " TRANSLATION_PATH);
+		}
+	} else {
+		MGlobal::displayWarning("VfxCMD: could not read file " ROTATION_PATH);
+	}
+}
+
+void VfxCmd::readEyeRotationFile(unsigned int numFrames) {
+	std::string line;
+
+	leftEyeRotation = MFloatVectorArray(numFrames);
+	rightEyeRotation = MFloatVectorArray(numFrames);
+	std::fstream leftEyeFile( LEFT_EYE_PATH, std::ios_base::in);
+	std::fstream rightEyeFile( RIGHT_EYE_PATH, std::ios_base::in);
+	MFloatVector leftOrigin, rightOrigin, leftCurrentPos, rightCurrentPos;
+	if (leftEyeFile.is_open()) {
+		if (rightEyeFile.is_open()) {
+			// Read first frame position
+			for (unsigned int j = 0; j < 3; j++) {
+				std::getline(leftEyeFile, line);
+				leftOrigin[j] = std::stof(line);
+				std::getline(rightEyeFile, line);
+				rightOrigin[j] = std::stof(line);
+			}
+			// Normalize to get vectors instead of positions
+			leftOrigin.normalize();
+			rightOrigin.normalize();
+
+			// Read the rest
+			for (unsigned int i = 1; i < numFrames; i++) {
+				// Read eye position
+				for (unsigned int j = 0; j < 3; j++) {
+					std::getline(leftEyeFile, line);
+					leftCurrentPos[j] = std::stof(line);
+					std::getline(rightEyeFile, line);
+					rightCurrentPos[j] = std::stof(line);
+				}
+				leftCurrentPos.normalize();
+				rightCurrentPos.normalize();
+
+				// Sin of the angle is current - origin
+				leftCurrentPos = leftCurrentPos - leftOrigin;
+				rightCurrentPos = rightCurrentPos - rightOrigin;
+
+				leftEyeRotation[i].x = -std::asin(leftCurrentPos.y) * TO_DEG
+						* eyeRotScale;
+				leftEyeRotation[i].y = std::asin(leftCurrentPos.x) * TO_DEG
+						* eyeRotScale;
+
+				leftEyeRotation[i].x = -std::asin(rightCurrentPos.y) * TO_DEG
+						* eyeRotScale;
+				rightEyeRotation[i].y = std::asin(rightCurrentPos.x) * TO_DEG
+						* eyeRotScale;
+
+				// It looks weird to have both eyes moving differently, do the
+				// mean and make them move together
+				leftEyeRotation[i] = (leftEyeRotation[i] + rightEyeRotation[i])
+						* 0.5;
+				rightEyeRotation[i] = leftEyeRotation[i];
+			}
+			rightEyeFile.close();
+			leftEyeFile.close();
 		} else {
 			MGlobal::displayWarning(
 					"VfxCMD: could not read file " TRANSLATION_PATH);
