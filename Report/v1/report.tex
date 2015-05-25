@@ -252,7 +252,48 @@ Let us define a set of blend shapes $\mathbf{B} = [\bb_0, \ldots, \bb_n]$ where 
 A number of different numerical optimisation methods where tested when solving for the blend shape weights. An unconstrained solution may be calculated by inverting matrix $\hat{\mathbf{B}}$, and multiplying it from the left with the left hand side of Eq.~\ref{eq:linsyst}. Instead we use Matlab's constrained non-negative least-squares solver (\texttt{lsqnonneg}) and constrained linear least-squares solver (\texttt{lsqlin})~\cite{Matlab}. For the non-negative least-squares solver we formulate our problem as follows:
 \begin{equation}
 	\min_\w \| \hat{\mathbf{B}} \w - (\F(\w) - \bb_0) \|_2^2, \: \w_i \geq 0, \: i = 1, \ldots, n. \label{eq:lsqnonneg}
-\end{equation} The solver uses an active set method, and iterative improves the active set of basis vectors; it converges in finite time. The same formulation is used for the linear least squares solver though it includes an additional upper limit on the argument. This solver uses a reflexive Newton method which is able to accurately locate the local minimisers of large systems, and exhibits global convergence. It is also able to maintain sparsity of matrices but is generally slower.
+\end{equation} The solver uses an active set method, and iteratively improves the active set of basis vectors; it converges in finite time. The same formulation is used for the linear least squares solver though it includes an additional upper limit on the argument. This solver uses a reflexive Newton method which is able to accurately locate the local minimisers of large systems, and exhibits global convergence. It is also able to maintain sparsity of matrices but is generally slower.
+
+Our initial tests of the optimisation algorithms were carried out on a two-dimensional sequence of facial motion. Approximately $90$ points on a sequence were marked and tracked to produce a sparse motion sequence. Then a set of key frames were hand-picked to represent the extreme cases of the facial motion, see Fig.~\ref{fig:2Dblends}. The sparse points from these frames are then used as blend shapes. The two solvers were tested on the entire motion sequence. We shall compare the results by estimating the average error between the pixels in the original sequence and the weighted sequence.
+
+Fig.~\ref{fig:frame10} and Fig.~\ref{fig:frame400} illustrate the concept of blend shapes. Frame $10$ is very close to one of the blend shapes, and both optimisation methods are able to represent this expression well; the average error associated with the constrained non-negative least-squares solver is less than $0.29$, which corresponds to approximately $0.01$ millimetres, while the average error for the second solver is less than $0.21$ (approximately 0.09 millimetres). Note that as expected both methods use frame $9$ with a large weight. However, the other blend shapes are different for the two methods. This suggests that none of the blend shapes is able to capture the subtle change between frames $9$ and $10$. In comparison, frame $400$ is twelve frames away from a frame that was chosen as a blend shape, resulting in an increase in average error for he two methods (approximately 0.49 in both cases). As expected, both methods use the two blend shapes that are the nearest to frame $400$ in terms of timing. The weights used for these two shapes are the same to three significant digits, and the extra shape used by the first method is has a low weight assigned to it. Note that the first method does not obey the restriction of $\sum_{i=1}^N w_i = 1$. Though the second method is able to produce slightly more accurate results, the difference does not seem to be significant. 
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/weights/2D/basis/all.png}
+	\caption{Set of facial expressions used as blend shapes. The first frame is used as a neutral expression.}
+	\label{fig:2Dblends}
+\end{figure}
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/weights/2D/frame_10/all.png}
+	\caption{Frame $9$ on the left represented as a linear combination of the key frames. The top solution was obtained using the \texttt{lsqnonneg} solver while the bottom one was obtained using \texttt{lsqlin}.}
+	\label{fig:frame10}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/weights/2D/frame_400/all.png}
+	\caption{Frame $400$ on the left represented as a linear combination of the key frames. The top solution was obtained using the \texttt{lsqnonneg} solver while the bottom one was obtained using \texttt{lsqlin}.}
+	\label{fig:frame400}
+\end{figure}
+
+talking sequence that contains $371$ frames. We used the $68$ blend shapes provided with the digital Emily model.  At each frame of the sequence, the chosen optimisation method calculates the best possible combination of blend shapes weights given the Emily motion sequence. This sequence is obtained using a linear elasticity method as previously described. 
+
+The constrained non-negative least-squares solver 
+
+% TEST TALKING SEQUENCE
+% For w2, 5 out of 371 frames use the new blends with weights of less than 3*10^-3. The one that stands out is frame 284, the weight there is 0.03. 
+% For w2, the error decreases from 0.2622 to 0.2575. 
+% For w3, the error decreases from 0.2333 to 0.2307. the first exta face is used 
+
+% w3: with 68 shapes. Increase upper limit in solver to 1.2. NOthing changes.
+
+% w2: 19 blends. Error is 0.3048.
+% w3: 19 blends. Error is 0.2610.
+
+% w2: dense E with not mouth. 68 blends. Error 0.3006. 
+% w3: dense E with not mouth. 68 blends. Error 0.2801.
 
 
 % Constructing Rich blendshapes. Cf. ~\cite{Choe:2005}. Say tht we do not use actuation of muscles because the basis is really hard to construct.
