@@ -56,10 +56,12 @@ std::vector<float> VfxCmd::blinkWeight = { 0.9, 1, 0.5, 0.4, 0.5 };
 #define LOAD_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
 #define SAVE_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_out"
 #define ROTATION_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\invRotation.txt"
+#define TRANSLATION_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\translation.txt"
 #else
 #define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights2.txt"
 #define SAVE_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_out"
 #define ROTATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/invRotation.txt"
+#define TRANSLATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/translation.txt"
 #endif
 
 MStatus VfxCmd::doIt(const MArgList &args) {
@@ -138,10 +140,10 @@ void VfxCmd::loadWeights(int numWeights) {
 
 	std::vector<std::vector<float> > weights;
 	// Read all the weights from the weights file
-	unsigned int numFrames = readWeigths(numWeights, weights);
+	unsigned int numFrames = readWeights(numWeights, weights);
 
 	// Read the rotation matrix from the rotation file
-	readRot(numFrames);
+	readTransMatrixFile(numFrames);
 
 	// Ignore the last weight
 	numWeights--;
@@ -185,16 +187,23 @@ void VfxCmd::loadWeights(int numWeights) {
 
 		// Set head movement
 		cmd = "xform -m ";
+		// Rotation part
 		for (unsigned int j = 0; j < 3; j++) {
 			cmd += " ";
-			cmd += invRot.at(i).at(j * 3);
+			cmd += invTransform.at(i).at(j * 3);
 			cmd += " ";
-			cmd += invRot.at(i).at(j * 3 + 1);
+			cmd += invTransform.at(i).at(j * 3 + 1);
 			cmd += " ";
-			cmd += invRot.at(i).at(j * 3 + 2);
+			cmd += invTransform.at(i).at(j * 3 + 2);
 			cmd += " 0";
 		}
-		cmd += " 0 0 0 1";
+		// Translation
+		for (unsigned int j = 9; j < 12; j++) {
+			cmd += " ";
+			cmd += invTransform.at(i).at(j);
+		}
+		// Homogeneus scale value in the matrix
+		cmd += " 1";
 		dgMod.commandToExecute(cmd);
 
 		for (unsigned int j = 0; j < weights.at(i).size(); j++) {
@@ -306,43 +315,65 @@ void VfxCmd::setBlinkAt(int frameNum, float blinkVal) {
 	dgMod.commandToExecute(cmd);
 }
 
-unsigned int VfxCmd::readWeigths(int numWeights,
+unsigned int VfxCmd::readWeights(int numWeights,
 		std::vector<std::vector<float> >& weights) {
 	unsigned int numFrames = 0;
 	std::string line;
 	unsigned int weightNum = 0;
 	std::vector<float> currentWeights(numWeights, 0.0);
-	std::fstream myfile( LOAD_WEIGHTS_PATH, std::ios_base::in);
-	while (std::getline(myfile, line)) {
-		// Save current weight
-		currentWeights.at(weightNum) = std::stof(line);
-		weightNum++;
-		if (weightNum == (unsigned int) (((numWeights)))) {
-			// Save weights for current frame in weights vector
-			weights.push_back(currentWeights);
-			std::fill(currentWeights.begin(), currentWeights.end(), 0);
-			weightNum = 0;
-			numFrames++;
+	std::fstream weightsFile( LOAD_WEIGHTS_PATH, std::ios_base::in);
+	if (weightsFile.is_open()) {
+		while (std::getline(weightsFile, line)) {
+			// Save current weight
+			currentWeights.at(weightNum) = std::stof(line);
+			weightNum++;
+			if (weightNum == (unsigned int) (((numWeights)))) {
+				// Save weights for current frame in weights vector
+				weights.push_back(currentWeights);
+				std::fill(currentWeights.begin(), currentWeights.end(), 0);
+				weightNum = 0;
+				numFrames++;
+			}
 		}
+		weightsFile.close();
+	} else {
+		MGlobal::displayWarning(
+				"VfxCMD: could not read file " LOAD_WEIGHTS_PATH);
 	}
-	myfile.close();
 	return numFrames;
 }
 
-void VfxCmd::readRot(unsigned int numFrames) {
+void VfxCmd::readTransMatrixFile(unsigned int numFrames) {
 	std::string line;
-	std::vector<double> emptymatrix(9, 0);
+	std::vector<double> emptymatrix(12, 0);
 	emptymatrix.at(0) = 1;
 	emptymatrix.at(4) = 1;
 	emptymatrix.at(8) = 1;
 
-	invRot.resize(numFrames, emptymatrix);
-	std::fstream myfile( ROTATION_PATH, std::ios_base::in);
-	for (unsigned int i = 0; i < numFrames; i++) {
-		for (unsigned int j = 0; j < 9; j++) {
-			std::getline(myfile, line);
-			invRot.at(i).at(j) = std::stod(line);
+	invTransform.resize(numFrames, emptymatrix);
+	std::fstream rotationFile( ROTATION_PATH, std::ios_base::in);
+	std::fstream translationFile( TRANSLATION_PATH, std::ios_base::in);
+	if (rotationFile.is_open()) {
+		if (translationFile.is_open()) {
+			for (unsigned int i = 0; i < numFrames; i++) {
+				for (unsigned int j = 0; j < 9; j++) {
+					std::getline(rotationFile, line);
+					invTransform.at(i).at(j) = std::stod(line);
+				}
+				for (unsigned int j = 9; j < 12; j++) {
+					std::getline(translationFile, line);
+					// Negative of the translation since we are replicating the movement
+					// not correcting it
+					invTransform.at(i).at(j) = -std::stod(line);
+				}
+			}
+			translationFile.close();
+			rotationFile.close();
+		} else {
+			MGlobal::displayWarning(
+					"VfxCMD: could not read file " TRANSLATION_PATH);
 		}
+	} else {
+		MGlobal::displayWarning("VfxCMD: could not read file " ROTATION_PATH);
 	}
-	myfile.close();
 }
