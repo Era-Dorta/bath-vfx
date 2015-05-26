@@ -6,17 +6,19 @@ clearvars -except Richard2_left_vx500 Richard2_left_vy500 ...
 addpath(genpath('vlfeat-0.9.20'));
 
 %% Read a pair of rectified stereo images
-folder_left = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Left\images_rect\';
-folder_right = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Right\images_rect\';
-im_left = imread([folder_left, 'Richard2_left_rect_0001.jpg']);
-im_right = imread([folder_right, 'Richard2_right_rect_0001.jpg']);
+folder_left = 'C:\Users\Richard\Desktop\CDE\Semester2\Visual_Effects\Data\Richard2\Left\images_rect\';
+folder_right = 'C:\Users\Richard\Desktop\CDE\Semester2\Visual_Effects\Data\Richard2\Right\images_rect\';
+im_left = imread([folder_left, 'Richard2_left_rect_1000.jpg']);
+im_right = imread([folder_right, 'Richard2_right_rect_1000.jpg']);
 
 figure(1);
-subplot(1,2,1); imshow(im_left);
-subplot(1,2,2); imshow(im_right);
+% subplot(1,2,1); 
+imshow(im_left);
+% subplot(1,2,2); 
+% imshow(im_right);
 
 %% Load calibration data
-load('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Calib_Results_stereo_rectified');
+load('C:\Users\Richard\Desktop\CDE\Semester2\Visual_Effects\Data\Richard2\Calib_Results_stereo_rectified');
 
 % Intrinsic camera matrices
 K_left = KK_left_new;
@@ -44,19 +46,21 @@ im_left_sift = single(im_left);
 
 % Select region of interest
 disp('Select region of interest');
-figure(1); subplot(1,2,1); hold on; 
+figure(1); % subplot(1,2,1); 
+hold on; 
 M = single(roipoly(im_left));
 im_left_sift = im_left_sift.*M;
 
 % Detect features
 [f,d] = vl_sift(im_left_sift, 'Octaves', 2, 'Levels', 5, 'FirstOctave', -1,...
-    'PeakThresh', 3, 'EdgeThresh', 5, 'NormThresh', 1, ...
+    'PeakThresh', 2, 'EdgeThresh', 10, 'NormThresh', 1, ...
     'Magnif', 1, 'WindowSize', 10);
 
 % Plot features
-figure(1); subplot(1,2,1); hold on;
+figure(1); % subplot(1,2,1); 
+hold on;
 vl_plotframe(f(:,:));
-plot(f(1,:),f(2,:),'r*');
+% plot(f(1,:),f(2,:),'r*');
 
 % Store features
 clear points_left;
@@ -72,7 +76,8 @@ numFeatures = size(points_left,2);
 %% Add points manually
 disp('Adding points, right click to exit');
 addPoint = true;
-figure(1); subplot(1,2,1); hold on;
+figure(1); % subplot(1,2,1); 
+hold on;
 i = numFeatures + 1;
 while(true)
     [points_left(1,i,1), points_left(2,i,1), button] = ginput(1);
@@ -137,13 +142,13 @@ load('points_left');
 numFeatures = size(points_left,2);
 
 % Plot left features
-figure(1);
+figure(2);
 subplot(1,2,1); hold on; 
-plot(points_left(1,:),points_left(2,:),'yO')
+plot(points_left(1,:),points_left(2,:),'r+')
 
 % Display feature numbers
 for i = 1:numFeatures
-    figure(1); subplot(1,2,1); hold on;
+    figure(2); subplot(1,2,1); hold on;
     text(points_left(1,i),points_left(2,i),num2str(i));
 end
 

@@ -9,7 +9,8 @@ plot(points(1,:),points(2,:),'y+');
 plot(inliers(1,:),inliers(2,:),'gO');
 hold off;
 
-s = 30;
+% s = 30;
+s = 20;
 scale = 5;
 count = 1;
 

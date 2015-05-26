@@ -5,7 +5,7 @@ clearvars -except vx vy; close all;
 if isunix
     folder = '~/workspaces/matlab/vfx/Data/Richard1/images_BW/';
 else
-    folder = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard1\images_BW';
+    folder = 'C:\Users\Richard\Desktop\CDE\Semester2\Visual Effects\Data\Richard1\images_BW';
 end
 imgType = '.png';
 numImgs = 500;
