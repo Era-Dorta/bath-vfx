@@ -51,9 +51,18 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 		"mouth_upperLipRaise_r", "nose_wrinkle_l", "nose_wrinkle_r",
 		"smoothCompensated" };
 
-std::vector<unsigned int> VfxCmd::blinkFrames { 48, 322, 474, 575, 588 };
-std::vector<unsigned int> VfxCmd::blinkTime = { 7, 10, 8, 8, 6 };
-std::vector<float> VfxCmd::blinkWeight = { 0.9, 1, 0.5, 0.4, 0.5 };
+std::vector<unsigned int> VfxCmd::blinkStart = { 680, 756, 792, 883, 1273, 1504,
+		1935, 1991, 2082, 2766, 2904 };
+std::vector<unsigned int> VfxCmd::blinkClose = { 687, 765, 800, 890, 1277, 1509,
+		1939, 2000, 2088, 2770, 2916 };
+std::vector<unsigned int> VfxCmd::blinkOpen = { 743, 783, 818, 931, 1278, 1510,
+		1940, 2001, 2089, 2772, 2942 };
+std::vector<unsigned int> VfxCmd::blinkEnd = { 751, 792, 827, 942, 1282, 1519,
+		1947, 2019, 2096, 2779, 2980 };
+std::vector<float> VfxCmd::blinkWeight = { 0.4, 0.8, 0.8, 0.8, 0.2, 0.8, 0.2,
+		0.4, 0.2, 0.2, 0.4 };
+std::vector<VfxCmd::Eye> VfxCmd::blinkEye = { BOTH, RIGHT, LEFT, BOTH, BOTH,
+		BOTH, BOTH, BOTH, BOTH, BOTH, BOTH };
 
 #ifdef _WIN32
 #define LOAD_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
@@ -63,7 +72,7 @@ std::vector<float> VfxCmd::blinkWeight = { 0.9, 1, 0.5, 0.4, 0.5 };
 #define LEFT_EYE_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\left_eye.txt"
 #define RIGHT_EYE_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\right_eye.txt"
 #else
-#define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights2.txt"
+#define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights5.txt"
 #define SAVE_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_out"
 #define ROTATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/invRotation.txt"
 #define TRANSLATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/translation.txt"
@@ -78,7 +87,11 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	action = SAVE;
 	file_ind = 0;
 	translationScale = 0.1;
-	eyeOrientationScale = 2;
+	eyeOrientationScale = 1;
+
+	customFrameRange = false;
+	startFrame = 650;
+	endFrame = 850;
 
 	// Get state parameter
 	MString paramVal;
@@ -168,6 +181,7 @@ void VfxCmd::loadWeights(int numWeights) {
 	}
 	cmd = "disconnectAttr con_jaw_c_translateY.output con_jaw_c.translateY";
 	dgMod.commandToExecute(cmd);
+
 	// Key everything.
 	for (unsigned int i = 0; i < (unsigned int) (numWeights); i++) {
 		cmd = "setKeyframe { \"shapesBS.w[";
@@ -177,14 +191,22 @@ void VfxCmd::loadWeights(int numWeights) {
 	}
 	cmd = "setKeyframe  \"con_jaw_c.translateY\"";
 	dgMod.commandToExecute(cmd);
+
 	//Save and set max and min time in the playback slider
 	MAnimControl anim;
 	prevMaxTime = anim.maxTime();
 	prevMinTime = anim.minTime();
 	prevStartTime = anim.animationStartTime();
 	prevEndTime = anim.animationEndTime();
-	anim.setMinMaxTime(MTime(1.0), MTime((double) (numFrames)));
-	anim.setAnimationStartEndTime(MTime(1.0), MTime((double) (numFrames)));
+	if (customFrameRange) {
+		anim.setMinMaxTime(MTime((double) startFrame),
+				MTime((double) endFrame));
+		anim.setAnimationStartEndTime(MTime((double) startFrame),
+				MTime((double) endFrame));
+	} else {
+		anim.setMinMaxTime(MTime(1.0), MTime((double) (numFrames)));
+		anim.setAnimationStartEndTime(MTime(1.0), MTime((double) (numFrames)));
+	}
 
 	cmd = "select -r geoGroup";
 	dgMod.commandToExecute(cmd);
@@ -192,6 +214,10 @@ void VfxCmd::loadWeights(int numWeights) {
 	//Set numFrames to start at 0 for c++ indexing
 	numFrames -= 1;
 	for (unsigned int i = 0; i < weights.size(); i++) {
+		if (customFrameRange && i < startFrame) {
+			continue;
+		}
+
 		cmd = "currentTime ";
 		cmd = cmd + (i + 1);
 		dgMod.commandToExecute(cmd);
@@ -271,10 +297,11 @@ void VfxCmd::loadWeights(int numWeights) {
 	}
 
 	// Set keyframes for blinking
-	for (unsigned int i = 0; i < blinkFrames.size(); i++) {
-		setBlinkAt(blinkFrames.at(i) - blinkTime.at(i), 0.0);
-		setBlinkAt(blinkFrames.at(i), blinkWeight.at(i));
-		setBlinkAt(blinkFrames.at(i) + blinkTime.at(i), 0.0);
+	for (unsigned int i = 0; i < blinkStart.size(); i++) {
+		setBlinkAt(i, blinkStart.at(i), 0.0);
+		setBlinkAt(i, blinkClose.at(i), blinkWeight.at(i));
+		setBlinkAt(i, blinkOpen.at(i), blinkWeight.at(i));
+		setBlinkAt(i, blinkEnd.at(i), 0.0);
 	}
 
 	// Reset selection to none
@@ -282,7 +309,12 @@ void VfxCmd::loadWeights(int numWeights) {
 	dgMod.commandToExecute(cmd);
 
 	// Reset current time to 0
-	cmd = "currentTime 0";
+	cmd = "currentTime ";
+	if (customFrameRange) {
+		cmd += startFrame - 1;
+	} else {
+		cmd += "0";
+	}
 	dgMod.commandToExecute(cmd);
 }
 
@@ -319,25 +351,43 @@ void VfxCmd::saveWeights() {
 	myfile.close();
 }
 
-void VfxCmd::setBlinkAt(int frameNum, float blinkVal) {
+void VfxCmd::setBlinkLeft(float blinkVal) {
+	MString cmd = "setAttr \"shapesBS.eye_blink2_l\"";
+	cmd = cmd + blinkVal;
+	dgMod.commandToExecute(cmd);
+	cmd = "setKeyframe \"shapesBS.w[13]\"";
+	dgMod.commandToExecute(cmd);
+}
+
+void VfxCmd::setBlinkRight(float blinkVal) {
+	MString cmd = "setAttr \"shapesBS.eye_blink2_r\"";
+	cmd = cmd + blinkVal;
+	dgMod.commandToExecute(cmd);
+	cmd = "setKeyframe \"shapesBS.w[14]\"";
+	dgMod.commandToExecute(cmd);
+}
+
+void VfxCmd::setBlinkAt(unsigned int blinkInd, int frameNum, float blinkVal) {
 	MString cmd;
 	cmd = "currentTime ";
 	cmd = cmd + frameNum;
 	dgMod.commandToExecute(cmd);
 
-	cmd = "setAttr \"shapesBS.eye_blink2_l\"";
-	cmd = cmd + blinkVal;
-	dgMod.commandToExecute(cmd);
-
-	cmd = "setAttr \"shapesBS.eye_blink2_r\"";
-	cmd = cmd + blinkVal;
-	dgMod.commandToExecute(cmd);
-
-	cmd = "setKeyframe \"shapesBS.w[13]\"";
-	dgMod.commandToExecute(cmd);
-
-	cmd = "setKeyframe \"shapesBS.w[14]\"";
-	dgMod.commandToExecute(cmd);
+	switch (blinkEye.at(blinkInd)) {
+	case LEFT: {
+		setBlinkLeft(blinkVal);
+		break;
+	}
+	case RIGHT: {
+		setBlinkRight(blinkVal);
+		break;
+	}
+	case BOTH: {
+		setBlinkLeft(blinkVal);
+		setBlinkRight(blinkVal);
+		break;
+	}
+	}
 }
 
 unsigned int VfxCmd::readWeights(int numWeights,
@@ -358,6 +408,9 @@ unsigned int VfxCmd::readWeights(int numWeights,
 				std::fill(currentWeights.begin(), currentWeights.end(), 0);
 				weightNum = 0;
 				numFrames++;
+			}
+			if (customFrameRange && numFrames == endFrame) {
+				break;
 			}
 		}
 		weightsFile.close();
@@ -439,10 +492,42 @@ void VfxCmd::readOrientationFile(unsigned int numFrames) {
 				leftCurrentPos = leftCurrentPos - leftOrigin;
 				rightCurrentPos = rightCurrentPos - rightOrigin;
 
+				float alpha = 0.5, beta = 0.5, outTh = 1.0;
+				float m = -0.5f / 3.0f, c = -m * 4.0f;
+				// Check for fail tracking in only one eye, if so just force the
+				// fail one to follow the good one
+				if (leftCurrentPos.x > outTh || leftCurrentPos.x < -outTh) {
+					if (rightCurrentPos.x <= outTh
+							&& rightCurrentPos.x >= -outTh) {
+						alpha = c + m * fabs(leftCurrentPos.x);
+						beta = 1.0f - alpha;
+					}
+				} else {
+					if (rightCurrentPos.x > outTh
+							|| rightCurrentPos.x < -outTh) {
+						beta = c + m * fabs(rightCurrentPos.x);
+						alpha = 1.0f - beta;
+					}
+				}
+
+				if (leftCurrentPos.y > outTh || leftCurrentPos.y < -outTh) {
+					if (rightCurrentPos.y <= outTh
+							&& rightCurrentPos.y >= -outTh) {
+						alpha = c + m * fabs(leftCurrentPos.y);
+						beta = 1.0f - alpha;
+					}
+				} else {
+					if (rightCurrentPos.y > outTh
+							|| rightCurrentPos.y < -outTh) {
+						beta = c + m * fabs(rightCurrentPos.y);
+						alpha = 1.0f - beta;
+					}
+				}
+
 				// It looks weird to have both eyes moving differently, do the
 				// mean and make them move together
-				eyeOrientation[i] = (leftCurrentPos + rightCurrentPos) * 0.5
-						* eyeOrientationScale;
+				eyeOrientation[i] = (alpha * leftCurrentPos
+						+ beta * rightCurrentPos) * eyeOrientationScale;
 			}
 			rightEyeFile.close();
 			leftEyeFile.close();

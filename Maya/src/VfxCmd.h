@@ -19,6 +19,10 @@ class VfxCmd: public MPxCommand {
 		SAVE, LOAD
 	};
 
+	enum Eye {
+		LEFT, RIGHT, BOTH
+	};
+
 public:
 	virtual MStatus doIt(const MArgList&args);
 	virtual MStatus undoIt();
@@ -26,14 +30,17 @@ public:
 	virtual bool isUndoable() const;
 	static void *creator();
 	static MSyntax newSyntax();
+
 private:
 	void loadWeights(int numWeights);
 	void saveWeights();
-	void setBlinkAt(int blinkFrame, float blinkVal);
+	void setBlinkAt(unsigned int blinkInd, int blinkFrame, float blinkVal);
 	unsigned int readWeights(int numWeights,
 			std::vector<std::vector<float> >& weights);
 	void readTransMatrixFile(unsigned int numFrames);
 	void readOrientationFile(unsigned int numFrames);
+	void setBlinkLeft(float blinkVal);
+	void setBlinkRight(float blinkVal);
 
 private:
 	Actions action;
@@ -43,9 +50,12 @@ private:
 	float translationScale;
 	float eyeOrientationScale;
 	MFloatVectorArray eyeOrientation;
-	static std::vector<unsigned int> blinkFrames;
-	static std::vector<unsigned int> blinkTime;
+	static std::vector<unsigned int> blinkStart;
+	static std::vector<unsigned int> blinkClose;
+	static std::vector<unsigned int> blinkOpen;
+	static std::vector<unsigned int> blinkEnd;
 	static std::vector<float> blinkWeight;
+	static std::vector<Eye> blinkEye;
 	const static MString names[];
 	int file_ind;
 	MDGModifier dgMod;
@@ -53,6 +63,9 @@ private:
 	MTime prevMaxTime;
 	MTime prevStartTime;
 	MTime prevEndTime;
+	unsigned int startFrame;
+	unsigned int endFrame;
+	bool customFrameRange;
 };
 
 #endif
