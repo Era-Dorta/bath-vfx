@@ -72,7 +72,7 @@ std::vector<VfxCmd::Eye> VfxCmd::blinkEye = { BOTH, RIGHT, LEFT, BOTH, BOTH,
 #define LEFT_EYE_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\left_eye.txt"
 #define RIGHT_EYE_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\right_eye.txt"
 #else
-#define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights5.txt"
+#define LOAD_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_restricted5.txt"
 #define SAVE_WEIGHTS_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/weights_out"
 #define ROTATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/invRotation.txt"
 #define TRANSLATION_PATH "/home/gdp24/workspaces/matlab/vfx/Data/Transformation/translation.txt"
