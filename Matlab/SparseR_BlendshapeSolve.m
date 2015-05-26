@@ -40,6 +40,23 @@ options = optimset('Display','notify','TolX',1e-15);
 weight_array = [];
 
 for frame = 1:numFrames
+    if (frame > 2500 && frame < 2660)
+       ub(24) = 0.1; 
+       ub(25) = 0.1;
+       ub(37) = 0.5;
+       ub(22) = 0.1;
+    elseif (frame > 2670 && frame < 2710)
+       ub(7) = 0.1;
+       ub(43) = 0.1; 
+       ub(37) = 0.1;
+    else 
+        ub = 1*ones(68,1);
+        ub(1:7) = 2;
+        ub(8:9) = 1.5;   
+    end
+    
+
+    
 % for frame = 1:400
     X_frame = X_sequence(:,:,frame);
     X_frame = reshape(X_frame, 3*97, 1);

@@ -15,7 +15,31 @@
 \setbeameroption{show notes}
 \usepackage{multicol}
 \usepackage{caption}
+\usepackage{subcaption} % To use subfigures with subcaptions
 \usepackage{textpos}
+
+\captionsetup[subfigure]{labelformat=empty}
+\renewcommand{\figurename}{}
+\usepackage[labelsep=endash]{caption}
+
+\usepackage{wrapfig}
+\definecolor{light-gray}{gray}{0.95}
+\usepackage{tcolorbox}
+
+\newcommand{\phim}{\mathbf{\phi}}
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\Y}{\mathbf{Y}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\w}{\mathbf{w}}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\z}{\mathbf{z}}
+\newcommand{\h}{\mathbf{h}}
+\newcommand{\dd}{\: \mathrm{d}}
+\newcommand{\B}{\mathbf{B}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\bb}{\mathbf{b}}
+\newcommand{\vect}[1]{\mathbf{#1}}
 
 \usebackgroundtemplate
 {
@@ -161,17 +185,74 @@ Centre For Digital Entertainment
 \end{frame}
 
 %----------------------------------------------------------------------
-\section{Ieva's Part}
-\begin{frame}{Frame name}
+\section{Blendshape Model}
+\begin{frame}{General idea}
+Given a set of blendshapes $\mathbf{B} = [\bb_1, \ldots, \bb_n]$ and a neutral face $\bb_0$, a new facial expression $\mathbf{F(\w)}$ is a linear combination of the offsets of the basic shapes:
+\begin{equation*}
+	\underbrace{\F(\w)}_{\text{new expression}} = \underbrace{ \bb_0 }_{\text{neutral face}}+ \sum_{i=1}^N \: \underbrace{w_i}_{\text{weights}} \: \underbrace{|\bb_i - \bb_0|}_{\text{offsets from neutral}}.
+\end{equation*}
+The \textbf{weights} describe how much each of the basic shapes affect the new expression. 
+\end{frame}
+
+
+\begin{frame}{Designing blendshapes}
+\begin{description}
+	\item[Option 1] Create blendshapes \textbf{by hand} $\Rightarrow$ correspond to a basic facial expression, for example a raised eyebrow.\\
+					$\times$  Hard to produce. \vspace{0.5 cm}
+	\item[Option 2] Use \textbf{P}rincipal \textbf{C}omponent \textbf{A}nalysis $\Rightarrow$ automatic construction. \\
+					$\times$  Hard to adjust manually.
+\end{description}
 
 \end{frame}
 
 
-\begin{frame}{Frame name}
+\begin{frame}{Estimating weights}
+The weights $\w$ are estimating by solving the following:
+
+
+\begin{minipage}[t]{0.95\linewidth} 
+\begin{tcolorbox}[colback=gray!5,colframe=jvagreen, title=Minimisation problem]
+\begin{equation*}
+	\min_\w \| \underbrace{\hat{\mathbf{B}}}_{\text{matrix with offsets}} \: \: \: \underbrace{\w}_{\text{vector of weights}} - \underbrace{(\F(\w) - \bb_0)}_{\text{offsets of new expression}} \|,
+\end{equation*}        
+\end{tcolorbox} 
+\end{minipage}  \vspace{0.5 cm}
+
+where the weights add up to $1$.
 
 \end{frame}
 
+\begin{frame}{Improvements}
+\begin{itemize}
+	\item Reduced set of blendshapes.
+	\item Corrective shapes.
+\end{itemize}
 
+\end{frame}
+
+\begin{frame}{Different Approaches}
+\visible<1->{\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.43\textwidth}
+                \includegraphics[width=\textwidth]{img/Richdomain}
+                \caption{Recorded sequence}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.2\textwidth}
+                \includegraphics[width=\textwidth]{img/arrow}
+                \caption{\hspace{0.2cm} Thin plate splines}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/Emilydomain}
+                \caption{Emily sequence}
+        \end{subfigure}
+\end{figure}}
+
+\visible<2->{\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{img/backarrow}
+\end{figure}}
+
+\end{frame}
 %----------------------------------------------------------------------
 \section{Garoe's Part}
 \begin{frame}{Frame name}
