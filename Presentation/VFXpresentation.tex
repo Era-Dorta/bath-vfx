@@ -152,11 +152,175 @@ Centre For Digital Entertainment
 
 %----------------------------------------------------------------------
 \section{Richard's Part}
-\begin{frame}{Frame name}
+\begin{frame}{Data Capture}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Performance capture using two DSLR cameras in stereo.
+\item Video recorded at 60fps with resolution $640 \times 480$ pixels.
+\item Video streams synchronised using audio signals.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.7\textwidth]{img/setup1}
+\caption{\tiny{The data capture session using two DSLR cameras in stereo.}}
+\end{figure}
+\end{center}
 
 \end{frame}
 
-\begin{frame}{Frame name}
+
+
+\begin{frame}{Face Markers}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Markers are drawn onto the actor's face to track the facial performance.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.35\textwidth]{img/facemarkers} ~
+\includegraphics[width=0.4\textwidth]{img/surreydata}
+\caption{\tiny{Marker positions were roughly based on the Surrey Audio-Visual Expressed Emotion (SAVEE) Database.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Stereo Calibration}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item A checkerboard pattern used to calibrate stereo camera setup.
+\item Obtain the cameras' intrinsic and external parameters.
+\item Compute the projection matrices and fundamental matrix.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.4\textwidth]{img/checkerboard} ~
+\includegraphics[width=0.42\textwidth]{img/calib}
+\caption{\tiny{The stereo cameras were calibrated using a checkerboard pattern.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Stereo Rectification}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Using the camera parameters we rectify each stereo pair for a captured image sequence.
+\item Corresponding epipolar lines lie on the same pixel rows.
+\item Reduces correspondence problem to a 1D search.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.8\textwidth]{img/epipolarlines}
+\caption{\tiny{Each frame of an image sequence is stereo rectified.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Initial Marker Detection}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Face markers are detected by computing SIFT features in the left image of the first frame.
+\item Wrongly detected pixels can be removed and additional points included interactively.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=1.0\textwidth]{img/detection}
+\caption{\tiny{Markers on the face are detected using SIFT features.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Feature Matching}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Corresponding markers in the right image are found by searching along the corresponding epipolar lines.
+\item Matching features are found by computing the normalised cross-correlation for image patches around each feature point.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=1.0\textwidth]{img/matching}
+\caption{\tiny{Corresponding markers are found in the right image.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Marker Tracking}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item We track the face markers throughout the entire image sequence using the KLT tracking algorithm.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=1.0\textwidth]{img/matching}
+\caption{\tiny{Corresponding markers are found in the right image.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Sparse Reconstruction}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Using the known camera projection matrices, we compute a sparse 3D reconstruction for every frame.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.8\textwidth]{img/faces}
+\caption{\tiny{A sample of reconstructed frames from a captured image sequence.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Head Stabilisation}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item We attempt to remove the rigid head motion by performing Procrustes alignment.
+\item The head pose in each frame of an image sequence is aligned to the neutral pose. 
+\item The 3D point trajectories are also smoothed to remove jittery head motion. 
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.8\textwidth]{img/procrustes}
+\caption{\tiny{Rigid head motion is removed using Procrustes analysis.}}
+\end{figure}
+\end{center}
 
 \end{frame}
 
