@@ -11,6 +11,7 @@
 #include <maya/MTime.h>
 #include <maya/MArgList.h>
 #include <maya/MFloatVectorArray.h>
+#include <maya/MFloatMatrix.h>
 
 class VfxCmd: public MPxCommand {
 
@@ -32,17 +33,16 @@ private:
 	unsigned int readWeights(int numWeights,
 			std::vector<std::vector<float> >& weights);
 	void readTransMatrixFile(unsigned int numFrames);
-	void readEyeRotationFile(unsigned int numFrames);
+	void readOrientationFile(unsigned int numFrames);
 
 private:
 	Actions action;
 	int numWeights;
 	std::vector<unsigned int> attrIndices;
-	std::vector<std::vector<double>> invTransform;
-	double translationScale;
-	double eyeRotScale;
-	MFloatVectorArray leftEyeRotation;
-	MFloatVectorArray rightEyeRotation;
+	std::vector<MFloatMatrix> invTransform;
+	float translationScale;
+	float eyeOrientationScale;
+	MFloatVectorArray eyeOrientation;
 	static std::vector<unsigned int> blinkFrames;
 	static std::vector<unsigned int> blinkTime;
 	static std::vector<float> blinkWeight;
