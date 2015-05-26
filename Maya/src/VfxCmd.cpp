@@ -51,12 +51,18 @@ const MString VfxCmd::names[] = { "brow_lower_l", "brow_lower_r",
 		"mouth_upperLipRaise_r", "nose_wrinkle_l", "nose_wrinkle_r",
 		"smoothCompensated" };
 
-std::vector<unsigned int> VfxCmd::blinkStart = { 680, 756, 792 };
-std::vector<unsigned int> VfxCmd::blinkClose = { 687, 765, 800 };
-std::vector<unsigned int> VfxCmd::blinkOpen = { 743, 783, 818 };
-std::vector<unsigned int> VfxCmd::blinkEnd = { 751, 792, 827 };
-std::vector<float> VfxCmd::blinkWeight = { 0.4, 0.8, 0.8 };
-std::vector<VfxCmd::Eye> VfxCmd::blinkEye = { BOTH, RIGHT, LEFT };
+std::vector<unsigned int> VfxCmd::blinkStart = { 680, 756, 792, 883, 1273, 1504,
+		1935, 1991, 2082, 2766, 2904 };
+std::vector<unsigned int> VfxCmd::blinkClose = { 687, 765, 800, 890, 1277, 1509,
+		1939, 2000, 2088, 2770, 2916 };
+std::vector<unsigned int> VfxCmd::blinkOpen = { 743, 783, 818, 931, 1278, 1510,
+		1940, 2001, 2089, 2772, 2942 };
+std::vector<unsigned int> VfxCmd::blinkEnd = { 751, 792, 827, 942, 1282, 1519,
+		1947, 2019, 2096, 2779, 2980 };
+std::vector<float> VfxCmd::blinkWeight = { 0.4, 0.8, 0.8, 0.8, 0.2, 0.8, 0.2,
+		0.4, 0.2, 0.2, 0.4 };
+std::vector<VfxCmd::Eye> VfxCmd::blinkEye = { BOTH, RIGHT, LEFT, BOTH, BOTH,
+		BOTH, BOTH, BOTH, BOTH, BOTH, BOTH };
 
 #ifdef _WIN32
 #define LOAD_WEIGHTS_PATH "C:\\Users\\Ieva\\Dropbox\\Semester2\\VFX\\Matlab\\Transformation\\data\\weights_6.txt"
