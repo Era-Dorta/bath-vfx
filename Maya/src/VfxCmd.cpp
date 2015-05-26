@@ -78,7 +78,7 @@ MStatus VfxCmd::doIt(const MArgList &args) {
 	action = SAVE;
 	file_ind = 0;
 	translationScale = 0.1;
-	eyeOrientationScale = 2;
+	eyeOrientationScale = 1.5;
 
 	// Get state parameter
 	MString paramVal;
@@ -439,10 +439,42 @@ void VfxCmd::readOrientationFile(unsigned int numFrames) {
 				leftCurrentPos = leftCurrentPos - leftOrigin;
 				rightCurrentPos = rightCurrentPos - rightOrigin;
 
+				float alpha = 0.5, beta = 0.5, outTh = 1.0;
+				float m = -0.5f / 3.0f, c = -m * 4.0f;
+				// Check for fail tracking in only one eye, if so just force the
+				// fail one to follow the good one
+				if (leftCurrentPos.x > outTh || leftCurrentPos.x < -outTh) {
+					if (rightCurrentPos.x <= outTh
+							&& rightCurrentPos.x >= -outTh) {
+						alpha = c + m * fabs(leftCurrentPos.x);
+						beta = 1.0f - alpha;
+					}
+				} else {
+					if (rightCurrentPos.x > outTh
+							|| rightCurrentPos.x < -outTh) {
+						beta = c + m * fabs(rightCurrentPos.x);
+						alpha = 1.0f - beta;
+					}
+				}
+
+				if (leftCurrentPos.y > outTh || leftCurrentPos.y < -outTh) {
+					if (rightCurrentPos.y <= outTh
+							&& rightCurrentPos.y >= -outTh) {
+						alpha = c + m * fabs(leftCurrentPos.y);
+						beta = 1.0f - alpha;
+					}
+				} else {
+					if (rightCurrentPos.y > outTh
+							|| rightCurrentPos.y < -outTh) {
+						beta = c + m * fabs(rightCurrentPos.y);
+						alpha = 1.0f - beta;
+					}
+				}
+
 				// It looks weird to have both eyes moving differently, do the
 				// mean and make them move together
-				eyeOrientation[i] = (leftCurrentPos + rightCurrentPos) * 0.5
-						* eyeOrientationScale;
+				eyeOrientation[i] = (alpha * leftCurrentPos
+						+ beta * rightCurrentPos) * eyeOrientationScale;
 			}
 			rightEyeFile.close();
 			leftEyeFile.close();
