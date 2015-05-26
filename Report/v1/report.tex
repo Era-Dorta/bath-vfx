@@ -41,6 +41,9 @@
     urlcolor={blue!80!black}
 }
 
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
 \title{Performance-driven Facial Animation} \author{Garoe Dorta-Perez, Ieva Kazlauskaite, Richard Shaw}
 %\degree{Doctor of Philosophy}
 \unit{ CM50247 - Visual Effects }
@@ -146,6 +149,16 @@ More recently, extensions that include denoising stages \cite{Chappalli:2005} or
 This technique projects all the low-resolution images into the hight resolution space and fuses the data maximizing the quality.
 Bose et al.~\cite{Bose:2006} proposed a fusing technique using the moving least square (MLS) method, the authors estimated the pixel value as a polynomial approximation of the pixel neighbourhood with adaptive polynomial order for each pixel.
 Takeda et al.~\cite{Takeda:2007} proposed a method to generalize this and other problems such as denoising or interpolation into a generalized kernel regression problem.
+
+\textit{Regularization}-based methods tackle the problem from a probabilistic viewpoint.
+An estimation using the maximum likelihood (ML) of the high-resolution image $\mathbf{X}^{ML}$ was proposed by Tom et al.~\cite{Tom:1995}, such that
+
+\begin{equation}
+\mathbf{X}^{ML} = \underset{\mathbf{X}}{\argmax} P(\mathbf{Y} | \mathbf{X}),
+\end{equation} 
+
+where $\mathbf{Y}$ the unknown high-resolution image and $\mathbf{X}$ is the low resolution image.
+Extensions using maximum a posterior (MAP) with Markov random fields ~\cite{Humblot:2006} and Markov Chain Monte Carlo methods ~\cite{Tian:2010} have been researched.
 
 In the \textit{learning}-based area, Wie et al.~\cite{Wei:2000} proposed a technique to synthesized new textures based on a sample image and a random noise.
 The main idea of the authors work was to maximize the local similarity when choosing a new pixel in the synthesized texture image, based on the already built neighbourhood in the new image.
