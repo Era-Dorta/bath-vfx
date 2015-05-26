@@ -6,7 +6,7 @@ addpath(genpath('WOBJ_toolbox_Version2b'));
 
 %% Initialise
 % Load calibration data
-load('C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Calib_Results_stereo_rectified');
+load('C:\Users\Richard\Desktop\CDE\Semester2\Visual_Effects\Data\Richard2\Calib_Results_stereo_rectified');
 % Intrinsic camera matrices
 K_left = KK_left_new;
 K_right = KK_right_new;
@@ -22,8 +22,8 @@ clearvars -except P_left P_right K_left K_right R t OBJ;
 % Load feature point sequence
 firstFrame = 5150;
 lastFrame = 5880;
-load('points_left_5150_5880');
-load('points_right_5150_5880');
+load('points_left_1000_4000');
+load('points_right_1000_4000');
 numFeatures = size(points_left,2);
 numFrames = size(points_left,3);
 
@@ -44,6 +44,7 @@ trisurf(tri, Xn(:,1), Xn(:,2), Xn(:,3), 'LineWidth', 1.5); axis equal; view([0 9
 colormap(cool); light; lighting gouraud; material dull;
 
 for frame = 1:numFrames
+%     for frame  = 1:100
     Xtemp = Reconstruct(P_left, P_right, points_left(:,:,frame), points_right(:,:,frame));
     x_offset = Xtemp(1,54); % Keep nose position at x = 0
     y_offset = -Xtemp(2,54); % Keep nose position at y = 0
@@ -52,7 +53,7 @@ for frame = 1:numFrames
     y = -Xtemp(2,:)-y_offset;
     z = -Xtemp(3,:)-z_offset;
     X(:,:,frame) = [x;y;z]';
-    figure(1);
+    figure(2);
     tri = delaunay(X(:,1),X(:,2)); % Delaunay triangulation
     trisurf(tri, x, y, z, 'LineWidth', 1.5); 
     axis equal; axis([-60 60 -80 80 -80 0]); view([0 90]);
@@ -104,7 +105,7 @@ for frame = 1:numFrames
 end
 
 %% Transform sparse points
-load('X_sequence');
+% load('X_sequence');
 load('X_neutral'); % Richard neutral (sparse)
 Xn = X; 
 load('X_emily'); % Emily neutral (sparse)
@@ -112,7 +113,7 @@ X_emily = X;
 [w, param] = TPS3D(Xn, X_emily, Xn);
 
 for frame = 1:numFrames
-% for frame = 1
+% for frame = 1:100
     w(:,:,frame) = TSP3DTransformPoints(param, Xn, X_sequence(:,:,frame));
     figure(2);
     trisurf(tri, w(:,1,frame), w(:,2,frame), w(:,3,frame), ones(1,size(w,1)), ...

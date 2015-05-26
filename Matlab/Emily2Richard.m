@@ -14,7 +14,8 @@ v = OBJ{1, 1}.vertices;
 %% Get neutral
 load('X_emily');
 E_neutral = X;
-load('X_neutral');
+% load('X_neutral');
+load('Xs_neutral');
 R_neutral = X;
 
 figure(1);
@@ -92,4 +93,6 @@ end
 %% Save
 % save('w_neutral','w_neutral');
 % save('w_blends','w_blends');
+% save('ws_neutral','w_neutral');
+% save('ws_blends','w_blends');
 

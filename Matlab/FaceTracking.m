@@ -8,8 +8,8 @@ if isunix
     folder_left = '~/workspaces/matlab/vfx/Data/Richard2/Left/images_rect/'; % Left image folder
     folder_right = '~/workspaces/matlab/vfx/Data/Richard2/Right/images_rect/'; % Right image folder
 else
-    folder_left = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Left\images_rect';
-    folder_right = 'C:\Users\Richard\Desktop\CDE\Semester 2\Visual Effects\Data\Richard2\Right\images_rect';
+    folder_left = 'C:\Users\Richard\Desktop\CDE\Semester2\Visual_Effects\Data\Richard2\Left\images_rect';
+    folder_right = 'C:\Users\Richard\Desktop\CDE\Semester2\Visual_Effects\Data\Richard2\Right\images_rect';
 end
 imgType = 'jpg';
 sDir_left =  dir( fullfile(folder_left ,['*' imgType]) );
@@ -17,8 +17,10 @@ sDir_right =  dir( fullfile(folder_right ,['*' imgType]) );
 numImgs = size(sDir_left, 1);
 
 % Specify frames and feature points
-firstFrame = 5150;
-lastFrame = 5880;
+% firstFrame = 5150;
+% lastFrame = 5880;
+firstFrame = 1000;
+lastFrame = 4000;
 load(['points_left_' num2str(firstFrame,'% 05.f') '.mat']);
 load(['points_right_' num2str(firstFrame,'% 05.f') '.mat']);
 numFeatures = size(points_left,2);
@@ -93,7 +95,7 @@ for frame = (firstFrame+1):lastFrame
     
     % Estimate the geometric transformation between the old points
     % and the new points and eliminate outliers
-    dist = 2;
+    dist = 1;
     [xform_left, oldInliers_left, visiblePoints_left] = estimateGeometricTransform(...
         oldInliers_left, visiblePoints_left, 'similarity', 'MaxDistance', dist);
     [xform_right, oldInliers_right, visiblePoints_right] = estimateGeometricTransform(...
@@ -106,13 +108,13 @@ for frame = (firstFrame+1):lastFrame
     predict_right = double([X';Y']);
         
     % If points are lost, re-estimate points
-    if size(visiblePoints_left,1)<numFeatures
+    if size(visiblePoints_left,1)<numFeatures || rem(frame,500)==0
         disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
         % Re-estimate points in last frame
         visiblePoints_left = ReEstimatePoints(newImg_left, predict_left, visiblePoints_left');
         visiblePoints_left = single(visiblePoints_left)';
     end
-    if size(visiblePoints_right,1)<numFeatures
+    if size(visiblePoints_right,1)<numFeatures || rem(frame,500)==0
         disp(['Points lost on frame ', num2str(frame),'! Please re-estimate points']);
         % Re-estimate points in last frame
         visiblePoints_right = ReEstimatePoints(newImg_right, predict_right, visiblePoints_right');
