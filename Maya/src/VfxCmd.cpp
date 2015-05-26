@@ -59,7 +59,7 @@ std::vector<unsigned int> VfxCmd::blinkOpen = { 743, 783, 818, 931, 1278, 1510,
 		1940, 2001, 2089, 2772, 2942 };
 std::vector<unsigned int> VfxCmd::blinkEnd = { 751, 792, 827, 942, 1282, 1519,
 		1947, 2019, 2096, 2779, 2980 };
-std::vector<float> VfxCmd::blinkWeight = { 0.4, 0.8, 0.8, 0.8, 0.2, 0.8, 0.2,
+std::vector<float> VfxCmd::blinkWeight = { 0.4, 0.8, 0.8, 0.4, 0.2, 0.4, 0.2,
 		0.4, 0.2, 0.2, 0.4 };
 std::vector<VfxCmd::Eye> VfxCmd::blinkEye = { BOTH, RIGHT, LEFT, BOTH, BOTH,
 		BOTH, BOTH, BOTH, BOTH, BOTH, BOTH };
@@ -438,7 +438,7 @@ void VfxCmd::readTransMatrixFile(unsigned int numFrames) {
 				for (unsigned int row = 0; row < 3; row++) {
 					for (unsigned int col = 0; col < 3; col++) {
 						std::getline(rotationFile, line);
-						invTransform.at(i)(row, col) = std::stof(line);
+						invTransform.at(i)(col, row) = std::stof(line);
 					}
 				}
 
