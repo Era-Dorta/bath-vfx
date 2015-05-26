@@ -14,6 +14,7 @@
 %\graphicspath{{../}}
 \setbeameroption{show notes}
 \usepackage{multicol}
+\usepackage[compatibility=false]{caption}
 \usepackage{caption}
 \usepackage{subcaption} % To use subfigures with subcaptions
 \usepackage{textpos}
@@ -175,7 +176,7 @@ Centre For Digital Entertainment
 %\end{frame}
 
 %----------------------------------------------------------------------
-\section{Richard's Part}
+\section{Data Capture and 3D Reconstruction}
 \begin{frame}{Data Capture}
 
 \begin{itemize}
@@ -303,8 +304,7 @@ Centre For Digital Entertainment
 
 \begin{center}
 \begin{figure}
-\includegraphics[width=1.0\textwidth]{img/matching}
-\caption{\tiny{Corresponding markers are found in the right image.}}
+\includegraphics[width=0.5\textwidth]{img/tracking}
 \end{figure}
 \end{center}
 
@@ -312,7 +312,26 @@ Centre For Digital Entertainment
 
 
 
-\begin{frame}{Sparse Reconstruction}
+
+\begin{frame}{Sparse 3D Reconstruction}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Using the known camera projection matrices, we compute a sparse 3D reconstruction by triangulating.
+\end{itemize}
+
+\begin{center}
+\begin{figure}
+\includegraphics[width=0.6\textwidth]{img/face}
+\caption{\tiny{The 3D reconstruction of the neutral expression.}}
+\end{figure}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}{Sparse Sequence Reconstruction}
 
 \begin{itemize}
 \setlength\itemsep{0.5em}
@@ -321,7 +340,7 @@ Centre For Digital Entertainment
 
 \begin{center}
 \begin{figure}
-\includegraphics[width=0.8\textwidth]{img/faces}
+\includegraphics[width=0.7\textwidth]{img/faces}
 \caption{\tiny{A sample of reconstructed frames from a captured image sequence.}}
 \end{figure}
 \end{center}
