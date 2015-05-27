@@ -1,5 +1,4 @@
 \beamer@endinputifotherversion {3.24pt}
 \beamer@sectionintoc {1}{Data Capture and 3D Reconstruction}{2}{0}{1}
-\beamer@sectionintoc {2}{Blendshape Model}{13}{0}{2}
-\beamer@sectionintoc {3}{Skin Rendering}{20}{0}{3}
-\beamer@sectionintoc {4}{Results}{30}{0}{4}
+\beamer@sectionintoc {2}{Blendshape Model}{14}{0}{2}
+\beamer@sectionintoc {3}{Skin Rendering}{24}{0}{3}
