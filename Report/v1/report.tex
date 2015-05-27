@@ -693,7 +693,7 @@ Given three images $A$, $A'$ and $B$, where $A$ is an unfiltered example, $A'$ i
 A k-d tree for an Approximate Nearest-Neighbour Search (ANN) is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
 The closest match for a neighbourhood in pixel $q$ in $B$ and $B'$ is located in the tree.
 A detailed description of the algorithm in pseudo code is shown in Algorithm~\ref{alg:image_analogies}, where $F$ is computed a weighted distance over the feature vectors using a Gaussian kernel and $s$ is a data structure such that $s(q) = p$.
-Following Ashikhmin et al~\cite{Ashikhmin2001} method, a match that is coherent to what has been already synthesized is computed as well.
+Based on Ashikhmin's work, a match that is coherent to what has been already synthesized is computed.
 These two candidates are weighted and the best one is chosen.
 The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence this means that the neighbourhoods also include the previous level in the search.
 We found three Image Analogies implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
@@ -744,7 +744,7 @@ The first one is a simple single threaded implementation, the second one was don
 \end{minipage}
 \end{figure}
 
-As a first approach we tried to reproduce the results for bump mapping quality increase by Graham et al~\cite{Graham2013}, results are shown in Figure~\ref{fig:bump_maps}.
+As a first step, we tried to reproduce the results for bump mapping quality increase by Graham et al~\cite{Graham2013}, results are shown in Figure~\ref{fig:bump_maps}.
 The authors add an extra parameter $\alpha \in \left\lbrace 0, \ldots, 1 \right\rbrace$ to control Hertzmann's image synthesis process.
 To be more precise, a match between $A$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $1 - \alpha$, and a match between $A'$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $\alpha$.
 The logic behind this addition is to encourage more details of $A'$ to be included in $B'$.
@@ -758,10 +758,10 @@ Also in the coherence match two searches will be done and weighted accordingly, 
 	\label{fig:bump_maps}
 \end{figure}
 
-Another approach we tried was to use the Image Analogies filter to create increased quality textures.
+We also tried applying the Image Analogies filter to generate increased quality textures, which is in essence a deblurring filter.
 The idea is to improve a low quality texture from a 3D scan using pictures of the texture taken at a closer range.
 To achieve this we took a close up high quality sample $A'$, to generate $A$, the sample $A'$ was blurred using a Gaussian kernel until it look qualitative similar to the 3D scan texture $B$, with this three inputs we generated a picture $B'$ of higher quality.
-Since faces have differentiated areas, this process was done separately for each of them, the generated patches are stitched together using linear interpolation.
+Since faces have differentiated areas, this process was done separately for each relevant section in the face texture image, the generated patches are stitched together using linear interpolation.
 The texture segmentation is shown in Figure~\ref{fig:texture_synthesis_parts} and results are shown in Figure~\ref{fig:texture_synthesis}.
 
 \begin{figure}[htbp!]
@@ -771,7 +771,7 @@ The texture segmentation is shown in Figure~\ref{fig:texture_synthesis_parts} an
 	\label{fig:texture_synthesis}
 \end{figure}
 
-Another option for increasing the quality of the texture is to use image super-resolution, we used Jianchao et al~\cite{Jianchao2010} work for this purpose.
+Another option for increasing the quality of the texture is to apply image super-resolution techniques, we used Jianchao et al~\cite{Jianchao2010} work for this purpose.
 The idea is that by doubling the resolution of the original texture, yet avoiding blur by adding information from a dictionary of high resolution images, the final rendering quality of the face will increase.
 Results for this approach are shown in Figure~\ref{fig:emily_super_resolution}.
 
