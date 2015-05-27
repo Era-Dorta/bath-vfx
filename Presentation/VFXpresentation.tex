@@ -405,15 +405,38 @@ where the weights add up to $1$.
 
 \end{frame}
 
-\begin{frame}{Improvements}
+\begin{frame}{Experiments}
 \begin{itemize}
-	\item Reduced set of blendshapes.
-	\item Corrective shapes.
+	\item Performance of numerical methods is compared by measuring \textbf{mean squared reconstruction error}.
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{img/error2}
+\end{figure}
+	\item Extra shapes.	\begin{figure}[htbp!]
+        \centering
+        \begin{subfigure}[b]{0.12\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/lipcorners15.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.12\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/eyebrowsin2.png}
+        \end{subfigure} ~
+        \begin{subfigure}[b]{0.12\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/nosewrinkle2.png}
+        \end{subfigure}
+        ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+          %(or a blank line to force the subfigure onto a new line)
+        \begin{subfigure}[b]{0.12\textwidth}
+                \includegraphics[trim = 50mm 30mm 80mm 30mm,clip,width=\textwidth]{img/mouthsuck.png}
+        \end{subfigure}
+\end{figure}
+\item Different upper bound on each dimension of $\w$.
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}{Different Approaches}
+\begin{frame}{Initial Approach}
 \visible<1->{\begin{figure}
         \centering
         \begin{subfigure}[b]{0.43\textwidth}
@@ -430,12 +453,62 @@ where the weights add up to $1$.
         \end{subfigure}
 \end{figure}}
 
+\visible<2->{$\Rightarrow$ Solve for weights in Emily domain.}
+
+\end{frame}
+
+\begin{frame}{Solve for weights in actor's domain}
+
+\visible<1->{\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.2\textwidth}
+                \includegraphics[width=\textwidth]{img/Rneutral}
+                \caption{Neutral actor}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.2\textwidth}
+                \includegraphics[width=\textwidth]{img/arrow}
+                \caption{\hspace{0.2cm} $\mathbf{T}$}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/Eneutral}
+                \caption{Neutral Emily}
+        \end{subfigure}
+\end{figure}}
+
 \visible<2->{\begin{figure}
-\centering
-\includegraphics[width=0.5\textwidth]{img/backarrow}
+        \centering
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/Eblends}
+                \caption{Emily blendshapes}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.2\textwidth}
+                \includegraphics[width=\textwidth]{img/arrow}
+                \caption{\hspace{0.2cm} $\mathbf{T}^{-1}$}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/Rblends}
+                \caption{Actor's blendshapes}
+        \end{subfigure}
 \end{figure}}
 
 \end{frame}
+
+\begin{frame}{Issues}
+\begin{itemize}
+	\item Mismatch of neutral expressions.
+	\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.2\textwidth}
+                \includegraphics[width=\textwidth]{img/Richard2neutral}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.2\textwidth}
+                \includegraphics[width=\textwidth]{img/Emily2neutral}
+        \end{subfigure}
+\end{figure}
+\end{itemize}
+
+\end{frame}
+
 %----------------------------------------------------------------------
 \section{Garoe's Part}
 \begin{frame}{Frame name}
@@ -446,27 +519,6 @@ where the weights add up to $1$.
 \begin{frame}{Frame name}
 
 \end{frame}
-
-
-%----------------------------------------------------------------------
-\section{Results}
-\begin{frame}{Frame name}
-%\begin{center}
-%\begin{figure}
-%\movie[width=0.45\textwidth, autostart, loop]
-%        {\includegraphics[width=0.25\textwidth]{img/arkanoid}}{img/arkanoid1.mov}
-%~
-%%,showcontrols
-%\caption*{\tiny{Left shows rigid body physics, right shows crossplatform interaction.}}
-%\end{figure}
-%\end{center}
-\end{frame}
-
-
-\begin{frame}{Frame name}
-
-\end{frame}
-
 
 
 %\begin{center}
