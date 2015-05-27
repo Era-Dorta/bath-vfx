@@ -18,6 +18,7 @@
 \usepackage{caption}
 \usepackage{subcaption} % To use subfigures with subcaptions
 \usepackage{textpos}
+\usepackage{multicol}
 
 \captionsetup[subfigure]{labelformat=empty}
 \renewcommand{\figurename}{}
@@ -437,16 +438,153 @@ where the weights add up to $1$.
 
 \end{frame}
 %----------------------------------------------------------------------
-\section{Garoe's Part}
-\begin{frame}{Frame name}
+\section{Skin Rendering}
+
+%-----------------------------------------------
+
+\begin{frame}{Texture super-resolution}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Improve rendering quality by increasing skin texture quality
+\item Increase the resolution of a texture image
+\end{itemize}
+
+\begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{img/super-resolution-int}
+        \caption{Super-resolution example, (a) is original image, (b) is enlarged with pixel duplication and (c) is enlarge with super-resolution technique.}
+\end{figure}
 
 \end{frame}
 
+%-----------------------------------------------
 
-\begin{frame}{Frame name}
+\begin{frame}{Image Analogies}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item General filter based on image examples
+	\begin{itemize}
+	\setlength\itemsep{0.5em}
+	\item Pixel match for A'
+	\item Coherence match for patch in B'   
+	\end{itemize}
+\end{itemize}
+
+\begin{multicols}{2}
+	\begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{img/ia_diagram}        
+	\end{figure}
+	
+	\vfill
+	\columnbreak
+	\vspace*{\fill}
+	\footnotesize{Image analogies diagram, $A$ and $A'$ are example images, $B$ is input image, $B'$ is output image, $l$ is the synthesis level, $q$ is the current pixel in $B,B'$ and $p$ the current pixel in $A,A'$.}
+\end{multicols}
 
 \end{frame}
 
+%-----------------------------------------------
+
+\begin{frame}{Image Analogies}
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.65\textwidth}
+                \includegraphics[width=\textwidth]{img/texture_synthesis}
+                \caption{With inputs $A$, $A'$ and $B$, Image Analogies filter outputs $B'$, images is falsed-coloured to highlight differences.}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.25\textwidth}
+                \includegraphics[width=\textwidth]{img/texture_synthesis_parts}
+                \caption{Areas of face segmentation.}
+        \end{subfigure}
+\end{figure}
+
+\end{frame}
+
+%-----------------------------------------------
+
+\begin{frame}{Image Analogies}
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+                \includegraphics[width=\textwidth]{img/tex_richard}
+                \caption{Original texture.}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\textwidth}
+                \includegraphics[width=\textwidth]{img/tex_richard_ai}
+                \caption{Filtered texture.}
+        \end{subfigure}
+\end{figure}
+
+\end{frame}
+
+%-----------------------------------------------
+
+\begin{frame}{Super-resolution with sparse reconstruction}
+
+\begin{itemize}
+\setlength\itemsep{0.5em}
+\item Built dictionary of high resolution samples
+\item Synthesize new image taking patches from the dictionary
+\end{itemize}
+
+\begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{img/superres_dic}
+        \caption{Image patches in the dictionary.}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Super-resolution with sparse reconstruction}
+
+\begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{img/emily_super_resolution}
+        \caption{Texture super-resolution for Emily, (left) original texture, (right) synthesized texture with higher resolution.}
+\end{figure}
+\end{frame}
+
+%-----------------------------------------------
+
+\begin{frame}{Super-resolution with sparse reconstruction}
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.48\textwidth}
+                \includegraphics[width=\textwidth]{img/emily_close_original}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                \includegraphics[width=\textwidth]{img/emily_close_sr}
+        \end{subfigure}
+        \caption{Close up of texture super-resolution for Emily, (left) original texture, (right) synthesized texture with higher resolution.}
+\end{figure}
+
+\end{frame}
+
+%-----------------------------------------------
+
+\begin{frame}{Image Analogies: Other applications}
+\begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{img/bump_maps}
+        \caption{Adding high frequency detail to a bump map.}
+\end{figure}
+\end{frame}
+
+%-----------------------------------------------
+
+\begin{frame}{Image Analogies: Other applications}
+\begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{img/normal_generation}
+        \caption{Generating normal maps from gray scale textures, images is falsed-coloured to highlight differences.}
+\end{figure}
+\end{frame}
 
 %----------------------------------------------------------------------
 \section{Results}
