@@ -1002,16 +1002,18 @@ The quality of an animation may be evaluated in a number of different ways. In o
 	\label{fig:UV}
 \end{figure}
 
+% Rendering was improved when doing super-resolution on the textures.
+% Improvement only noticeable at close ups
+% Improvement was only marginal
+
 
 \section{Future Work}
-
-
 
 There are a number of different techniques that could be used to construct blendshapes in the actor's domain. Deng et al. proposed designing the blendshapes by hand~\cite{Deng:2006}. In particular, the authors choose a number of characteristic frames in the motion capture sequence, and manually design a set of shapes that perceptually match the expressions observed in these frames. They then form correspondences between the PCA coefficients of motion capture frames and the weights of the blendshapes. Finally, Radial Basis Functions are used to map the new frames in the sequence onto the three-dimensional model to produce the animation. Another option would be to use a muscle actuation basis, proposed by Choe and Ko~\cite{Choe:2005}. The design of a muscle actuation basis is based on the human facial anatomy, and is driven by the actuation of different facial muscles. Our main reservation about these approach is the extensive manual effort required to design the set of initial correspondences between the chosen frames and the three-dimensional mesh.
 
 % We could improve our model by adding more markers, and including wrinkles.
-
-
+% Talk about adding BSSRDF to the skin rendering
+% Adding normal maps for more detail -> capture studio with light dome
 
 \newpage
 \bibliographystyle{eg-alpha}
