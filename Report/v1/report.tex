@@ -492,12 +492,21 @@ The original ICP algorithm is limited to rigid transformations, i.e. rotation an
 \subsection{Blendshape model}
 The aim of this project is to used captured data of a face to animate a given model. We use the digital Emily model that comes with $68$ controllable blendshapes ranging from simple eyebrow movements to complicated lip corner pulls. Each blendshape has a weight $w_i$ associated with it, and $w_i \in [0,1]$. The model includes eyes and teeth. The aim is to find a combination of these blendshapes that produce a specified facial expression. In particular, we are interested in reproducing the captured sequence of expressions. 
 
-\textbf{First attempt}. We manually construct a sparse set of points that corresponds to the sparse source mesh Fig.~\ref{}???. Then the neutral expression of the subject is matched with the neutral expression of Emily by transforming the sparse source mesh to the sparse target mesh. The transformation is then stored, and it is used to map all the expressions in the captured sequence. This produces a sparse Emily sequence; using TPS again we warp the dense Emily mesh according to the positions of the sparse points. The quality of the resulting animation is poor for a number of reasons, see Fig.\ref{}. Firstly, the sparse points are not able to constrain the dense mesh, especially since parts of the face, for example the eyelids and the lips are not tracked in the sparse mesh. Consequently, numerous artefacts appear on the dense mesh, and they are particularly noticeable around the lips as no boundary conditions are imposed. Secondly, though there is a clear correspondence between the generated Emily sequence and the source sequence, the generated expressions look unnatural. This may be explained by the differences in the geometry and anatomy of the two faces; for instance, the source may be able to pull expressions that may not be mimicked by the model. In addition, the errors in tracking, reconstruction, and manual selection of sparse points on Emily further reduce the quality of the animation.
-% USING LINEAR ELASTICITY
+We manually choose a sparse set of points that corresponds to the sparse source mesh. Then the neutral expression of the subject is matched with the neutral expression of Emily by transforming the sparse source mesh to the sparse target mesh. The transformation is then stored, and it is used to map all the expressions in the captured sequence. This produces a sparse Emily sequence; using TPS again we warp the dense Emily mesh according to the positions of the sparse points. The quality of the resulting animation is poor for a number of reasons. Firstly, the sparse points are not able to constrain the dense mesh, especially since parts of the face, for example the eyelids and the lips are not tracked in the sparse mesh. Consequently, numerous artefacts appear on the dense mesh, and they are particularly noticeable around the lips as no boundary conditions are imposed. Secondly, though there is a clear correspondence between the generated Emily sequence and the source sequence, the generated expressions look unnatural. This may be explained by the differences in the geometry and anatomy of the two faces; for instance, the source may be able to pull expressions that may not be mimicked by the model. In addition, the errors in tracking, reconstruction, and manual selection of sparse points on Emily further reduce the quality of the animation.
 
-\textbf{Simplified mesh}. Our initial attempt to improve the method involved simplifying the dense Emily model by removing the part of the mesh that corresponds to the lips. Though the simpler mesh exhibited slightly better behaviour, i.e. there were fewer visible artefacts, the sparse point cloud was still unable to constrain the dense mesh well enough to produce realistic results, see Fig.~\ref{}. 
+Our initial attempt to improve the method involved simplifying the dense Emily model by removing the part of the mesh that corresponds to the lips. Though the simpler mesh exhibited slightly better behaviour, i.e. there were fewer visible artefacts, the sparse point cloud was still unable to constrain the dense mesh well enough to produce realistic results, see Fig.~\ref{fig:ghost}. 
+\begin{figure}[htbp!]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+                \includegraphics[width=\textwidth]{img/ghost1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\textwidth}
+                \includegraphics[width=\textwidth]{img/ghost2.png}
+        \end{subfigure}
+        \caption{The comparison of on the left were produced using our original approach. The expressions in the middle where produced using the weights that were calculated in the actor's domain. }\label{fig:ghost}
+\end{figure}
 
-\textbf{Blend shapes}. In an attempt to improve the visual quality of the generated animation, we decided to use a set of Emily key-shapes, that were readily available to us. The main argument for using these blend shapes is that in most situations a simple linear relation exists between an arbitrary facial expression and the set of key-shapes. There exist a number of different options for create a set of shapes; the shape may encode the entire geometry of the case, the displacement from the neutral face, or the local features of a face. Alternatively, a set of blend shapes may be producing using a dimensionality reduction technique. Such set of blend shapes is orthogonal, thus the features encoded by each shape are controlled independently; however, such shapes do not allow for intuitive facial transformations making it difficult to perform manual post-process editing.
+In an attempt to improve the visual quality of the generated animation, we decided to use a set of Emily key-shapes, that were readily available to us. The main argument for using these blend shapes is that in most situations a simple linear relation exists between an arbitrary facial expression and the set of key-shapes. There exist a number of different options for create a set of shapes; the shape may encode the entire geometry of the case, the displacement from the neutral face, or the local features of a face. Alternatively, a set of blend shapes may be producing using a dimensionality reduction technique. Such set of blend shapes is orthogonal, thus the features encoded by each shape are controlled independently; however, such shapes do not allow for intuitive facial transformations making it difficult to perform manual post-process editing.
 
 Let us define a set of blend shapes $\mathbf{B} = [\bb_0, \ldots, \bb_n]$ where $\bb_0$ is the mesh of a neutral face, and each of the $\bb_i$ correspond to a basic facial expression, for example the raise of an eyebrow. Unless stated otherwise, we shall use $68$ shapes provided with the digital Emily model. Then a new facial expression $\mathbf{F(\w)}$ may be constructed by finding an appropriate linear combination of the offsets of the basic shapes:
 \begin{equation}
@@ -711,9 +720,6 @@ We note that our final animation was not always able to capture the slight smile
         \end{subfigure}
         \caption{The comparison of neutral expressions.}\label{fig:neutrals}
 \end{figure}
-
-
-There are a number of different techniques that could have been used to construct blendshapes in the actor's domain. Deng et al. proposed designing the blendshapes by hand~\cite{Deng:2006}. In particular, the authors choose a number of characteristic frames in the motion capture sequence, and manually design a set of shapes that perceptually match the expressions observed in these frames. They then form correspondences between the PCA coefficients of motion capture frames and the weights of the blendshapes. Finally, Radial Basis Functions are used to map the new frames in the sequence onto the three-dimensional model to produce the animation. The decision not to use this approach was made because of the extensive manual effort required to design the set of initial correspondences between the chosen frames and the three-dimensional mesh. For the same reason we choose not to use a muscle actuation basis, proposed by Choe and Ko~\cite{Choe:2005}. The design of a muscle actuation basis is based on the human facial anatomy, and is driven by the actuation of different facial muscles. 
 
 
 \section{Skin Rendering}
@@ -964,11 +970,24 @@ Additionally, if both eyes surpass the threshold $t$, $\alpha$ and $\beta$ will 
 %-----------------------------------------------------------------------
 \chapter{Results}
 
-% We could improve our model by adding wrinkles.
-% uncanny valley
+
+
 
 %-----------------------------------------------------------------------
-\chapter{Conclusions}
+\chapter{Conclusions and Future Work}
+\section{Conclusions}
+% uncanny valley
+
+
+\section{Future Work}
+
+
+
+There are a number of different techniques that could be used to construct blendshapes in the actor's domain. Deng et al. proposed designing the blendshapes by hand~\cite{Deng:2006}. In particular, the authors choose a number of characteristic frames in the motion capture sequence, and manually design a set of shapes that perceptually match the expressions observed in these frames. They then form correspondences between the PCA coefficients of motion capture frames and the weights of the blendshapes. Finally, Radial Basis Functions are used to map the new frames in the sequence onto the three-dimensional model to produce the animation. Another option would be to use a muscle actuation basis, proposed by Choe and Ko~\cite{Choe:2005}. The design of a muscle actuation basis is based on the human facial anatomy, and is driven by the actuation of different facial muscles. Our main reservation about these approach is the extensive manual effort required to design the set of initial correspondences between the chosen frames and the three-dimensional mesh.
+
+
+% We could improve our model by adding wrinkles.
+
 
 
 \newpage
