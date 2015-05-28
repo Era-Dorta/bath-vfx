@@ -15,6 +15,15 @@
 \usepackage{csquotes}
 \usepackage[ruled]{algorithm2e} % Algorithms 
 \renewcommand*{\mkcitation}[1]{ #1}
+\usepackage{listings} % For C++ code
+\lstset{language=C++,
+                basicstyle=\scriptsize,
+                keywordstyle=\color{blue}\ttfamily,
+                stringstyle=\color{red}\ttfamily,
+                commentstyle=\color{green}\ttfamily,
+                morecomment=[l][\color{magenta}]{\#},
+                showstringspaces=false
+}
 
 \newcommand{\phim}{\mathbf{\phi}}
 \newcommand{\X}{\mathbf{X}}
@@ -30,6 +39,8 @@
 \newcommand{\F}{\mathbf{F}}
 \newcommand{\bb}{\mathbf{b}}
 \newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\Maya}{Maya\textsuperscript\textregistered}
+\newcommand{\Matlab}{Matlab\textsuperscript\textregistered}
 
 %\usepackage[hidelinks]{hyperref} % Adds references links without color
 \usepackage{hyperref} % Adds references links with color
@@ -407,6 +418,7 @@ Two equations are acquired from each image point in the two views, giving a tota
 \end{figure}
 
 \subsection{Stabilising Head Movement}
+\label{sec:stabilising_head_movement}
 
 It is important for the actor's head to remain still throughout the sequence so that the reconstructed facial expressions are expressed as true non-rigid deviations from the neutral facial expression. Proper stabilisation of the head is required to avoid artefacts in the resulting blendshape facial animation and retargeting process \cite{Beeler:2014}. If the rigid head movement is not removed, then the expression shapes will contain this 'baked-in' rigid motion, and any facial animation constructed from the expressions will also contain this unwanted rigid head motion. In industry, face-stabilisation is still usually performed manually; Weise \textit{et al}. \cite{Weise:2009} aim to remove the rigid motion component of multiple expressions using ICP registration and Vlasic \textit{et al}. \cite{Vlasic:2005} use Procrustes alignment.
 
@@ -837,6 +849,70 @@ results are shown in Figure~\ref{fig:richard_disp_impr}, note how the addition o
 \label{sec:implementation_details}
 
 Talk about Maya plugins and any other implementation stuff worth talking about. 
+..... Introduce the topic
+
+We used the rigs for Maya that are provided for free by \cite{FaceWareRigsWeb}, the first thing to fix is to reset the paths for the textures in all the materials in the Hipershade window in \Maya.
+The next step was to write plugin to load the weights from Matlab and set keyframes for each of them; to do this our plugin would create a new \Maya command that could be easily executed. 
+The work flow for writing the code would be to first do the action in Maya manually if possible, see what MEL commands where executed, write them in the plugin and if possible rewrite them as pure C++ code instead of MEL commands.
+The file format for the weights is one weight per line in frame order, as shown in Figure~\ref{fig:file_format}, where $N$ is the number of weights and $F$ is the number of frames.
+Once we have the weights loaded, the connections between the blenshape object weights and its outputs have to be broken, this is done in order to be able to set the keyframes, otherwise the setKeyframe function would not work, an extract of the code is shown in Listing~\ref{lst:set_weights}.
+Additionally, we program our code to comply with \Maya undo command policy, which means using the \emph{DagModifier} class or manually undoing the actions, however in the final stages of our implementation it was faster to reload the scene that to undo de command.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.1\textwidth]{img/file_format}
+	\caption{File format for weights import and export.}
+	\label{fig:file_format}
+\end{figure}
+
+\begin{lstlisting}[caption = Breaking the weights connections and setting keyframes., label = lst:set_weights, frame=single, float]  % Start your code-
+
+// Break connections.
+for (unsigned int i = 0; i < (unsigned int)(numWeights); i++){
+		cmd = "disconnectAttr shapesBS_";
+		cmd = cmd + names[i];
+		cmd = cmd + ".output shapesBS.";
+		cmd = cmd + names[i];
+		dgMod.commandToExecute(cmd);
+}
+
+// Set key frames
+for (unsigned int j = 0; j < weights.at(i).size(); j++){
+		cmd = "setAttr shapesBS.weight[";
+		cmd = cmd + j;
+		cmd = cmd + "] ";
+		cmd = cmd + weights.at(i).at(j);
+		dgMod.commandToExecute(cmd);
+		
+		cmd = "setKeyframe { \"shapesBS.w[";
+		cmd = cmd + j;
+		cmd = cmd + "]\" }";
+		dgMod.commandToExecute(cmd);
+	}
+}
+\end{lstlisting}
+
+The next step was to include head rotation and translation back into the animation.
+In order to achieve this, we saved the inverse rotation from the Procustes analisys that was performed on Section~\ref{sec:stabilising_head_movement}, into a file with the same format as shown in Figure~\ref{fig:file_format}.
+We then read the data into \Maya and applied the transformation for each frame; for the translation we did a equivalent procedure with a translation file.
+Note that Matlab matrices are column-wise while \Maya matrices are row-wise, so we read them taking into account this consideration.
+The matrix multiplication order also plays in important role here, as shown in Equation~\ref{eq:rotation_translation_inv}, to achieve the correct result we need to undo the translation first and rotate the result.
+
+\begin{equation}
+\mathbf{x}_{new} = R\mathbf{x} + \mathbf{t} ~ \rightarrow  R^{-1}(\mathbf{x}_{new} - \mathbf{t}) = \mathbf{x},
+\label{eq:rotation_translation_inv}
+\end{equation}
+
+where $\mathbf{x}$ is the original point, $\mathbf{x}_{new}$ is the transformed point, $R$ is the rotation matrix and $\mathbf{t}$ is a translation vector.
+We implemented this transformation in \Maya using the ``xform -m" command, so we first apply the translation and then apply the rotation with an extra parameter ``-r" so that both matrices get multiplied in the desired order.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/eyes_interpolation}
+	\caption{Offset interpolation for eye movements in \Maya.}
+	\label{fig:eyes_interpolation}
+\end{figure}
+
 
 %-----------------------------------------------------------------------
 \chapter{Results}
