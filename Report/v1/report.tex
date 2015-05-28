@@ -945,10 +945,13 @@ This positions were saved into separate files for each eye using the format show
 The positions were loaded into \Maya and the eye control object was translated using the offsets with the respect to the first frame, which was assumed to be looking straight.
 With this first approach each eye can move independently which leads to unsatisfactory results, an initial solution to this problem was to move both eyes using the mean offset for each frame.
 Nevertheless, this would introduce considerable error when one of the eyes winks, as the tracking becomes completely unreliable for the winking eye which in turn drags the other eye.
-Our solution involves interpolating between the two offsets using variable factors, the final offset $d_f$ will be computed as $d_f = \alpha d_l + \beta d_r$, where $\alpha$ and $\beta$ are the interpolation factors, $d_l$ and $d_r$ are the offsets for the left and right eye, respectively.
+Our solution involves interpolating between the two offsets using variable factors, the idea is to have both eyes moving together, rapidly ignore if one eye goes off and while sustaining smooth movements.
+The final offset $d_f$ will be computed as $d_f = \alpha d_l + \beta d_r$, where $\alpha$ and $\beta$ are the interpolation factors, $d_l$ and $d_r$ are the offsets for the left and right eye, respectively.
 Figure~\ref{fig:eyes_interpolation} shows the $\alpha_x$ values along the $x$ direction, where $t$ is the change threshold and $l$ is the maximum offset limit.
 Initially $\alpha_x$ is $0.5$, however if the offset goes beyond a threshold $t$, $\alpha$ will decrease linearly until it reaches the limit $l$.
 The same criteria will be applied in the $y$ direction, and the value for that eye will be $\alpha = \min \left\lbrace \alpha_x, \alpha_y \right\rbrace$.
+The $\beta$ factor will be computed as $\beta = 1 - \alpha$, however, if the right eye is the one surpassing the threshold $t$, then the whole process will be reversed. 
+Additionally, if both eyes surpass the threshold $t$, $\alpha$ and $\beta$ will be $0.5$, this will allow the eyes to move together beyond the threshold if needed.
 
 \begin{figure}[htbp!]
 \centering
