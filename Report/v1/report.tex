@@ -421,8 +421,8 @@ The Procrustes analysis computes a least-squares fit of each facial expression i
 	\label{fig:procrustes}
 \end{figure}
 
-\section{Blendshape Optimisation}
-In this section we introduce the techniques used to warp the meshes, and the optimisation methods.
+\section{Facial Animation}
+Given the motion capture data, our goal is to produce an animation that resembles the captured motion. We use the digital Emily model designed by Alexander et al.~\cite{Alexander:2009}. In this section we introduce the techniques used to match three-dimensional surfaces and point clouds, and the optimisation methods used to estimate the parameters that describe the motion of the digital model.
 
 \subsection{Thin Plate Splines}
 Thin plate theory addresses problems that commonly arise in areas of natural sciences and engineering when trying to model the behaviour of a thin sheet of some material. The possible processes include but are not limited to stretching, bending, crumpling, buckling, shrinking, straining and tearing. The corresponding mathematical model is based on ideas from differential geometry as well as continuum mechanics, and the set of equations describing the aforementioned phenomena are often notoriously difficult to solve. Therefore, in Computer Graphics, as well as other fields, a number of simplifying assumptions are made when constructing a thin plate model. 
@@ -653,9 +653,6 @@ We then attempt an opposite approach, i.e. we include extra bend shapes to accou
         \end{subfigure}
         \caption{Additional blend shapes. }\label{fig:extrafaces}
 \end{figure}
-
-Fig.~\ref{fig:usage} shows the activation of the extra blend shapes throughout the motion sequence. Both of the optimisation methods favour the first additional blendshape that corresponds to the smile in Fig.~\ref{fig:extrafaces} while the other shapes are only used with low weights. Despite the extension to the set of shapes, the reconstruction error decreased by less then $0.01$ centimetres for both methods. This is explained by the fact that the extra blenshapes are closely related to the original ones, as they are in fact a linear combination of the original blendshapes. A more systematic approach needs to be used to produce more diverse shapes. For example, an additional optimisation step may be included that randomly alters the existing blendshapes, and used a small subset of the altered shapes to find the extension that minimises the reconstruction error. In particular, we choose a set of new shapes that are constructed by adding a small random quantity to the average of the existing set. Then these shapes are included in the optimisation algorithm. The new shapes are stored if they reduce the reconstruction error, and new blend shapes are suggested until the error decreases below a chosen threshold. Using this iterative procedure, we are able to reduce the reconstruction error by about $10 \%$; however, this approach is very computationally intensive, and the new shapes cannot be easily included in the existing model. 
-
 \begin{figure}[htbp!]
         \centering
         \begin{subfigure}[b]{0.47\textwidth}
@@ -668,17 +665,43 @@ Fig.~\ref{fig:usage} shows the activation of the extra blend shapes throughout t
         \end{subfigure}
         \caption{The weights associated with the extra blend shapes as a function of frames in the sequence. The left diagram corresponds to the constrained non-negative least-squares solver while the right one gives he results for the linear least-squares solver.}\label{fig:usage}
 \end{figure}
+Fig.~\ref{fig:usage} shows the activation of the extra blend shapes throughout the motion sequence. Both of the optimisation methods favour the first additional blendshape that corresponds to the smile in Fig.~\ref{fig:extrafaces} while the other shapes are only used with low weights. Despite the extension to the set of shapes, the reconstruction error decreased by less then $0.01$ centimetres for both methods. This is explained by the fact that the extra blenshapes are closely related to the original ones, as they are in fact a linear combination of the original blendshapes. A more systematic approach needs to be used to produce more diverse shapes. For example, an additional optimisation step may be included that randomly alters the existing blendshapes, and used a small subset of the altered shapes to find the extension that minimises the reconstruction error. In particular, we choose a set of new shapes that are constructed by adding a small random quantity to the average of the existing set. Then these shapes are included in the optimisation algorithm. The new shapes are stored if they reduce the reconstruction error, and new blend shapes are suggested until the error decreases below a chosen threshold. Using this iterative procedure, we are able to reduce the reconstruction error by about $10 \%$; however, this approach is very computationally intensive, and the new shapes cannot be easily included in the existing model. 
 
 
 
-% We don't impose temporal smoothness.~\cite{Bouaziz:2013} Compare with diagrams from this paper.
-% We could improve our model by adding wrinkles.
+At this stage our best results still lack expressiveness and visual appeal. In the current pipeline, we first transform the motion sequence from the actor to Emily, and then solve for the blendshapes in the Emily domain. This approach relies on the transformation to produce valid motion in the Emily domain; however, the transformation is geometrical, and it does not guarantee to produce a realistic and natural-looking animation. Therefore, we test the opposite approach. We first find the thin plate spline transformation $\mathbf{T}$ from the actor's neutral expression to Emily's neutral expression. Then the inverse transformation $\mathbf{T^{-1}}$ is used to map the Emily blendshapes to the actor's domain. We thus have matching sets of sparse blendshapes in both domains, see Fig~ref{fig:EtoR}. The weights are calculated at each frame using the original captured sequence and the newly designed blendshapes in the actor's domain; these weights are then applied directly in the Emily domain. 
 
+\begin{figure}[htbp!]
+        \centering
+        \includegraphics[width=0.8\textwidth]{img/EtoRblends}
+        \caption{Use the inverse thin plate spline transform $\mathbf{T^{-1}}$ to produce a set of blendshapes in the actor's domain. The left images are the sparse Emily blendshapes (red dots) while the right images are the sparse actor's blendshapes (vertices of the mesh)}\label{fig:EtoR}
+\end{figure}
+
+Fig.~\ref{fig:resultcomp} compares the results produced using the two antipode approaches. The new approach is able to better mimic the motion of the actor and it improves the appearance of the digital model, i.e. the new animation appears more natural and realistic. Note that the original method tries to reproduce the actor's performance using the transformed geometrical data while the new method relies more on the semantics associated with the blendshapes. In particular, we do not expect the actor and Emily expressions to match identically, for example one of them might be able to raise the eye-brows higher than the other. The new approach is better at respecting and enhancing the different features of the two faces. 
+\begin{figure}[htbp!]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{img/comp4s.png}
+        \end{subfigure} \\
+        \begin{subfigure}[b]{0.6\textwidth}
+                \includegraphics[width=\textwidth]{img/comp6s.png}
+        \end{subfigure}
+        \caption{The comparison of on the left were produced using our original approach. The expressions in the middle where produced using the weights that were calculated in the actor's domain. }\label{fig:resultcomp}
+\end{figure}
+We note that our final animation was not always able to capture the slight smiles that are noticeable in the recorded sequence. This may be explained by the poor match of neutral expressions. Specifically, all of the methods that we used rely on the transformation between the neutral faces. However, the actor's neutral expression is more positive (i.e. the corners of the lips are raised) than that of Emily, see Fig.~\ref{fig:neutrals}. This may be fixed by choosing a better matching neutral face from the actor's sequence, or by mimicking the actor's expression on Emily, and using that as her neutral. In our final results we use the second approach, and apply a additional small positive weight to the blendshapes that correspond to a smiling face, see Sec.~\ref{sec:implementation_details}.
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.3\textwidth}
+                \includegraphics[width=\textwidth]{img/Richard2neutral}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.4\textwidth}
+                \includegraphics[width=\textwidth]{img/emily_neutral}
+        \end{subfigure}
+        \caption{The comparison of neutral expressions.}\label{fig:neutrals}
+\end{figure}
 
 
 There are a number of different techniques that could have been used to construct blendshapes in the actor's domain. Deng et al. proposed designing the blendshapes by hand~\cite{Deng:2006}. In particular, the authors choose a number of characteristic frames in the motion capture sequence, and manually design a set of shapes that perceptually match the expressions observed in these frames. They then form correspondences between the PCA coefficients of motion capture frames and the weights of the blendshapes. Finally, Radial Basis Functions are used to map the new frames in the sequence onto the three-dimensional model to produce the animation. The decision not to use this approach was made because of the extensive manual effort required to design the set of initial correspondences between the chosen frames and the three-dimensional mesh. For the same reason we choose not to use a muscle actuation basis, proposed by Choe and Ko~\cite{Choe:2005}. The design of a muscle actuation basis is based on the human facial anatomy, and is driven by the actuation of different facial muscles. 
-
-% uncanny valley
 
 
 \section{Skin Rendering}
@@ -840,6 +863,8 @@ Talk about Maya plugins and any other implementation stuff worth talking about.
 %-----------------------------------------------------------------------
 \chapter{Results}
 
+% We could improve our model by adding wrinkles.
+% uncanny valley
 
 %-----------------------------------------------------------------------
 \chapter{Conclusions}
