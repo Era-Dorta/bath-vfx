@@ -193,13 +193,22 @@ For an in depth analysis of super-resolution techniques, we refer the readers to
 \chapter{Methodology}
 \label{sec:methods}
 
+This section presents the methodology behind our proposed facial performance capture system and discusses some of the technical challenges we faced in its implementation.
+
 \section{Pipeline}
 
-The proposed pipeline is shown below...
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/pipeline1}
+	\caption{A schematic of the proposed VFX pipeline for the performance-driven facial animation system.}
+	\label{fig:pipeline1}
+\end{figure}
+
+\newpage
 
 \section{Data Capture} \label{sec:datacapture}
 
-Two DSLR cameras were positioned in a stereo configuration to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. The facial performance was recorded on video with a resolution of $640 \times 480$ at 60fps, and the cameras were roughly synchronised by aligning the two separate audio signals. Fixing the cameras close to one another at approximately 10cm separation, and about 1m distance from the subject, meant that the images from both views would be quite similar, allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for triangulation of points on the face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees. 
+The first task was to gather some initial input data for the system by recording the facial performance of an actor in the form of a video sequence. Two DSLR cameras were positioned close to the actor's face in a stereo configuration in order to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. A short sequence, consisting of the actor pulling a number of facial expressions and then talking, was recorded on video with a resolution of $640 \times 480$ at 60fps. The video streams were roughly synchronised afterwards during post-processing in the computer by aligning the two separate audio signals. A relatively low image resolution was chosen in order to try to limit the amount of video data we had to deal with, especially when recording sequences at higher frame-rates. The cameras were fixed on stands to prevent any camera-shake during the performance capture session and calibration process - since it is important that the camera positions remain static for accurate 3D reconstruction. Positioning the cameras close to one another, at approximately 10cm horizontal separation and at a distance of about 1m from the subject, meant that the images from both views would be quite similar - allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for triangulation of points on the actor's face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees.
 
 \begin{figure}[htbp!]
 \centering
@@ -208,7 +217,7 @@ Two DSLR cameras were positioned in a stereo configuration to capture the actor'
 	\label{fig:setup1}
 \end{figure}
 
-Markers used to track the facial performance were placed on the face in the configuration shown in Figure \ref{fig:facemarkers}. 97 markers were used in total, and were drawn onto the actor's face with a makeup pencil so as to be easily removed after the capture session. The positions of the markers were roughly based on those used in the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}, as shown in Figure \ref{fig:surreydata}, although they use fewer markers with 60 in total. In hindsight, using slightly fewer number of markers might have been preferable, as consistently detecting and tracking a large number of markers became quite time-consuming and labour intensive. Furthermore, rather than simply using a black pencil, it might have advantageous to use markers of a significantly different colour to the tones of the human face in order to aid marker detection and tracking, perhaps even using retro-reflective markers as in many commercial motion capture systems ~\cite{Vicon}.
+Markers used to track the facial performance were placed on the face in the configuration shown in Figure \ref{fig:facemarkers}. 97 markers were used in total, and were drawn onto the actor's face with a makeup pencil so as to be easily removed after the capture session. The positions of the markers were roughly based on those used in the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}, as shown in Figure \ref{fig:surreydata}, although they use fewer markers with 60 in total. In hindsight, using slightly fewer number of markers might have been preferable, as consistently detecting and tracking a large number of markers became quite a time-consuming and labour intensive process. Furthermore, rather than simply using a black pencil, it might have advantageous to use markers of a significantly different colour to the tones of the human face in order to aid marker detection and tracking, perhaps even using retro-reflective markers as in many commercial motion capture systems ~\cite{Vicon}.
 
 \begin{figure}[htbp!]
 \begin{minipage}[b]{0.47\textwidth}
@@ -229,16 +238,16 @@ Markers used to track the facial performance were placed on the face in the conf
 
 \section{Camera Calibration}
 
-In order to obtain the 3D coordinates of the markers on the face, the cameras first needed to be calibrated. This was achieved using a checkerboard pattern held in a number of different positions in front of both cameras simultaneously, as shown in Figure \ref{fig:checkerboard}. We made use of the Camera Calibration Toolbox for Matlab \cite{Calib} provided by Jean-Yves Bouguet. It was important to ensure that the checkboard remained within the frame of both cameras during the entire calibration process. 
+Once we had obtained a video sequence of the actor's face, the next stage was to calibrate the stereo camera system in order to obtain accurate 3D coordinates of the markers on the face. This was achieved by using a checkerboard pattern held in a number of different positions in front of both cameras simultaneously, as shown in Figure \ref{fig:checkerboard}. To do this, we made use of the Camera Calibration Toolbox for Matlab \cite{Calib} provided by Jean-Yves Bouguet. It was important to ensure that the checkboard remained within the frame of both cameras during the entire calibration process, and that the camera positions did not move between the performance capture session and the calibration procedure. 
 
 \begin{figure}[htbp!]
 \centering
-\includegraphics[width=0.6\textwidth]{img/checkerboard}
-	\caption{A checkerboard pattern was used to calibrate the pair of stereo cameras.}
+\includegraphics[width=0.8\textwidth]{img/calib2}
+	\caption{A checkerboard pattern was used to calibrate the pair of stereo cameras. The checkerboard had to be visible from both camera viewpoints simultaneously.}
 	\label{fig:checkerboard}
 \end{figure}
 
-As a result of the stereo calibration, we obtain an estimate of the intrinsic and external parameters of the two cameras, from which we can compute the camera projection matrices using the perspective projection equation:
+As a result of the stereo calibration, we obtain an estimate of the intrinsic and external parameters of the two cameras, from which we can compute the camera projection matrices $\vect{P}$ and $\vect{P}'$ for the left and right cameras respectively using the equation for perspective projection:
 
 \begin{equation*}
 \label{qrdecomp}
@@ -289,7 +298,7 @@ As a result of the stereo calibration, we obtain an estimate of the intrinsic an
 \end{equation*}
 
 
-The resulting extrinsic parameters, describing the rotation and translation between the views, are visualised in Figure \ref{fig:calib}.
+The resulting extrinsic parameters, describing the rotation $\vect{R}$ and translation $\vect{t}$ between the two camera views, are visualised in Figure \ref{fig:calib}.
 
 \begin{figure}[htbp!]
 \centering
