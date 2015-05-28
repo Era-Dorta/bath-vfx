@@ -976,7 +976,15 @@ Additionally, if both eyes surpass the threshold $t$, $\alpha$ and $\beta$ will 
 %-----------------------------------------------------------------------
 \chapter{Conclusions and Future Work}
 \section{Conclusions}
-% uncanny valley
+The objective of our project was to produce a prototype pipeline that takes captured facial performance as input, and creates an animation of a three-dimensional model of a human face. 
+
+The quality of an animation may be evaluated in a number of different ways. In our final animated sequence Emily is able to closely mimic the motion of the actor while retaining individuality that is related to structure and features of Emily's face. The realism of our animations improved with time; the first animation has no eyes or mouth, and it exhibits unusual behaviours. On the contrary, the final animation includes motion of the eyes, the tongue and the teeth, as well as more plausible overall performance, thus it looks significantly more appealing. Though more realistic than a hand-drawn character or an industrial robot, our results lack the naturalness of human motion. We believe that our results belong in the uncanny valley of the familiarity versus human likeness diagram, see Fig.~\ref{fig:UV}. The theory of the uncanny valley suggests that human-like appearance and behaviour appears repulsive as the resemblance increases~\cite{UV}.
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/UV}
+	\caption{Our animations in the context of the uncanny valley.}
+	\label{fig:UV}
+\end{figure}
 
 
 \section{Future Work}
@@ -985,8 +993,7 @@ Additionally, if both eyes surpass the threshold $t$, $\alpha$ and $\beta$ will 
 
 There are a number of different techniques that could be used to construct blendshapes in the actor's domain. Deng et al. proposed designing the blendshapes by hand~\cite{Deng:2006}. In particular, the authors choose a number of characteristic frames in the motion capture sequence, and manually design a set of shapes that perceptually match the expressions observed in these frames. They then form correspondences between the PCA coefficients of motion capture frames and the weights of the blendshapes. Finally, Radial Basis Functions are used to map the new frames in the sequence onto the three-dimensional model to produce the animation. Another option would be to use a muscle actuation basis, proposed by Choe and Ko~\cite{Choe:2005}. The design of a muscle actuation basis is based on the human facial anatomy, and is driven by the actuation of different facial muscles. Our main reservation about these approach is the extensive manual effort required to design the set of initial correspondences between the chosen frames and the three-dimensional mesh.
 
-
-% We could improve our model by adding wrinkles.
+% We could improve our model by adding more markers, and including wrinkles.
 
 
 
