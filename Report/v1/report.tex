@@ -865,7 +865,7 @@ Additionally, we program our code to comply with \Maya undo command policy, whic
 	\label{fig:file_format}
 \end{figure}
 
-\begin{lstlisting}[caption = Breaking the weights connections and setting keyframes., label = lst:set_weights, frame=single, float]  % Start your code-
+\begin{lstlisting}[caption = Breaking the weights connections and setting keyframes., label = lst:set_weights, frame=single, float]
 
 // Break connections.
 for (unsigned int i = 0; i < (unsigned int)(numWeights); i++){
@@ -892,6 +892,18 @@ for (unsigned int j = 0; j < weights.at(i).size(); j++){
 }
 \end{lstlisting}
 
+Once the weights were added, we noticed that the teeth and tongue of the Emily rig would not move.
+Both meshes were actually regulated by the position of a control object in the scene, so the solution was to translate the object by a factor of the mean of all the weights involved in the mouth control, as shown in Listing~\ref{lst:teeth_tonge_control}.
+
+\begin{lstlisting}[caption = Teeth and tongue control based on relevant weights., label = lst:teeth_tonge_control, frame=single, float]
+
+cmd = "setAttr con_jaw_c.translateY ";
+cmd += -3.2 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
+dgMod.commandToExecute(cmd);
+cmd = "setKeyframe  \"con_jaw_c.translateY\"";
+dgMod.commandToExecute(cmd);
+\end{lstlisting}
+
 The next step was to include head rotation and translation back into the animation.
 In order to achieve this, we saved the inverse rotation from the Procustes analisys that was performed on Section~\ref{sec:stabilising_head_movement}, into a file with the same format as shown in Figure~\ref{fig:file_format}.
 We then read the data into \Maya and applied the transformation for each frame; for the translation we did a equivalent procedure with a translation file.
@@ -905,6 +917,16 @@ The matrix multiplication order also plays in important role here, as shown in E
 
 where $\mathbf{x}$ is the original point, $\mathbf{x}_{new}$ is the transformed point, $R$ is the rotation matrix and $\mathbf{t}$ is a translation vector.
 We implemented this transformation in \Maya using the ``xform -m" command, so we first apply the translation and then apply the rotation with an extra parameter ``-r" so that both matrices get multiplied in the desired order.
+
+Having eye movement is quite important to achieve realism in the animation, for this purpose we tracked the pupils world positions in the input frame sequence.
+This positions were saved into separate files for each eye using the format shown in Figure~\ref{fig:file_format}.
+The positions were loaded into \Maya and the eye control object was translated using the offsets with the respect to the first frame, which was assumed to be looking straight.
+With this first approach each eye can move independently which leads to unsatisfactory results, an initial solution to this problem was to move both eyes using the mean offset for each frame.
+Nevertheless, this would introduce considerable error when one of the eyes winks, as the tracking becomes completely unreliable for the winking eye which in turn drags the other eye.
+Our solution involves interpolating between the two offsets using variable factors, the final offset $d_f$ will be computed as $d_f = \alpha d_l + \beta d_r$, where $\alpha$ and $\beta$ are the interpolation factors, $d_l$ and $d_r$ are the offsets for the left and right eye, respectively.
+Figure~\ref{fig:eyes_interpolation} shows the $\alpha_x$ values along the $x$ direction, where $t$ is the change threshold and $l$ is the maximum offset limit.
+Initially $\alpha_x$ is $0.5$, however if the offset goes beyond a threshold $t$, $\alpha$ will decrease linearly until it reaches the limit $l$.
+The same criteria will be applied in the $y$ direction, and the value for that eye will be $\alpha = \min \left\lbrace \alpha_x, \alpha_y \right\rbrace$.
 
 \begin{figure}[htbp!]
 \centering
