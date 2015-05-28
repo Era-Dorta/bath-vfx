@@ -595,7 +595,11 @@ We start by manually marking the three-dimensional face of Emily; the try to rep
         \caption{The red dots mark the position of the markers in the motion sequence while the black cirles correspond to the reconstructed position of the markers. The top results were produced using the non-negative least-squares solver while the bottom results were produced by the linear least-squares solver. }\label{fig:errorw2w3}
 \end{figure}
 
-The use of blend shapes greatly improves the visual quality of the resulting animation. However, the animation still lacks realism and expressiveness, thus we implement a number of changes to the original model. Firstly, a reduced set of key expressions is used in the solver; this leads to a smaller system of equations to be optimised. The reduced set contains $19$ shapes included in the visual set of controls in the original blend shape model. The smaller set of shapes leads to a slight increased (of approximately $0.03$ centimetres) in reconstruction error. There is no noticeable effect on the visual quality of the resulting animation, see Fig.~\ref{fig:19blends}. Thus the only notable advantage of using fewer blend shapes is the acceleration of the  optimisation step. However, if the performance of the algorithm is the main objective, then a PCA basis is a better choice than a reduced non-orthogonal set of shapes.
+The use of blend shapes greatly improves the visual quality of the resulting animation. However, the animation still lacks realism and expressiveness, thus we implement a number of changes to the original model. Firstly, we aim to find a sparse solution, i.e. minimise the number of blendshapes used at any given time. This is done by adding a penalty term on the $L1$-norm of the weights to the original minimisation problem. Then an iterative method is used to find the optimal set of weights; we use a Matlab implementation of the LASSO algorithm~\cite{Schmidt:2005}. After careful adjustment of the scaling parameter, the least squares solver is able to reduce the mean reconstruction error by approximately $0.03$ centimetres. However, the best results were achieved without imposing the upper and lower bound on the weights. We found that in our case it is more import to impose these bounds than to favour sparse solutions. Moreover, the solution produced by the initial solver uses on average $21$ blendshapes per frame, which does not seem unreasonable given the complexity of human facial motion.
+
+As noted by Bouaziz et al., a motion capture sequence also has temporal constraints, i.e. each frame in closely related to the previous frames~\cite{Bouaziz:2013}. This constraint may be included in the minimisation problem by adding a smoothness term, $||\w^{t-2} - 2 \w^{t-1} + \w^t||^2_2$, where $\w$ is the vector of weights, and $t$ is the frame number. However, the origin solution automatically obeys this smoothness constraint as the the input sequence was filmed at a relatively rate of $60$ frames per second. Specifically, we compared the change in blendshape weights from frame to frame; the average difference is $0.007$, which is hardy noticeable. The highest differences (of around$0.3$) appear during the opening and closing of the mouth; these transitions look natural at the original frame rate. We note that if the motion capture data was recorded at a lower frame rate, then the temporal constraints should improve the quality of the animation.
+
+Next, we examined the effect of using a reduced set of key expressions in the solver; this leads to a smaller system of equations to be optimised. The reduced set contains $19$ shapes included in the visual set of controls in the original blend shape model. The smaller set of shapes leads to a slight increase (of approximately $0.03$ centimetres) in reconstruction error. There is no noticeable effect on the visual quality of the resulting animation, see Fig.~\ref{fig:19blends}. Thus the only notable advantage of using fewer blend shapes is the acceleration of the  optimisation step. However, if the performance of the algorithm is the main objective, then a PCA basis is a better choice than a reduced non-orthogonal set of shapes.
 
 \begin{figure}[htbp!]
         \centering
@@ -650,9 +654,7 @@ We then attempt an opposite approach, i.e. we include extra bend shapes to accou
         \caption{Additional blend shapes. }\label{fig:extrafaces}
 \end{figure}
 
-Fig.~\ref{fig:usage} shows the activation of the extra blend shapes throughout the motion sequence. Both of the optimisation methods favour the first additional blendshape that corresponds to the smile in Fig.~\ref{fig:extrafaces} while the other shapes are only used with low weights. Despite the extension to the set of shapes, the reconstruction error decreased by less then $0.01$ centimetres for both methods. This is explained by the fact that the extra blenshapes are closely related to the original ones, as they are in fact a linear combination of the original blendshapes. A more systematic approach needs to be used to produce more diverse shapes. For example, an additional optimisation step may be included that randomly alters the existing blendshapes, and used a small subset of the altered shapes to find the extension that minimises the reconstruction error. In particular, we choose a set of new shapes that are constructed by adding a small random quantity to the average blend shape. Then these shapes are included in the optimisation algorithm. The new shapes are stored if they reduce the reconstruction error, and new blend shapes are suggested until the error decreases below a chosen threshold. 
-
-% 10,50 shapes: min 0.2326.
+Fig.~\ref{fig:usage} shows the activation of the extra blend shapes throughout the motion sequence. Both of the optimisation methods favour the first additional blendshape that corresponds to the smile in Fig.~\ref{fig:extrafaces} while the other shapes are only used with low weights. Despite the extension to the set of shapes, the reconstruction error decreased by less then $0.01$ centimetres for both methods. This is explained by the fact that the extra blenshapes are closely related to the original ones, as they are in fact a linear combination of the original blendshapes. A more systematic approach needs to be used to produce more diverse shapes. For example, an additional optimisation step may be included that randomly alters the existing blendshapes, and used a small subset of the altered shapes to find the extension that minimises the reconstruction error. In particular, we choose a set of new shapes that are constructed by adding a small random quantity to the average of the existing set. Then these shapes are included in the optimisation algorithm. The new shapes are stored if they reduce the reconstruction error, and new blend shapes are suggested until the error decreases below a chosen threshold. Using this iterative procedure, we are able to reduce the reconstruction error by about $10 \%$; however, this approach is very computationally intensive, and the new shapes cannot be easily included in the existing model. 
 
 \begin{figure}[htbp!]
         \centering
@@ -667,20 +669,17 @@ Fig.~\ref{fig:usage} shows the activation of the extra blend shapes throughout t
         \caption{The weights associated with the extra blend shapes as a function of frames in the sequence. The left diagram corresponds to the constrained non-negative least-squares solver while the right one gives he results for the linear least-squares solver.}\label{fig:usage}
 \end{figure}
 
-The constrained non-negative least-squares solver 
 
-
-% w2: dense E with not mouth. 68 blends. Error 0.3006. 
-% w3: dense E with not mouth. 68 blends. Error 0.2801.
-
-
-% Constructing Rich blendshapes. Cf. ~\cite{Choe:2005}. Say tht we do not use actuation of muscles because the basis is really hard to construct.
-% Compare with ~\cite{Deng:2006}. No. . Meanwhile, based on the selected reference video frames (face snapshots), animators manually tune the weights of the blendshape face model to perceptually match the model and the reference images, which creates surpervised correspondences between the PCA coefficients of motion capture frames and the weights of the blendshape face model (referred to as mocap-weight pairs). 
 
 % We don't impose temporal smoothness.~\cite{Bouaziz:2013} Compare with diagrams from this paper.
 % We could improve our model by adding wrinkles.
 
+
+
+There are a number of different techniques that could have been used to construct blendshapes in the actor's domain. Deng et al. proposed designing the blendshapes by hand~\cite{Deng:2006}. In particular, the authors choose a number of characteristic frames in the motion capture sequence, and manually design a set of shapes that perceptually match the expressions observed in these frames. They then form correspondences between the PCA coefficients of motion capture frames and the weights of the blendshapes. Finally, Radial Basis Functions are used to map the new frames in the sequence onto the three-dimensional model to produce the animation. The decision not to use this approach was made because of the extensive manual effort required to design the set of initial correspondences between the chosen frames and the three-dimensional mesh. For the same reason we choose not to use a muscle actuation basis, proposed by Choe and Ko~\cite{Choe:2005}. The design of a muscle actuation basis is based on the human facial anatomy, and is driven by the actuation of different facial muscles. 
+
 % uncanny valley
+
 
 \section{Skin Rendering}
 
