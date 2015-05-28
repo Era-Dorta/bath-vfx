@@ -916,6 +916,7 @@ for (unsigned int j = 0; j < weights.at(i).size(); j++){
 
 Once the weights were added, we noticed that the teeth and tongue of the Emily rig would not move.
 Both meshes were actually regulated by the position of a control object in the scene, so the solution was to translate the object by a factor of the mean of all the weights involved in the mouth control, as shown in Listing~\ref{lst:teeth_tonge_control}.
+The lower teeth and tongue would be left hanging mid air if the blendshapes that control the mouth opening were activated together; this problem was fixed by lowering the position of both meshes.
 
 \begin{lstlisting}[caption = Teeth and tongue control based on relevant weights., label = lst:teeth_tonge_control, frame=single, float]
 
@@ -940,12 +941,13 @@ The matrix multiplication order also plays in important role here, as shown in E
 where $\mathbf{x}$ is the original point, $\mathbf{x}_{new}$ is the transformed point, $R$ is the rotation matrix and $\mathbf{t}$ is a translation vector.
 We implemented this transformation in \Maya using the ``xform -m" command, so we first apply the translation and then apply the rotation with an extra parameter ``-r" so that both matrices get multiplied in the desired order.
 
-Having eye movement is quite important to achieve realism in the animation, for this purpose we tracked the pupils world positions in the input frame sequence.
-This positions were saved into separate files for each eye using the format shown in Figure~\ref{fig:file_format}.
-The positions were loaded into \Maya and the eye control object was translated using the offsets with the respect to the first frame, which was assumed to be looking straight.
+Having eye movement is quite important to achieve realism in the animation, for this purpose we tracked the pupils' world positions in the input frame sequence.
+These positions were saved into separate files for each eye using the format shown in Figure~\ref{fig:file_format}.
+The positions were loaded into \Maya and the eye control object was translated using the offsets with respect to the first frame, which was assumed to be looking straight.
 With this first approach each eye can move independently which leads to unsatisfactory results, an initial solution to this problem was to move both eyes using the mean offset for each frame.
 Nevertheless, this would introduce considerable error when one of the eyes winks, as the tracking becomes completely unreliable for the winking eye which in turn drags the other eye.
-Our solution involves interpolating between the two offsets using variable factors, the idea is to have both eyes moving together, rapidly ignore if one eye goes off and while sustaining smooth movements.
+Our solution involves interpolating between the two offsets using variable factors.
+The idea is to have both eyes moving together, start ignoring the offset for an eye if it goes off, while sustaining smooth movements.
 The final offset $d_f$ will be computed as $d_f = \alpha d_l + \beta d_r$, where $\alpha$ and $\beta$ are the interpolation factors, $d_l$ and $d_r$ are the offsets for the left and right eye, respectively.
 Figure~\ref{fig:eyes_interpolation} shows the $\alpha_x$ values along the $x$ direction, where $t$ is the change threshold and $l$ is the maximum offset limit.
 Initially $\alpha_x$ is $0.5$, however if the offset goes beyond a threshold $t$, $\alpha$ will decrease linearly until it reaches the limit $l$.
@@ -960,6 +962,20 @@ Additionally, if both eyes surpass the threshold $t$, $\alpha$ and $\beta$ will 
 	\label{fig:eyes_interpolation}
 \end{figure}
 
+Incorporating blinks was another important step towards attaining a more realistic animation.
+Since the eyelids were not tracked in the recording session, the only option was to manually set the blinking times in \Maya.
+To faithfully reproduce the blinking in the data the following information was manually added:
+\begin{itemize}
+\item Frame number marking when the eye:
+	\begin{itemize}
+	\item started closing;
+	\item closed completely;
+	\item started opening again;
+	\item was fully open again;
+	\end{itemize}
+\item The blink magnitude (eyes fully close, squinting, etc);
+\item The blink type (both eyes closed, only one eye).
+\end{itemize}
 
 %-----------------------------------------------------------------------
 \chapter{Results}
