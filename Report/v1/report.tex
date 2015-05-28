@@ -688,17 +688,6 @@ Our objective in skin rendering is to generate a face that would be indistinguis
 In our case, we have have taken a 3D scan of a subject and our aim is to improve the realism when rendering it.
 For this task we will mainly look at the techniques presented by Hertzmann et al~\cite{Hertzmann2001} and Graham et al~\cite{Graham2013}.
 
-Before we begin, lets explain the Image Analogies framework~\cite{Hertzmann2001} in more detail.
-Given three images $A$, $A'$ and $B$, where $A$ is an unfiltered example, $A'$ is a filtered example, and $B$ is an input image, the algorithm will generate an output image $B'$ such that $B'$ relates in the same way to $B$, as $A'$ does to $A$.
-A k-d tree for an Approximate Nearest-Neighbour Search (ANN) is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
-The closest match for a neighbourhood in pixel $q$ in $B$ and $B'$ is located in the tree.
-A detailed description of the algorithm in pseudo code is shown in Algorithm~\ref{alg:image_analogies}, where $F$ is computed a weighted distance over the feature vectors using a Gaussian kernel and $s$ is a data structure such that $s(q) = p$.
-Based on Ashikhmin's work, a match that is coherent to what has been already synthesized is computed.
-These two candidates are weighted and the best one is chosen.
-The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence this means that the neighbourhoods also include the previous level in the search.
-We found three Image Analogies implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
-The first one is a simple single threaded implementation, the second one was done with CUDA, however the author's single threaded code produced overall better results.
-
 \begin{algorithm}[htbp!] 
 	\caption{Image Analogies}
 	\label{alg:image_analogies}
@@ -727,6 +716,17 @@ The first one is a simple single threaded implementation, the second one was don
 	}
 	\KwRet{$B'_L$}
 \end{algorithm}
+
+Before we begin, lets explain the Image Analogies framework~\cite{Hertzmann2001} in more detail.
+Given three images $A$, $A'$ and $B$, where $A$ is an unfiltered example, $A'$ is a filtered example, and $B$ is an input image, the algorithm will generate an output image $B'$ such that $B'$ relates in the same way to $B$, as $A'$ does to $A$.
+A k-d tree for an Approximate Nearest-Neighbour Search (ANN) is built using a feature vector from a neighbour pixel $p$ in $A$ and $A'$.
+The closest match for a neighbourhood in pixel $q$ in $B$ and $B'$ is located in the tree.
+A detailed description of the algorithm in pseudo code is shown in Algorithm~\ref{alg:image_analogies}, where $F$ is computed a weighted distance over the feature vectors using a Gaussian kernel and $s$ is a data structure such that $s(q) = p$.
+Based on Ashikhmin's work, a match that is coherent to what has been already synthesized is computed.
+These two candidates are weighted and the best one is chosen.
+The whole process is carried in a multiresolution pyramid, as shown in Figure~\ref{fig:ia_diagram}, where $l$ indicates the current level, in essence this means that the neighbourhoods also include the previous level in the search.
+We found three Image Analogies implementations available \cite{ImAnSingleThreadWeb, ImAnCudaWeb, ImAnHertzmannWeb}.
+The first one is a simple single threaded implementation, the second one was done with CUDA, however the author's single threaded code produced overall better results.
 
 \begin{figure}[htbp!]
 \begin{minipage}[b]{.55\textwidth}
@@ -782,16 +782,55 @@ Results for this approach are shown in Figure~\ref{fig:emily_super_resolution}.
 	\label{fig:emily_super_resolution}
 \end{figure}
 
+\begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.48\textwidth}
+                \includegraphics[width=\textwidth]{img/emily_close_original}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+                \includegraphics[width=\textwidth]{img/emily_close_sr}
+        \end{subfigure}
+        \caption{Close up of texture super-resolution for Emily, (left) original texture, (right) synthesized texture with higher resolution.}
+\end{figure}
+
 Generating normals maps using Image Analogies is another interesting area, as it could provide an alternative to the costly standard capture methods.
 For this we tried to generate a normal maps from albedo images and from bump maps generated from the previous 3D scan texture, results are shown in Figure~\ref{fig:normal_synthesis}. 
 To create the bump maps, the textures were transformed to gray scale and a histogram equalization was applied.
-In order to improve the quality of the bump maps, we also applied the Image Analogies filter to them using a known good bump map as a filtered example, however the quality did not improve significantly.
+In order to improve the quality of the bump maps, we also applied the Image Analogies filter to them using a known good bump map as a filtered example, results are shown in Figure~\ref{fig:bump_map_quality_increase}.
 
 \begin{figure}[htbp!]
 \centering
 \includegraphics[width=\textwidth]{img/normal_generation}
 	\caption{ Normal synthesis from albedo image.}
 	\label{fig:normal_synthesis}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/bump_map_quality_increase}
+	\caption{ Improving the quality of a bump map from a gray scale texture.}
+	\label{fig:bump_map_quality_increase}
+\end{figure}
+
+The advantages of using a bump mapping are shown in Figure~\ref{fig:bump_mapping_richard}.
+In this example, a render with the original texture is shown in Figure~\ref{fig:richard_original}.
+The original RGB texture was converted to a gray scale image and applied directly as a bump map texture,
+results are shown in Figure~\ref{fig:richard_disp_impr}, note how the addition of high frequency imperfections adds extra realism to the image.
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[t]{0.48\textwidth}
+                \includegraphics[width=\textwidth]{img/richard_original}
+                \caption{Render with the original texture.}
+                \label{fig:richard_original}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.48\textwidth}
+                \includegraphics[width=\textwidth]{img/richard_disp_impr}
+                \caption{Render with the original texture and bump mapping.}
+                \label{fig:richard_disp_impr}
+        \end{subfigure}
+        \caption{The advantages of using a bump map..}
+        \label{fig:bump_mapping_richard}
 \end{figure}
 
 \chapter{Implementation details}
