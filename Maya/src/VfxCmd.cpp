@@ -15,7 +15,6 @@
 #include <vector>
 #include <string>
 #include <cassert>
-#include "ErrorCheck.h"
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>
 #include <cmath>
