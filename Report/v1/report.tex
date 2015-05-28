@@ -73,7 +73,7 @@
 
 A talented painter or sculptor is able to imagine and reproduce the subtle details of a human face. Hours of training and endless manual adjustments are required before an arbitrary shape resembles a facial expression. Furthermore, a human eye is trained to notice subtle changes in the expression of another human being, which also applies to animated humans, thus even the smallest discrepancies in an animated model are easily detected. Though artists are able to produce good quality and appealing results, the limitations in budget and time so prominent in the entertainment industry motivate the development of more automated, faster and cheaper models.
 
-The naive approach that allows for faster performance is the keyframe animation; though it is still based on manual input, keyframe animation requires fewer frames as the intermediate expressions are interpolated over. However, this approach is still very laborious and time consuming. With the emergence of software and systems for motion capture, development of mathods for performance-driven animation has received significant attention from both the industry as well as the academia.
+The naive approach that allows for faster performance is the keyframe animation; though it is still based on manual input, keyframe animation requires fewer frames as the intermediate expressions are interpolated over. However, this approach is still very laborious and time consuming. With the emergence of software and systems for motion capture, development of methods for performance-driven animation has received significant attention from both the industry as well as the academia.
 
 
 
@@ -985,8 +985,55 @@ To faithfully reproduce the blinking in the data the following information was m
 
 %-----------------------------------------------------------------------
 \chapter{Results}
+In this chapter we shall introduce our final results, highlight the strengths and weaknesses, and compare the results we have produced throughout the course of this project.
+
+In general, our final animation well resembles the motion of the actor, see Fig.~\ref{fig:results1}. The animation runs at $60$ frames per second, it is smooth and expressive, see the video in the supplementary material. The animation respects the intrinsic differences between the actor and Emily, i.e. the animated expressions are not exact replicas of the actor's expressions; instead they are Emily versions of the actor's expressions. The final result was enhanced by manually activating the blendshapes that control blinks and winks throughout the motion sequence, see Fig.~\ref{fig:results2}. 
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[t]{0.43\textwidth}
+                \includegraphics[width=\textwidth]{img/results/Emily_Maya_clean_video_300}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.43\textwidth}
+                \includegraphics[width=\textwidth]{img/results/Emily_Maya_clean_video_1187}
+        \end{subfigure}\\
+        \begin{subfigure}[t]{0.43\textwidth}
+                \includegraphics[width=\textwidth]{img/results/Emily_Maya_clean_video_1544}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.43\textwidth}
+                \includegraphics[width=\textwidth]{img/results/Emily_Maya_clean_video_2135}
+        \end{subfigure}
+        \caption{The final animation well resembles the captures sequence.}
+        \label{fig:results1}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/results/Emily_Maya_clean_video_775}
+	\caption{Manually added blinks.}
+	\label{fig:results2}
+\end{figure}
 
 
+
+\begin{figure}
+        \centering
+        \begin{subfigure}[t]{0.43\textwidth}
+                \includegraphics[width=\textwidth]{img/results/Emily_Maya_clean_video_2578}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.43\textwidth}
+                \includegraphics[width=\textwidth]{img/results/Emily_Maya_clean_video_2631}
+        \end{subfigure}
+        \caption{The final animation well resembles the captures sequence.}
+        \label{fig:results1}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/results/Emily_Maya_clean_video_2941}
+	\caption{Offset interpolation for eye movements in \Maya.}
+	\label{fig:eyes_interpolation}
+\end{figure}
 
 
 %-----------------------------------------------------------------------
@@ -1010,6 +1057,7 @@ The quality of an animation may be evaluated in a number of different ways. In o
 There are a number of different techniques that could be used to construct blendshapes in the actor's domain. Deng et al. proposed designing the blendshapes by hand~\cite{Deng:2006}. In particular, the authors choose a number of characteristic frames in the motion capture sequence, and manually design a set of shapes that perceptually match the expressions observed in these frames. They then form correspondences between the PCA coefficients of motion capture frames and the weights of the blendshapes. Finally, Radial Basis Functions are used to map the new frames in the sequence onto the three-dimensional model to produce the animation. Another option would be to use a muscle actuation basis, proposed by Choe and Ko~\cite{Choe:2005}. The design of a muscle actuation basis is based on the human facial anatomy, and is driven by the actuation of different facial muscles. Our main reservation about these approach is the extensive manual effort required to design the set of initial correspondences between the chosen frames and the three-dimensional mesh.
 
 % We could improve our model by adding more markers, and including wrinkles.
+% We could track eyelids and add blinks automatically.
 
 
 
