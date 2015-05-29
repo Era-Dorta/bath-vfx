@@ -62,6 +62,10 @@
 \degreemonthyear{May 2015}
 \norestrictions
 
+% Write here the section you are working on to compile only that one
+% Comment to compile all
+\includeonly{conclusions} 
+
 \begin{document}
 
 \maketitle
@@ -70,17 +74,17 @@
 \tableofcontents
 }
 
-\input{introduction}
+\include{introduction}
 
-\input{previous_work}
+\include{previous_work}
 
-\input{methodology}
+\include{methodology}
 
-\input{implementation_details}
+\include{implementation_details}
 
-\input{results}
+\include{results}
 
-\input{conclusions}
+\include{conclusions}
 
 \newpage
 \bibliographystyle{eg-alpha}
