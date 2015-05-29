@@ -4,16 +4,12 @@
 
 This section presents the methodology behind our proposed facial performance capture system and discusses some of the technical challenges we faced in its implementation.
 
-\section{Pipeline}
-
 \begin{figure}[htbp!]
 \centering
-\includegraphics[width=0.8\textwidth]{img/pipeline1}
-	\caption{A schematic of the proposed VFX pipeline for the performance-driven facial animation system.}
+\includegraphics[width=\textwidth]{img/pipeline1}
+	\caption{A schematic of the proposed pipeline for the performance capture system.}
 	\label{fig:pipeline1}
 \end{figure}
-
-\newpage
 
 \section{Data Capture} \label{sec:datacapture}
 
@@ -26,7 +22,9 @@ The first task was to gather some initial input data for the system by recording
 	\label{fig:setup1}
 \end{figure}
 
-Markers used to track the facial performance were placed on the face in the configuration shown in Figure \ref{fig:facemarkers}. 97 markers were used in total, and were drawn onto the actor's face with a makeup pencil so as to be easily removed after the capture session. The positions of the markers were roughly based on those used in the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}, as shown in Figure \ref{fig:surreydata}, although they use fewer markers with 60 in total. In hindsight, using slightly fewer number of markers might have been preferable, as consistently detecting and tracking a large number of markers became quite a time-consuming and labour intensive process. Furthermore, rather than simply using a black pencil, it might have advantageous to use markers of a significantly different colour to the tones of the human face in order to aid marker detection and tracking, perhaps even using retro-reflective markers as in many commercial motion capture systems ~\cite{Vicon}.
+Markers used to track the facial performance were placed on the actor's face in the configuration shown in Figure \ref{fig:facemarkers}. 97 markers were used in total, and were drawn onto the actor's face with a make-up pencil so as to be easily removed after the capture session. The positions of the markers were roughly based on those used in the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}, as shown in Figure \ref{fig:surreydata}, although they use fewer markers with just 60 in total. In hindsight, using slightly fewer number of markers in our system might have been preferable, as consistently detecting and tracking a large number of markers (and preserving the labelling order of the markers) became quite a time-consuming and labour intensive process, prone to error. Furthermore, rather than simply using a black pencil, it might have advantageous to use markers of a significantly different colour to the tones of the human face in order to aid marker detection and tracking, or perhaps even using retro-reflective markers as in many commercial motion capture systems ~\cite{Vicon}.
+
+Although the markers were placed all over the face to capture full facial performance, we tried to ensure that specific markers were placed in positions on the face which exhibit large non-rigid deformation, such as around the eyes, around the mouth and along the eye-brows, in order capture the full expressiveness of the face. In a future implementation, it would be useful to track the rigid head motion by tracking the positions of a number points on the head of the actor, for example by making the actor wear a skull cap with markers. Another useful addition would be to somehow track the eyelids so we can capture subtle eye movements and blinks. Also, since we only track points on the outside of the mouth, we do not gather information about the lip movement, such as expressions involving pursing or funnelling of the lips, etc.
 
 \begin{figure}[htbp!]
 \begin{minipage}[b]{0.47\textwidth}
@@ -47,16 +45,44 @@ Markers used to track the facial performance were placed on the face in the conf
 
 \section{Camera Calibration}
 
-Once we had obtained a video sequence of the actor's face, the next stage was to calibrate the stereo camera system in order to obtain accurate 3D coordinates of the markers on the face. This was achieved by using a checkerboard pattern held in a number of different positions in front of both cameras simultaneously, as shown in Figure \ref{fig:checkerboard}. To do this, we made use of the Camera Calibration Toolbox for Matlab \cite{Calib} provided by Jean-Yves Bouguet. It was important to ensure that the checkboard remained within the frame of both cameras during the entire calibration process, and that the camera positions did not move between the performance capture session and the calibration procedure. 
+Once we had obtained a video sequence of the actor's face, the next stage was to calibrate the stereo camera system in order to obtain accurate 3D coordinates of the markers on the face. 
+
+Camera calibration is name given to the process of recovering the camera projection matrix $\vect{P}$ from images of a controlled scene. We assume the pinhole camera model and under perspective projection the map between the three-dimensional world coordinates of a point $(X, Y, Z)^T$ and its two-dimensional image pixel coordinates $(u, v)^T$ is a linear mapping in homogeneous coordinates represented by the $3 \times 4$ projection matrix:
+
+\begin{equation}
+\label{projection}
+	\left(\!
+    \begin{array}{c}
+      su \\
+      sv \\
+      s
+    \end{array}
+  	\!\right) =
+  \begin{bmatrix}
+       p_{11} & p_{12} & p_{13} & p_{14} \\[0.3em]
+       p_{21} & p_{22} & p_{23} & p_{24} \\[0.3em]
+       p_{31} & p_{32} & p_{33} & p_{34}
+  \end{bmatrix}
+    \left(\!
+    \begin{array}{c}
+      X \\
+      Y \\
+      Z \\
+      1
+    \end{array}
+    \!\right)
+\end{equation}
+
+To obtain an estimate of the camera projection matrices for both cameras, we use a checkerboard pattern of known dimensions held in a number of different positions and orientations throughout the scene, in view of both cameras simultaneously, as shown in Figure \ref{fig:checkerboard}. To perform the calibration, we made use of the Camera Calibration Toolbox for Matlab \cite{Calib} provided by Jean-Yves Bouguet, which automatically detects the grid corners in each image and solves for the intrinsic camera parameters (focal length, principle point, and distortion coefficients) and the extrinsic parameters (rigid rotation and translation). It was important to ensure that the checkboard remained within the frame of both cameras during the entire calibration process, and that the camera positions did not move between the performance capture session and the calibration procedure. 
 
 \begin{figure}[htbp!]
 \centering
-\includegraphics[width=0.8\textwidth]{img/calib2}
+\includegraphics[width=0.9\textwidth]{img/calib2}
 	\caption{A checkerboard pattern was used to calibrate the pair of stereo cameras. The checkerboard had to be visible from both camera viewpoints simultaneously.}
 	\label{fig:checkerboard}
 \end{figure}
 
-As a result of the stereo calibration, we obtain an estimate of the intrinsic and external parameters of the two cameras, from which we can compute the camera projection matrices $\vect{P}$ and $\vect{P}'$ for the left and right cameras respectively using the equation for perspective projection:
+As a result of the stereo calibration, we obtain an estimate of the intrinsic matrices $\vect{K}$, $\vect{K}'$ and external parameters $\vect{R}$, $\vect{t}$ of the two cameras, from which we can compute the camera projection matrices $\vect{P}$ and $\vect{P}'$ for the left and right cameras respectively using the equation for perspective projection:
 
 \begin{equation*}
 \label{qrdecomp}
@@ -106,8 +132,9 @@ As a result of the stereo calibration, we obtain an estimate of the intrinsic an
     \!\right)
 \end{equation*}
 
+where the left camera is assumed to be centred at the origin and aligned with the world co-ordinate axes, i.e. its projection matrix is $\vect{P} = \vect{K} [\vect{I} | \vect{0}]$, and the right camera projection matrix is expressed as $\vect{P}' = \vect{K}' [\vect{R} | \vect{t}]$.
 
-The resulting extrinsic parameters, describing the rotation $\vect{R}$ and translation $\vect{t}$ between the two camera views, are visualised in Figure \ref{fig:calib}.
+The resulting extrinsic parameters, describing the rotation $\vect{R}$ and translation $\vect{t}$ between the two camera views, are visualised in Figure \ref{fig:calib}. The positions of the checkerboard used for calibration are also displayed.
 
 \begin{figure}[htbp!]
 \centering
@@ -116,7 +143,48 @@ The resulting extrinsic parameters, describing the rotation $\vect{R}$ and trans
 	\label{fig:calib}
 \end{figure}
 
-Given the estimated camera projection matrices, we can then rectify the stereo images for every frame from a captured image sequence, so that the eipolar lines are horizontal. This reduces the stereo matching problem to a 1D search problem, as the same 3D is constrained to lie on the same pixel row in each pair of images. A pair of rectified images and corresponding epipolar lines are shown in Figure \ref{fig:epipolarlines}.
+From the estimated projection matrices, we can compute an estimate of the fundamental matrix $\vect{F}$ relating the two camera views. The fundamental matrix encapsulates the intrinsic epipolar geometry algebraically and is defined by the following equation:
+
+\begin{equation*}
+\vect{u'}^T \vect{Fu} = 0
+\end{equation*}
+
+\begin{equation*}
+(u' v' 1)
+    \begin{bmatrix}
+    f_{11} & f_{12} & f_{13} \\
+    f_{21} & f_{22} & f_{23} \\
+    f_{31} & f_{32} & f_{33}
+    \end{bmatrix}
+    \left(\!
+    \begin{array}{c}
+     u \\
+  	 v \\
+   	 1  
+    \end{array}
+    \!\right) = 0
+\end{equation*}
+
+where $\vect{u} = (u,v,1)^T$ and $\vect{u}'= (u',v',1)^T$ are the 2D pixel coordinates of the same 3D world point imaged in the left and right views respectively. The fundamental matrix $\vect{F}$ is a $3 \times 3$ matrix, so has 9 elements but only has 7 DoF. This is because it has arbitrary scale, leaving 8 DoF, and is of rank 2 and singular, i.e. $\mathrm{det} [\vect{F}] = 0$, leaving 7 DoF. Using the fundamental matrix relation, the equation of the epipolar line in the right image $\vect{l}'$ corresponding to the point $\vect{u}$ in the left image, on which the feature point must lie, is therefore given by the following expression
+
+\begin{equation}
+\vect{l}' = \vect{Fu}
+\end{equation} 
+
+Similarly, the epipolar line $\vect{l}$ in the left image is given by
+
+\begin{equation*}
+\vect{l} = \vect{F}^T \vect{u}'
+\end{equation*} 
+
+The left and right epipoles $\vect{e}$ and $\vect{e}'$ are defined as the point in each image which is common to all the epipolar lines and are given by the null spaces of $\vect{F}$ and $\vect{F}^T$ respectively
+
+\begin{equation*}
+\vect{Fe} = \vect{0} \ \ \ \ \ \ \
+\vect{F}^T\vect{e}' = \vect{0}
+\end{equation*} 
+
+With the epipolar geometry fully defined, we can then rectify the stereo images for every frame of the captured image sequence so that the eipolar lines are horizontal. This reduces the stereo matching problem to a 1D search problem, as the same 3D world point imaged in both cameras is constrained to lie on the same pixel row in each pair of images. To rectify each pair of stereo images we implemented a function in Matlab \texttt{StereoRectify.m}, based on the function \texttt{rectify\_stereo\_pair.m} provided in the Camera Calibration Toolbox for Matlab \cite{Calib} which rectifies each pair of calibration images. This works as follows: we first bring the two cameras into the same orientation by rotating them 'minimally', so as to bring the translation vector $\vect{t}$ in alignment with the positive $x$-axis $(1,0,0)^T$. Global rotations are applied to both cameras so that the resulting rigid motion between the cameras is just a translation and the rotation matrix becomes $\vect{R} = \vect{I}$. The vertical component of the estimated focal length $f_u$ must be the same in both images and we set the horizontal focal length $f_v$ to the same as the vertical, resulting in square pixels, and new principle points are chosen to be the average of the two principle points. New camera projection matrices are computed accordingly and we warp each image so that the epipolar lines are horizontal. A pair of rectified images for a frame of the captured image sequence is shown in Figure \ref{fig:epipolarlines}. Matching image points and their corresponding epipolar lines are plotted.
 
 \begin{figure}[htbp!]
 \centering
