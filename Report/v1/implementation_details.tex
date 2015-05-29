@@ -4,6 +4,7 @@
 This chapter aims to provide some insight into the technicalities in our development process, and to highlight the issues that we had to solve in order to get the final results. 
 
 \section{\Maya Plugin}
+\label{sec:maya_plugin}
 
 We used the rigs for \Maya that are provided for free by \cite{FaceWareRigsWeb}, the first thing to fix is to reset the paths for the textures in all the materials in the Hipershade window in \Maya.
 The next step was to write plugin to load the weights from Matlab and set keyframes for each of them; to do this our plugin would create a new \Maya command that could be easily executed. 
@@ -112,8 +113,12 @@ To faithfully reproduce the blinking in the data the following information was m
 \item The blink type (both eyes closed, only one eye).
 \end{itemize}
 
+As mentioned in Section~\ref{sec:estimation_w_actor_domain}, there is a mismatch between Emily's neutral face and the actor's neutral face.
+In order to disguise this discrepancy as much as possible, a fixed constant was added to the blenshape weights controlling the smile, we found that the best value for this constant was $0.35$.
 Our code to complies with \Maya's undo command policy, which means using the \emph{DagModifier} class or including extra code to undo the actions.
 Nevertheless, in the final stages of the implementation, it was faster to reload the scene that to undo the command.
+
+%-----------------------------------------------------------------------------------------
 
 \section{Skin Rendering}
 
