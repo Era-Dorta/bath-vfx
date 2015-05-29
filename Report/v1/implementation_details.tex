@@ -150,6 +150,9 @@ In Figure~\ref{fig:skin_patch_error}, the top half of the image shows an example
 	\label{fig:skin_patch_error}
 \end{figure}
 
+To generate the results with the image super-resolution technique from Jianchao et al~\cite{Jianchao2010}, we used the image dictionaries provided by the authors.
+In order to increase the quality and efficiency of the computation, the texture was divided into the segments introduced in Section~\ref{sec:metho_skin_rendering}.
+Dividing the face into segments exploits more efficiently the nowadays common multi-core CPU architectures, as we can ran the algorithm for each patch independently.
 
 \section{Matlab}
 
