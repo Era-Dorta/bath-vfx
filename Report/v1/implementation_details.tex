@@ -138,10 +138,10 @@ There are two important problems when using Image Analogies filter for adding de
 The first one arises due to the difference in colour distributions between the inputs.
 For our data, this mismatch between $\left\lbrace A, A' \right\rbrace$ and $B$, was caused by divergent lighting conditions in the capture studio.
 Since we have the prior knowledge that the images should represent the same areas, we applied colour correction techniques to match the images.
-The second issue derives from the local texture patch growth that the algorithm uses to replicate coherent patches in the input images.
-If the kernel sizes do not match the features that we want to preserve in the example images, unconnected patches will be produced.
+The second issue derives from the local texture patch growth, that the algorithm uses to replicate coherent patches in the input images.
+If the kernel sizes does not match the features that we want to preserve in the example images, unconnected patches will be produced.
 Moreover, this problem will be exacerbated with the face segmentation approach that was presented in Section~\ref{sec:metho_skin_rendering}.
-In Figure~\ref{fig:skin_patch_error}, the top half of the image shows an example of kernel size error, and the seam between the two zones is quite evident due to the patch segmentation.
+In Figure~\ref{fig:skin_patch_error}, the top half of the image shows an example of such kernel size error, and the seam between the two zones is quite evident due to the patch segmentation.
 
 \begin{figure}[htbp!]
 \centering
