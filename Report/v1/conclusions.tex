@@ -11,9 +11,9 @@ The quality of an animation may be evaluated in a number of different ways. In o
 	\label{fig:UV}
 \end{figure}
 
-% Rendering was improved when doing super-resolution on the textures.
-% Improvement only noticeable at close ups
-% Improvement was only marginal
+Doubling the resolution of the texture for the Emily model provided an improvement in the realism in the final animation.
+This enhancement is mostly noticeable on close up views, where in medium distance or further shots it provides marginal to unnoticeable gains in quality.
+It should be noted that, even though the texture super-resolution technique is quite computationally expensive to generate, once it is done, it will benefit every frame of the animation without any further costs.
 
 
 \section{Future Work}
@@ -24,13 +24,9 @@ The accuracy of the model may be improved by taking extra care when matching the
 
 The main weakness of the current method is the amount of manual work that needs to be done before the animation takes its final shape. 
 % We could track eyelids and add blinks automatically.
-
+% Including wrinkles.
 
 The realism of the final animation could also be enhanced by applying more complex skin rendering techniques.
 In this line, we could add layered materials which model subsurface scattering in the skin \cite{Weyrich2006}.
 A further extension would be to include haemoglobin related phenomena, as proposed by~\cite{Donner2008, Jimenez2010}.
-
-% Including wrinkles.
-
-% Talk about adding BSSRDF to the skin rendering
-% Adding normal maps for more detail -> capture studio with light dome
+Adding bump maps or normals maps also increases the quality of the final result, however a light stage  is needed to acquire such data with enough resolution~\cite{Graham2013}.
