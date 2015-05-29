@@ -702,7 +702,7 @@ As a first step, we tried to reproduce the results for bump mapping quality incr
 The authors add an extra parameter $\alpha \in \left\lbrace 0, \ldots, 1 \right\rbrace$ to control Hertzmann's image synthesis process.
 To be more precise, a match between $A$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $1 - \alpha$, and a match between $A'$ and $\left\lbrace B,B' \right\rbrace$ will be weighted by $\alpha$.
 The logic behind this addition is to encourage more details of $A'$ to be included in $B'$.
-The modifications required to include this addition begin by building two separated k-d trees for $A$ and $A'$, when choosing the best match both distances will be weighted as explained above and the smaller one will be chosen.
+The modifications required to include this addition begin by building two separated k-d trees for $A$ and $A'$, when choosing the best match both distances will be weighted as explained above, and the pixel with the smaller distance will be chosen.
 Also in the coherence match two searches will be done and weighted accordingly, and the final pixel will be chosen without further adjustments.
 
 \begin{figure}[htbp!]
@@ -715,7 +715,7 @@ Also in the coherence match two searches will be done and weighted accordingly, 
 We also tried applying the Image Analogies filter to generate increased quality textures, which is in essence a deblurring filter.
 The idea is to improve a low quality texture from a 3D scan using pictures of the texture taken at a closer range.
 To achieve this we took a close up high quality sample $A'$, to generate $A$, the sample $A'$ was blurred using a Gaussian kernel until it look qualitative similar to the 3D scan texture $B$, with this three inputs we generated a picture $B'$ of higher quality.
-Since faces have differentiated areas, this process was done separately for each relevant section in the face texture image, the generated patches are stitched together using linear interpolation.
+Since faces have differentiated areas, this process was done separately for each relevant section of the face in the texture space, the generated patches were stitched together using linear interpolation.
 The texture segmentation is shown in Figure~\ref{fig:texture_synthesis_parts} and results are shown in Figure~\ref{fig:texture_synthesis}.
 
 \begin{figure}[htbp!]
