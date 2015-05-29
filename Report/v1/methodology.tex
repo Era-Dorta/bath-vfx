@@ -644,7 +644,7 @@ Fig.~\ref{fig:resultcomp} compares the results produced using the two antipode a
         \caption{The expressions on the left were produced using our original approach while the expressions in the middle use the weights that were calculated in the actor's domain. }\label{fig:resultcomp}
 \end{figure}
 
-We note that our final animation was not always able to capture the slight smiles that are noticeable in the recorded sequence. This may be explained by the poor match of neutral expressions. Specifically, all of the methods that we used rely on the transformation between the neutral faces. However, the actor's neutral expression is more positive (i.e. the corners of the lips are raised) than that of Emily, see Fig.~\ref{fig:neutrals}. This may be fixed by choosing a better matching neutral face from the actor's sequence, or by mimicking the actor's expression on Emily, and using that as her neutral. In our final results we use the second approach, and apply an additional small positive weight to the blendshapes that correspond to a smiling face, see Sec.~\ref{sec:implementation_details}.
+We note that our final animation was not always able to capture the slight smiles that are noticeable in the recorded sequence. This may be explained by the poor match of neutral expressions. Specifically, all of the methods that we used rely on the transformation between the neutral faces. However, the actor's neutral expression is more positive (i.e. the corners of the lips are raised) than that of Emily, see Fig.~\ref{fig:neutrals}. This may be fixed by choosing a better matching neutral face from the actor's sequence, or by mimicking the actor's expression on Emily, and using that as her neutral. In our final results we use the second approach, and apply an additional small positive weight to the blendshapes that correspond to a smiling face, see Sec.~\ref{sec:maya_plugin}.
 \begin{figure}
         \centering
         \begin{subfigure}[b]{0.3\textwidth}
@@ -768,8 +768,8 @@ Results for this approach are shown in Figure~\ref{fig:emily_super_resolution}.
 \end{figure}
 
 Generating normals maps using Image Analogies is another interesting area, as it could provide an alternative to the costly standard capture methods.
-For this we tried to generate a normal maps from albedo images and from bump maps generated from the previous 3D scan texture, results are shown in Figure~\ref{fig:normal_synthesis}. 
-To create the bump maps, the textures were transformed to gray scale and a histogram equalization was applied.
+We synthesized normal maps from albedo images and also from bump maps generated from the previous 3D scan texture, results are shown in Figure~\ref{fig:normal_synthesis}.
+To create the bump maps, the textures were converted to gray scale and a histogram equalization was applied.
 In order to improve the quality of the bump maps, we also applied the Image Analogies filter to them using a known good bump map as a filtered example, results are shown in Figure~\ref{fig:bump_map_quality_increase}.
 
 \begin{figure}[htbp!]
