@@ -11,7 +11,8 @@ This section presents the methodology behind our proposed facial performance cap
 	\label{fig:pipeline1}
 \end{figure}
 
-\section{Data Capture} \label{sec:datacapture}
+\section{Data Capture} 
+\label{sec:datacapture}
 
 The first task was to gather some initial input data for the system by recording the facial performance of an actor in the form of a video sequence. Two DSLR cameras were positioned close to the actor's face in a stereo configuration in order to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. A short sequence, consisting of the actor pulling a number of facial expressions and then talking, was recorded on video with a resolution of $640 \times 480$ at 60fps. The video streams were roughly synchronised afterwards during post-processing in the computer by aligning the two separate audio signals. A relatively low image resolution was chosen in order to try to limit the amount of video data we had to deal with, especially when recording sequences at higher frame-rates. The cameras were fixed on stands to prevent any camera-shake during the performance capture session and calibration process - since it is important that the camera positions remain static for accurate 3D reconstruction. Positioning the cameras close to one another, at approximately 10cm horizontal separation and at a distance of about 1m from the subject, meant that the images from both views would be quite similar - allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for triangulation of points on the actor's face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees.
 
@@ -623,6 +624,7 @@ For comparison, we attempt the opposite approach; we include extra blendshapes t
 Fig.~\ref{fig:usage} shows the activation of the extra blendshapes throughout the motion sequence. Both of the optimisation methods favour the first additional blendshape that corresponds to the smile in Fig.~\ref{fig:extrafaces} while the other shapes are only used with low weights. Despite the extension to the set of shapes, the reconstruction error decreased by less then $0.01$ centimetres for both methods. This is explained by the fact that the extra blenshapes are closely related to the original ones, as they are in fact a linear combination of the original blendshapes. A more systematic approach needs to be used to produce more diverse shapes. For example, an additional optimisation step may be included that randomly alters the existing blendshapes, and uses a small subset of the altered shapes to find the extension of the blendshape set that minimises the reconstruction error. In particular, we choose a set of new shapes that are constructed by adding a small random quantity to the average of the existing set. Then these shapes are included in the optimisation algorithm. The new shapes are stored if they reduce the reconstruction error, and new blendshapes are suggested until the error decreases below a chosen threshold. Using this iterative procedure, we are able to reduce the reconstruction error by about $10 \%$; however, this approach is very computationally intensive, and the new shapes cannot be easily included in the existing model. 
 
 \subsubsection{Estimation of Weights in Actor's Domain}
+\label{sec:estimation_w_actor_domain}
 
 At this stage our best results still lack expressiveness and visual appeal. In the current pipeline, we first transform the motion sequence from the actor to Emily, and then solve for the blendshapes in the Emily domain. This approach relies on the transformation to produce valid motion in the Emily domain; however, the transformation is geometrical, and it does not guarantee to produce a realistic and natural-looking animation. Therefore, we test the opposite approach. We first find the thin plate spline transformation $\mathbf{T}$ from the actor's neutral expression to Emily's neutral expression. Then the inverse transformation $\mathbf{T^{-1}}$ is used to map the Emily blendshapes to the actor's domain. We thus have matching sets of sparse blendshapes in both domains, see Fig~\ref{fig:EtoR}. The weights are calculated at each frame using the original captured sequence and the newly designed blendshapes in the actor's domain; these weights are then applied directly in the Emily domain. 
 
@@ -657,6 +659,7 @@ We note that our final animation was not always able to capture the slight smile
 \end{figure}
 
 \section{Skin Rendering}
+\label{sec:metho_skin_rendering}
 
 Our objective in skin rendering is to generate a face that would be indistinguishable from a real one.
 In our case, we have have taken a 3D scan of a subject and our aim is to improve the realism when rendering it.
