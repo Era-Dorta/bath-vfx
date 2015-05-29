@@ -246,7 +246,7 @@ We made use of two high-performing optical flow Matlab implementations to do thi
 
 \subsection{KLT Tracker}
 
-A more sophisticated method of tracking was then explored. We used the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. The KLT tracker employs a pyramidal image scale implementation to deal with a range of pixel displacements. If we define a residual function $\epsilon (\vect{v})$ to be:
+A more sophisticated method of tracking was then explored. We used the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. The KLT tracker employs a pyramidal image scale implementation to deal with a range of pixel displacements. We can define a residual function $\epsilon (\vect{v})$ to be:
 
 \begin{equation}
 \label{eq:KLT}
@@ -259,7 +259,7 @@ A more sophisticated method of tracking was then explored. We used the Kanade-Lu
 \end{aligned}
 \end{equation}
 
-where $\vect{v} = (v_x, v_y)$ is the optical flow at pixel $(x, y)$ from the image frame $I$ at time $t$ to time $t+1$. The algorithm generates an image pyramid where the image resolution is halved on each pyramid level.
+where $\vect{v} = (v_x, v_y)$ is the optical flow at pixel $(x, y)$ in image frame $I$ at time $t$ to time $t+1$. The algorithm generates an image pyramid where the image resolution is halved on each pyramid level, such that $I^0$ is the original $0$th level image and $I^{1...L}$ are the lower resolution pyramid images. If we consider a pixel $\vect{u}^0$ in the original image $I^0$, its corresponding position in the $L$th pyramidal image is $\vect{u}^L = \vect{u}^0  \times 2^{-L}$.
 
 We track the feature points from one frame to the next independently in both camera views using the KLT tracker. However, since we have previously stereo rectified all frames in the image sequence, and due to the fact that the same imaged 3D point should lie on the same pixel row (epipolar line), then we essentially have two estimates of the $y$-coordinate for each feature point; one prediction in each camera. We can exploit this by simply setting the $y$-coordinate of each pair of corresponding feature points to the average of their $y$-values, for every frame. This means that if in one camera view the feature point starts to drift from the correct position, and in the other view the point is being tracked correctly, the correct point helps compensate for the error in one view and prevents the tracking from deviating further from the correct position. Some of the results from tracking the points through the sequence are shown in Figure \ref{fig:tracking}.
 
