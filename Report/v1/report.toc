@@ -1,32 +1,32 @@
 \contentsline {chapter}{\numberline {1}Introduction}{3}{chapter.1}
 \contentsline {chapter}{\numberline {2}Previous Work}{4}{chapter.2}
-\contentsline {section}{\numberline {2.1}Data Capture}{4}{section.2.1}
-\contentsline {section}{\numberline {2.2}Sparse Reconstruction}{4}{section.2.2}
-\contentsline {section}{\numberline {2.3}Facial Animation}{4}{section.2.3}
-\contentsline {section}{\numberline {2.4}Skin Rendering}{8}{section.2.4}
+\contentsline {section}{\numberline {2.1}Facial Animation}{4}{section.2.1}
+\contentsline {section}{\numberline {2.2}Skin Rendering}{8}{section.2.2}
 \contentsline {chapter}{\numberline {3}Methodology}{11}{chapter.3}
 \contentsline {section}{\numberline {3.1}Data Capture}{12}{section.3.1}
 \contentsline {section}{\numberline {3.2}Camera Calibration}{14}{section.3.2}
 \contentsline {section}{\numberline {3.3}Initial Marker Detection}{17}{section.3.3}
-\contentsline {section}{\numberline {3.4}Marker Tracking}{19}{section.3.4}
+\contentsline {section}{\numberline {3.4}Marker Tracking}{18}{section.3.4}
 \contentsline {subsection}{\numberline {3.4.1}Optical Flow}{19}{subsection.3.4.1}
 \contentsline {subsection}{\numberline {3.4.2}KLT Tracker}{19}{subsection.3.4.2}
-\contentsline {subsection}{\numberline {3.4.3}Kalman Filter}{19}{subsection.3.4.3}
-\contentsline {section}{\numberline {3.5}Sparse Facial Reconstruction}{19}{section.3.5}
-\contentsline {subsection}{\numberline {3.5.1}Stabilising Head Movement}{20}{subsection.3.5.1}
-\contentsline {section}{\numberline {3.6}Facial Animation}{21}{section.3.6}
-\contentsline {subsection}{\numberline {3.6.1}Thin Plate Splines}{22}{subsection.3.6.1}
-\contentsline {subsection}{\numberline {3.6.2}Non-Rigid ICP}{23}{subsection.3.6.2}
-\contentsline {subsection}{\numberline {3.6.3}Animation}{24}{subsection.3.6.3}
-\contentsline {subsubsection}{Initial Approach}{24}{section*.12}
-\contentsline {subsubsection}{Introduction of Blendshapes}{25}{section*.14}
-\contentsline {subsubsection}{Two-dimensional Sequence}{26}{section*.15}
-\contentsline {subsubsection}{Principal Component Analysis}{27}{section*.19}
-\contentsline {subsubsection}{Animation of a 3D Model}{28}{section*.20}
-\contentsline {subsubsection}{Estimation of Weights in Actor's Domain}{32}{section*.26}
-\contentsline {section}{\numberline {3.7}Skin Rendering}{35}{section.3.7}
-\contentsline {chapter}{\numberline {4}Implementation details}{39}{chapter.4}
-\contentsline {chapter}{\numberline {5}Results}{43}{chapter.5}
-\contentsline {chapter}{\numberline {6}Conclusions and Future Work}{45}{chapter.6}
-\contentsline {section}{\numberline {6.1}Conclusions}{45}{section.6.1}
-\contentsline {section}{\numberline {6.2}Future Work}{45}{section.6.2}
+\contentsline {section}{\numberline {3.5}Sparse Facial Reconstruction}{20}{section.3.5}
+\contentsline {subsection}{\numberline {3.5.1}Stabilising Head Movement}{22}{subsection.3.5.1}
+\contentsline {section}{\numberline {3.6}Facial Animation}{23}{section.3.6}
+\contentsline {subsection}{\numberline {3.6.1}Thin Plate Splines}{24}{subsection.3.6.1}
+\contentsline {subsection}{\numberline {3.6.2}Non-Rigid ICP}{25}{subsection.3.6.2}
+\contentsline {subsection}{\numberline {3.6.3}Animation}{26}{subsection.3.6.3}
+\contentsline {subsubsection}{Initial Approach}{26}{section*.14}
+\contentsline {subsubsection}{Introduction of Blendshapes}{27}{section*.16}
+\contentsline {subsubsection}{Two-dimensional Sequence}{28}{section*.17}
+\contentsline {subsubsection}{Principal Component Analysis}{29}{section*.21}
+\contentsline {subsubsection}{Animation of a 3D Model}{30}{section*.22}
+\contentsline {subsubsection}{Estimation of Weights in Actor's Domain}{34}{section*.28}
+\contentsline {section}{\numberline {3.7}Skin Rendering}{37}{section.3.7}
+\contentsline {chapter}{\numberline {4}Implementation details}{43}{chapter.4}
+\contentsline {section}{\numberline {4.1}Maya\textsuperscript \textregistered Plugin}{43}{section.4.1}
+\contentsline {section}{\numberline {4.2}Skin Rendering}{46}{section.4.2}
+\contentsline {section}{\numberline {4.3}Matlab}{47}{section.4.3}
+\contentsline {chapter}{\numberline {5}Results}{48}{chapter.5}
+\contentsline {chapter}{\numberline {6}Conclusions and Future Work}{50}{chapter.6}
+\contentsline {section}{\numberline {6.1}Conclusions}{50}{section.6.1}
+\contentsline {section}{\numberline {6.2}Future Work}{51}{section.6.2}
