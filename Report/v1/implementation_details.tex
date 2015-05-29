@@ -150,6 +150,15 @@ In Figure~\ref{fig:skin_patch_error}, the top half of the image shows an example
 	\label{fig:skin_patch_error}
 \end{figure}
 
+Normal maps synthesis also required some pre and post-processing steps for the pipeline to work.
+The ground truth normal maps that we use as $\left\lbrace A, A' \right\rbrace$ were taken from Graham et al.\cite{Graham2013}.
+This data was encoded in the EXR format~\cite{EXRWeb}, which was not supported by the code we were using.
+Each EXR image was converted to two PNG images, one encoding the positive values of the original data and the other encoding the negative ones.
+The Image Analogies filter was run separately for each of them, and the results were recombined again into an EXR image.
+
+To generate the results with the image super-resolution technique from Jianchao et al.~\cite{Jianchao2010}, we used the image dictionaries provided by the authors.
+In order to increase the quality and efficiency of the computation, the texture was divided into the segments introduced in Section~\ref{sec:metho_skin_rendering}.
+Dividing the face into segments exploits more efficiently the nowadays common multi-core CPU architectures, as we can ran the algorithm for each patch independently.
 
 \section{Matlab}
 
