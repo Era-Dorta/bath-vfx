@@ -6,9 +6,11 @@ This chapter aims to provide some insight into the technicalities in our develop
 \section{\Maya Plugin}
 \label{sec:maya_plugin}
 
-We used the rigs for \Maya that are provided for free by \cite{FaceWareRigsWeb}, the first thing to fix is to reset the paths for the textures in all the materials in the Hipershade window in \Maya.
-The next step was to write plugin to load the weights from Matlab and set keyframes for each of them; to do this our plugin would create a new \Maya command that could be easily executed. 
-The work flow for writing the code would be to first do the action in Maya manually if possible, see what MEL commands where executed, write them in the plugin and if possible rewrite them as pure C++ code instead of MEL commands.
+We used rigs for \Maya that are provided for free by \cite{FaceWareRigsWeb}, the first thing to fix is to reset the paths for the textures in all the materials in the Hipershade window in \Maya.
+The next step was to write plugin to load the weights from Matlab and set keyframes for each of them; to do this our plugin created a new \Maya command that could be easily executed. 
+The work flow for writing the code was to first do the action in Maya manually if possible, see what MEL commands where executed, write them in the plugin and if possible rewrite them as pure C++ code instead of MEL commands.
+Our code to complies with \Maya's undo command policy, which means using the \emph{DagModifier} class or including extra code to undo the actions.
+Nevertheless, in the final stages of the implementation, it was faster to reload the scene that to undo the command.
 The file format for the weights is one weight per line in frame order, as shown in Figure~\ref{fig:file_format}, where $N$ is the number of weights and $F$ is the number of frames.
 
 \begin{figure}[htbp!]
@@ -115,8 +117,6 @@ To faithfully reproduce the blinking in the data the following information was m
 
 As mentioned in Section~\ref{sec:estimation_w_actor_domain}, there is a mismatch between Emily's neutral face and the actor's neutral face.
 In order to disguise this discrepancy as much as possible, a fixed constant was added to the blenshape weights controlling the smile, we found that the best value for this constant was $0.35$.
-Our code to complies with \Maya's undo command policy, which means using the \emph{DagModifier} class or including extra code to undo the actions.
-Nevertheless, in the final stages of the implementation, it was faster to reload the scene that to undo the command.
 
 %-----------------------------------------------------------------------------------------
 
