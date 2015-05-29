@@ -115,9 +115,19 @@ To faithfully reproduce the blinking in the data the following information was m
 Our code to complies with \Maya's undo command policy, which means using the \emph{DagModifier} class or including extra code to undo the actions.
 Nevertheless, in the final stages of the implementation, it was faster to reload the scene that to undo the command.
 
-\section{Image Analogies}
+\section{Skin Rendering}
 
+Initially for all the Image Analogies work we used an implementation based on~\cite{ImAnSingleThreadWeb}.
+This library was quite slow and it would not give results as good as the ones shown in the original paper.
+We then moved to a parallel CUDA implementation~\cite{ImAnCudaWeb}; with this code the problem was inconsisten results depending on the number of threads and erroneous pixel values, as shown in Figure~\ref{fig:cuda_error}.
+The original code for Image Analogies has not been maintained since 2001, a patched version of the library, along with instruction on how to compile and run the code are provided alongside this report.
 
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.5\textwidth]{img/cuda_error}
+	\caption{Result for CUDA image analogy implementation, erroneous values highlighted in the red square, image taken from~\cite{ImAnCudaWeb}.}
+	\label{fig:cuda_error}
+\end{figure}
 
 \section{Matlab}
 
