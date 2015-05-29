@@ -237,8 +237,8 @@ The first method we explored was to simply compute the optical flow for the imag
 \begin{equation}
 \label{eq:opticalflow}
 \begin{aligned}
-I(\vect{p}_, t) = 
-I(\vect{p}_i + \vect{v}_i, t+1)
+I(\vect{u}_, t) = 
+I(\vect{u}_i + \vect{v}_i, t+1)
 \end{aligned}
 \end{equation}
 
@@ -246,9 +246,31 @@ We made use of two high-performing optical flow Matlab implementations to do thi
 
 \subsection{KLT Tracker}
 
-A more sophisticated method of tracking was then explored. We used the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. 
+A more sophisticated method of tracking was then explored. We used the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. The KLT tracker employs a pyramidal image scale implementation to deal with a range of pixel displacements. If we define a residual function $\epsilon (\vect{v})$ to be:
 
-\subsection{Kalman Filter}
+\begin{equation}
+\label{eq:KLT}
+\begin{aligned}
+\epsilon (\vect{v}) = 
+\epsilon (v_x, v_y) = 
+\sum
+\sum
+(I_t(x,y) - I_{t+1}(x + v_x, y + v_y))^2
+\end{aligned}
+\end{equation}
+
+where $\vect{v} = (v_x, v_y)$ is the optical flow at pixel $(x, y)$ from the image frame $I$ at time $t$ to time $t+1$. The algorithm generates an image pyramid where the image resolution is halved on each pyramid level.
+
+We track the feature points from one frame to the next independently in both camera views using the KLT tracker. However, since we have previously stereo rectified all frames in the image sequence, and due to the fact that the same imaged 3D point should lie on the same pixel row (epipolar line), then we essentially have two estimates of the $y$-coordinate for each feature point; one prediction in each camera. We can exploit this by simply setting the $y$-coordinate of each pair of corresponding feature points to the average of their $y$-values, for every frame. This means that if in one camera view the feature point starts to drift from the correct position, and in the other view the point is being tracked correctly, the correct point helps compensate for the error in one view and prevents the tracking from deviating further from the correct position. Some of the results from tracking the points through the sequence are shown in Figure \ref{fig:tracking}.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/tracking}
+	\caption{A number of frames from the image sequence with facial markers tracked using the KLT algorithm.}
+	\label{fig:tracking}
+\end{figure}
+
+The tracking method we use is still not very robust, and it can be very difficult to obtain a good track for all 97 facial points over a large number of frames. One reason for this is because we are simply performing a global track of all points and not taking into account the local object information. One example of this is by Darren, and uses a mesh based object tracking approach. This is likely to perform much better in this situation.
 
 \section{Sparse Facial Reconstruction}
 
@@ -601,7 +623,6 @@ For comparison, we attempt the opposite approach; we include extra blendshapes t
 Fig.~\ref{fig:usage} shows the activation of the extra blendshapes throughout the motion sequence. Both of the optimisation methods favour the first additional blendshape that corresponds to the smile in Fig.~\ref{fig:extrafaces} while the other shapes are only used with low weights. Despite the extension to the set of shapes, the reconstruction error decreased by less then $0.01$ centimetres for both methods. This is explained by the fact that the extra blenshapes are closely related to the original ones, as they are in fact a linear combination of the original blendshapes. A more systematic approach needs to be used to produce more diverse shapes. For example, an additional optimisation step may be included that randomly alters the existing blendshapes, and uses a small subset of the altered shapes to find the extension of the blendshape set that minimises the reconstruction error. In particular, we choose a set of new shapes that are constructed by adding a small random quantity to the average of the existing set. Then these shapes are included in the optimisation algorithm. The new shapes are stored if they reduce the reconstruction error, and new blendshapes are suggested until the error decreases below a chosen threshold. Using this iterative procedure, we are able to reduce the reconstruction error by about $10 \%$; however, this approach is very computationally intensive, and the new shapes cannot be easily included in the existing model. 
 
 \subsubsection{Estimation of Weights in Actor's Domain}
-\label{sec:estimation_w_actor_domain}
 
 At this stage our best results still lack expressiveness and visual appeal. In the current pipeline, we first transform the motion sequence from the actor to Emily, and then solve for the blendshapes in the Emily domain. This approach relies on the transformation to produce valid motion in the Emily domain; however, the transformation is geometrical, and it does not guarantee to produce a realistic and natural-looking animation. Therefore, we test the opposite approach. We first find the thin plate spline transformation $\mathbf{T}$ from the actor's neutral expression to Emily's neutral expression. Then the inverse transformation $\mathbf{T^{-1}}$ is used to map the Emily blendshapes to the actor's domain. We thus have matching sets of sparse blendshapes in both domains, see Fig~\ref{fig:EtoR}. The weights are calculated at each frame using the original captured sequence and the newly designed blendshapes in the actor's domain; these weights are then applied directly in the Emily domain. 
 
@@ -623,7 +644,7 @@ Fig.~\ref{fig:resultcomp} compares the results produced using the two antipode a
         \caption{The expressions on the left were produced using our original approach while the expressions in the middle use the weights that were calculated in the actor's domain. }\label{fig:resultcomp}
 \end{figure}
 
-We note that our final animation was not always able to capture the slight smiles that are noticeable in the recorded sequence. This may be explained by the poor match of neutral expressions. Specifically, all of the methods that we used rely on the transformation between the neutral faces. However, the actor's neutral expression is more positive (i.e. the corners of the lips are raised) than that of Emily, see Fig.~\ref{fig:neutrals}. This may be fixed by choosing a better matching neutral face from the actor's sequence, or by mimicking the actor's expression on Emily, and using that as her neutral. In our final results we use the second approach, and apply an additional small positive weight to the blendshapes that correspond to a smiling face, see Sec.~\ref{sec:maya_plugin}.
+We note that our final animation was not always able to capture the slight smiles that are noticeable in the recorded sequence. This may be explained by the poor match of neutral expressions. Specifically, all of the methods that we used rely on the transformation between the neutral faces. However, the actor's neutral expression is more positive (i.e. the corners of the lips are raised) than that of Emily, see Fig.~\ref{fig:neutrals}. This may be fixed by choosing a better matching neutral face from the actor's sequence, or by mimicking the actor's expression on Emily, and using that as her neutral. In our final results we use the second approach, and apply an additional small positive weight to the blendshapes that correspond to a smiling face, see Sec.~\ref{sec:implementation_details}.
 \begin{figure}
         \centering
         \begin{subfigure}[b]{0.3\textwidth}
@@ -636,7 +657,6 @@ We note that our final animation was not always able to capture the slight smile
 \end{figure}
 
 \section{Skin Rendering}
-\label{sec:metho_skin_rendering}
 
 Our objective in skin rendering is to generate a face that would be indistinguishable from a real one.
 In our case, we have have taken a 3D scan of a subject and our aim is to improve the realism when rendering it.
