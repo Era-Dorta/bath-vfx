@@ -195,11 +195,18 @@ With the epipolar geometry fully defined, we can then rectify the stereo images 
 
 \section{Initial Marker Detection}
 
-The facial markers are detected in the first frame of a captured image sequence and then are tracked throughout the length of the sequence. The initial marker detection is achieved by detecting SIFT features in the image. We employ the open source Matlab implementation VLFeat \cite{vedaldi08vlfeat} to do this. 
+With the stereo camera system fully calibrated, the next task is to compute the 2D image positions of all the facial markers in each left and right stereo pair for all frames in the captured sequence. Before the markers can be tracked through the sequence, their positions need to be initialised in the first frame. We do this by semi-automatically detecting the facial markers in the left image of the first frame, and then compute the corresponding marker positions in the right image. The initial marker detection is achieved by detecting SIFT features in the left image. We employ the open source Matlab implementation VLFeat \cite{vedaldi08vlfeat} to do this. 
 
-The marker detection process for the first frame of a given stereo image sequence is carried out as follows. First the user defines a region of interest in the left image around the face of the actor to be tracked, by drawing a contour in the image. We make use of the Matlab function \texttt{roipoly} for this. Then, SIFT features are detected within the selected image region, choosing the appropriate SIFT parameters to pick out features of around 5 pixels in diameter - this may take a few tries to get right. Once reasonable SIFT features have been detected, additional feature points can then be added manually, and also wrongly detected points can be removed, by interactively selecting certain points the user wishes to change. Once the user has successfully detected all 97 facial markers in the left image, the corresponding marker positions are found in the right image by searching along the corresponding epipolar lines; simply the same row of pixels in the right image since the images have been stereo rectified beforehand. The matching points in the right image are found by computing the normalised cross-correlation between image patches:
+The marker detection process for the first frame of a given stereo image sequence is carried out as follows. First the user defines a region of interest in the left image around the face of the actor to be tracked, by drawing a contour in the image. We make use of the Matlab function \texttt{roipoly} for this, as shown in left image in Figure \ref{fig:detection}. Then, SIFT features are detected within the selected image region, choosing the appropriate SIFT parameters to pick out features of the correct scale; around 5 pixels in diameter - this may take a few tries to get right. We found that it was quite difficult to pick out just the marker features because the size of the markers varied a lot, and so to detect most of the markers we had to search for a wide range of scales of SIFT features. This can be seen in the middle image of Figure \ref{fig:detection}, where running the SIFT feature detection has picked out a lot of other unwanted points. However, we found that it was still faster and often more accurate to detect points this way and refine the detection after, rather than manually select all 97 points by hand.
+
+Once reasonable SIFT features have been detected, additional feature points can then be added manually, and also wrongly detected points can be removed, by interactively selecting certain points the user wishes to change. This gives the resulting initial marker positions in the left image as shown on the right in Figure \ref{fig:detection}. 
+
+Once the user has successfully detected all 97 facial markers in the left image, the corresponding marker positions are found in the right image by searching along the corresponding epipolar lines; simply the same row of pixels in the right image since all the images have been stereo rectified beforehand. The matching marker positions in the right image are found by computing the normalised cross-correlation (NCC) between image patches, as given in Equation \ref{eq:NCC}. So that for each marker point $\vect{u}$ in the left image we take the surrounding square patch of $N$ pixels and compute the NCC with each $N$ pixel patch in the right image, for all pixels in the same row. $I_i^L$ is the intensity of pixel $i$ in an image patch in the left image, and similarly $I_i^R$ in the right image. $\mu^L$, $\mu^R$, $\sigma^L$, and $\sigma^R$ are the means and standard deviations of pixel intensities in image patches in the left and right images respectively. The pixel location in the right image that produces the maximum response is chosen as the matching marker position to the marker in the left image. Since the two views are similar, we also apply the constraints that corresponding marker positions must lie close to each other in the two images (within some threshold distance) and that the order of the markers must be maintained, i.e. if a marker is to the left of another in one image, it must be to the left of the corresponding marker in the other image. 
+
+This produces the result shown in Figure \ref{fig:matching}, where all markers in the left image are matched to corresponding markers in the right image. The markers are numbered from 1 to 97 to illustrate this. The ordering of the marker indices in the left image is arbitrary (simply numbered from left to right in the image), but the markers in the right image must adhere to this ordering and maintain the same order as they are tracked throughout the entire image sequence. 
 
 \begin{equation}
+\label{eq:NCC}
 \begin{aligned}
 	C_{NCC} = \sum_{i=1}^N \frac{(I_i^L - \mu^L)(I_i^R - \mu^R)}{\sigma^L \sigma^R}
 \end{aligned}
@@ -221,13 +228,25 @@ The marker detection process for the first frame of a given stereo image sequenc
 
 \section{Marker Tracking}
 
-With the facial markers detected in the first frame, the next task was to track the positions of the markers as they move throughout the image sequence. 
+With all 97 facial markers initialised in both stereo images for the first frame, the next procedure was to track the positions of the markers as they move throughout the image sequence. 
 
 \subsection{Optical Flow}
 
+The first method we explored was to simply compute the optical flow for the image sequence, from one frame to the next, and move the positions of all the markers along the flow. The optical flow is based on the assumption that the pixel intensity of the same imaged 3D point will be similar from one frame to the next, i.e.
+
+\begin{equation}
+\label{eq:opticalflow}
+\begin{aligned}
+I(\vect{p}_, t) = 
+I(\vect{p}_i + \vect{v}_i, t+1)
+\end{aligned}
+\end{equation}
+
+We made use of two high-performing optical flow Matlab implementations to do this, namely C. Lui's optical flow code \cite{Lui:2011} and M. Black's implementation \cite{Black:2010}. However, we found that simply tracking the points in this way was not robust enough to coherently track markers on the face, particularly when the actor made fast facial movements such as opening and closing the mouth during speech. Even at 60fps, these fast facial movements resulted in slightly blurred image frames causing the point tracking to go awry, after just a small number of frames.
+
 \subsection{KLT Tracker}
 
-\cite{Shi:1994}
+A more sophisticated method of tracking was then explored. We used the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. 
 
 \subsection{Kalman Filter}
 
