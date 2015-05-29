@@ -233,34 +233,34 @@ With all 97 facial markers initialised in both stereo images for the first frame
 
 \subsection{Optical Flow}
 
-The first method we explored was to simply compute the optical flow for the image sequence, from one frame to the next, and move the positions of all the markers along the flow. The optical flow is based on the assumption that the pixel intensity of the same imaged 3D point will be similar from one frame to the next, i.e.
+The first method we explored for tracking was to simply compute the optical flow for the image sequence, from one frame to the next, and to move the positions of all the markers along the direction of the flow. Optical flow is based on the assumption that the pixel intensity of the same imaged 3D point will be similar from one frame to the next, i.e.
 
 \begin{equation}
 \label{eq:opticalflow}
 \begin{aligned}
-I(\vect{u}_, t) = 
+I(\vect{u}_i, t) = 
 I(\vect{u}_i + \vect{v}_i, t+1)
 \end{aligned}
 \end{equation}
 
-We made use of two high-performing optical flow Matlab implementations to do this, namely C. Lui's optical flow code \cite{Lui:2011} and M. Black's implementation \cite{Black:2010}. However, we found that simply tracking the points in this way was not robust enough to coherently track markers on the face, particularly when the actor made fast facial movements such as opening and closing the mouth during speech. Even at 60fps, these fast facial movements resulted in slightly blurred image frames causing the point tracking to go awry, after just a small number of frames.
+We made use of two high-performing optical flow Matlab implementations to do this, namely C. Lui's optical flow code \cite{Lui:2011} and M. Black's implementation \cite{Black:2010}. However, we found that simply tracking the points in this way was not robust enough to coherently track markers on the face, particularly when the actor made fast facial movements such as opening and closing the mouth during speech. Even at 60fps, these fast facial movements resulted in slightly blurred image frames causing the point tracking to go awry, even after just a small number of frames.
 
 \subsection{KLT Tracker}
 
-A more sophisticated method of tracking was then explored. We used the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. The KLT tracker employs a pyramidal image scale implementation to deal with a range of pixel displacements. We can define a residual function $\epsilon (\vect{v})$ to be:
+A more sophisticated method of tracking was then explored - the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. The KLT tracker employs a pyramidal image scale implementation to deal with a range of pixel displacements. We can define a residual function $\epsilon (\vect{v})$ to be:
 
 \begin{equation}
 \label{eq:KLT}
 \begin{aligned}
 \epsilon (\vect{v}) = 
 \epsilon (v_x, v_y) = 
-\sum
-\sum
+\sum_{x = u_x - w}^{u_x + w}
+\sum_{y = u_y - w}^{u_y + w}
 (I_t(x,y) - I_{t+1}(x + v_x, y + v_y))^2
 \end{aligned}
 \end{equation}
 
-where $\vect{v} = (v_x, v_y)$ is the optical flow at pixel $(x, y)$ in image frame $I$ at time $t$ to time $t+1$. The algorithm generates an image pyramid where the image resolution is halved on each pyramid level, such that $I^0$ is the original $0$th level image and $I^{1...L}$ are the lower resolution pyramid images. If we consider a pixel $\vect{u}^0$ in the original image $I^0$, its corresponding position in the $L$th pyramidal image is $\vect{u}^L = \vect{u}^0  \times 2^{-L}$.
+where $\vect{v} = (v_x, v_y)$ is the optical flow at $(x, y)$ in image frame $I$ at time $t$ to time $t+1$, and $w$ is half the width of the image window around pixel $\vect{u} = (u_x, u_y)$. We want to find the flow $\vect{v}$ that minimises the residual $\epsilon$. The algorithm generates an image pyramid where the image resolution is halved on each pyramid level, such that $I^0$ is the original $0$th level image and $I^{1...L}$ are the lower resolution pyramid images. If we consider a pixel $\vect{u}^0$ in the original image $I^0$, its corresponding position in the $n$th pyramidal image is $\vect{u}^n = \vect{u}^0  \times 2^{-n}$. The pyramid tracking works as follows: $\vect{v}^L$ is computed at the lowest pyramid level $L$ and is used as the initial guess to the next level above $\vect{v}^{L-1}$, continuing up to the original image $\vect{v}^0$. The flow at each level $\vect{v}^n$ is small and so is easy to compute using standard KLT algorithm - by minimising the residual $\epsilon^n$ at that level. The final optical flow solution is the sum of the flows at all levels, i.e. $\sum_{n = 0}^L 2^n \vect{v}^n$ \cite{Kanade}.
 
 We track the feature points from one frame to the next independently in both camera views using the KLT tracker. However, since we have previously stereo rectified all frames in the image sequence, and due to the fact that the same imaged 3D point should lie on the same pixel row (epipolar line), then we essentially have two estimates of the $y$-coordinate for each feature point; one prediction in each camera. We can exploit this by simply setting the $y$-coordinate of each pair of corresponding feature points to the average of their $y$-values, for every frame. This means that if in one camera view the feature point starts to drift from the correct position, and in the other view the point is being tracked correctly, the correct point helps compensate for the error in one view and prevents the tracking from deviating further from the correct position. Some of the results from tracking the points through the sequence are shown in Figure \ref{fig:tracking}.
 
@@ -271,7 +271,7 @@ We track the feature points from one frame to the next independently in both cam
 	\label{fig:tracking}
 \end{figure}
 
-The tracking method we use is still not very robust, and it can be very difficult to obtain a good track for all 97 facial points over a large number of frames. One reason for this is because we are simply performing a global track of all points and not taking into account the local object information. One example of this is by Darren, and uses a mesh based object tracking approach. This is likely to perform much better in this situation.
+We implemented a procedure in which if the KLT tracking starts to lose a point, the user can manually re-estimate the position of the point in the image. The tracking method we use is still not very robust, and it can be very difficult to obtain a good track for all 97 facial points over a large number of frames. One reason for this is because we are simply performing a global track of all points and not taking into account the local object information. For example, if we kept a running probabilistic model of the face points, the system would be able to handle occlusions and be more robust to tracking errors. One interesting approach is implemented by Li \textit{et al}. \cite{Li2013} which uses a mesh based object tracking method which would likely perform much better in this situation.
 
 \section{Sparse Facial Reconstruction}
 
