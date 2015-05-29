@@ -1,15 +1,14 @@
 \chapter{Implementation details}
-\label{sec:implementation_details}
+\label{ch:implementation_details}
 
-Talk about Maya plugins and any other implementation stuff worth talking about. 
-..... Introduce the topic
+This chapter aims to provide some insight into the technicalities in our development process, and to highlight the issues that we had to solve in order to get the final results. 
 
-We used the rigs for Maya that are provided for free by \cite{FaceWareRigsWeb}, the first thing to fix is to reset the paths for the textures in all the materials in the Hipershade window in \Maya.
+\section{\Maya Plugin}
+
+We used the rigs for \Maya that are provided for free by \cite{FaceWareRigsWeb}, the first thing to fix is to reset the paths for the textures in all the materials in the Hipershade window in \Maya.
 The next step was to write plugin to load the weights from Matlab and set keyframes for each of them; to do this our plugin would create a new \Maya command that could be easily executed. 
 The work flow for writing the code would be to first do the action in Maya manually if possible, see what MEL commands where executed, write them in the plugin and if possible rewrite them as pure C++ code instead of MEL commands.
 The file format for the weights is one weight per line in frame order, as shown in Figure~\ref{fig:file_format}, where $N$ is the number of weights and $F$ is the number of frames.
-Once we have the weights loaded, the connections between the blenshape object weights and its outputs have to be broken, this is done in order to be able to set the keyframes, otherwise the setKeyframe function would not work, an extract of the code is shown in Listing~\ref{lst:set_weights}.
-Additionally, we program our code to comply with \Maya undo command policy, which means using the \emph{DagModifier} class or manually undoing the actions, however in the final stages of our implementation it was faster to reload the scene that to undo de command.
 
 \begin{figure}[htbp!]
 \centering
@@ -18,7 +17,12 @@ Additionally, we program our code to comply with \Maya undo command policy, whic
 	\label{fig:file_format}
 \end{figure}
 
-\begin{lstlisting}[caption = Breaking the weights connections and setting keyframes., label = lst:set_weights, frame=single, float]
+After reading the weights  from the file, the connections between the blenshape object weights and its outputs have to be broken, this is done in order to be able to set the keyframes, otherwise the setKeyframe function would not work, an extract of the code is shown in Listing~\ref{lst:set_weights}.
+An minor point to highlight in this section is that, the weights can be accessed using the following command, \textit{``shapesBS.weight[i]"}, however to break the connections the weight name in \Maya is needed.
+To obtain a list with all the weights names the following command can be used, \textit{``listAttr -m shapesBS.w"}.
+The weights will be listed in alphabetical order, yet the indices do not strictly follow the same order. 
+
+\begin{lstlisting}[caption = Breaking the weights connections and setting keyframes., label = lst:set_weights, frame=single]
 
 // Break connections.
 for (unsigned int i = 0; i < (unsigned int)(numWeights); i++){
@@ -49,7 +53,7 @@ Once the weights were added, we noticed that the teeth and tongue of the Emily r
 Both meshes were actually regulated by the position of a control object in the scene, so the solution was to translate the object by a factor of the mean of all the weights involved in the mouth control, as shown in Listing~\ref{lst:teeth_tonge_control}.
 The lower teeth and tongue would be left hanging mid air if the blendshapes that control the mouth opening were activated together; this problem was fixed by lowering the position of both meshes.
 
-\begin{lstlisting}[caption = Teeth and tongue control based on relevant weights., label = lst:teeth_tonge_control, frame=single, float]
+\begin{lstlisting}[caption = Teeth and tongue control based on relevant weights., label = lst:teeth_tonge_control, frame=single]
 
 cmd = "setAttr con_jaw_c.translateY ";
 cmd += -3.2 * (weights.at(i).at(58) + weights.at(i).at(55)) + 1;
@@ -107,3 +111,10 @@ To faithfully reproduce the blinking in the data the following information was m
 \item The blink magnitude (eyes fully close, squinting, etc);
 \item The blink type (both eyes closed, only one eye).
 \end{itemize}
+
+Our code to complies with \Maya's undo command policy, which means using the \emph{DagModifier} class or including extra code to undo the actions.
+Nevertheless, in the final stages of the implementation, it was faster to reload the scene that to undo the command.
+
+\section{Image Analogies}
+
+\section{Matlab}
