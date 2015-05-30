@@ -14,28 +14,28 @@ This section presents the methodology behind our proposed facial performance cap
 \section{Data Capture} 
 \label{sec:datacapture}
 
-The first task was to gather some initial input data for the system by recording the facial performance of an actor in the form of a video sequence. Two DSLR cameras were positioned close to the actor's face in a stereo configuration in order to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. A short sequence, consisting of the actor pulling a number of facial expressions and then talking, was recorded on video with a resolution of $640 \times 480$ at 60fps. The video streams were roughly synchronised afterwards during post-processing in the computer by aligning the two separate audio signals. A relatively low image resolution was chosen in order to try to limit the amount of video data we had to deal with, especially when recording sequences at higher frame-rates. The cameras were fixed on stands to prevent any camera-shake during the performance capture session and calibration process - since it is important that the camera positions remain static for accurate 3D reconstruction. Positioning the cameras close to one another, at approximately 10cm horizontal separation and at a distance of about 1m from the subject, meant that the images from both views would be quite similar - allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for triangulation of points on the actor's face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees.
+The first task was to gather some initial input data for the system by recording the facial performance of an actor in the form of a video sequence. Two DSLR cameras were positioned close to the actor's face in a stereo configuration in order to capture the actor's facial performance, as shown in Figure \ref{fig:setup1}. A short sequence, consisting of the actor pulling a number of facial expressions and then talking, was recorded on video with a resolution of $640 \times 480$ at 60fps. The video streams were roughly synchronised afterwards during a post-processing stage in the computer by aligning the two separate audio signals. The video was also converted into an image sequence of jpeg images. A relatively low image resolution was chosen in order to try to limit the amount of video data we had to deal with, especially when recording multiple sequences at high frame-rates. The cameras were fixed on stands to prevent any camera-shake during the performance capture session and calibration process - since it is important that the camera positions remain static for accurate 3D reconstruction. Positioning the cameras close to one another, at approximately 10cm horizontal separation and at a distance of about 1m from the subject, meant that the images from both views would be quite similar - allowing for easier feature matching across the two images. However, the camera spacing was sufficiently large to enable both sides of the face to be in view, and to allow for 3D triangulation of points on the actor's face; a good rule of thumb is for the cameras and subject to subtend an angle of at least 5 degrees. A limitation with the capture system was observed that if the actor rotated his/her head significantly, then one side of the face would be occluded, making detection and reconstruction of some marker points on the face a problem. In a future implementation it would be better to use three cameras - one straight on and the other two slightly to the sides, so that all points on the face can always be seen by at least two cameras.
 
 \begin{figure}[htbp!]
 \centering
 \includegraphics[width=\textwidth]{img/setup1}
-	\caption{The stereo camera setup used to capture the facial performance.}
+	\caption{The stereo camera setup used to capture the actor's facial performance.}
 	\label{fig:setup1}
 \end{figure}
 
-Markers used to track the facial performance were placed on the actor's face in the configuration shown in Figure \ref{fig:facemarkers}. 97 markers were used in total, and were drawn onto the actor's face with a make-up pencil so as to be easily removed after the capture session. The positions of the markers were roughly based on those used in the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}, as shown in Figure \ref{fig:surreydata}, although they use fewer markers with just 60 in total. In hindsight, using slightly fewer number of markers in our system might have been preferable, as consistently detecting and tracking a large number of markers (and preserving the labelling order of the markers) became quite a time-consuming and labour intensive process, prone to error. Furthermore, rather than simply using a black pencil, it might have advantageous to use markers of a significantly different colour to the tones of the human face in order to aid marker detection and tracking, or perhaps even using retro-reflective markers as in many commercial motion capture systems ~\cite{Vicon}.
+Markers used to track the facial performance were placed on the actor's face in the configuration shown in Figure \ref{fig:facemarkers}. 97 markers were used in total, and were drawn onto the actor's face with a make-up pencil so as to be easily removed after the capture session. The positions of the markers were roughly based on those used in the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}, as shown in Figure \ref{fig:surreydata}, although they use fewer markers with just 60 in total. In hindsight, using slightly fewer number of markers in our system might have been preferable, as consistently detecting and tracking a large number of markers (and preserving the labelling order of the markers) became quite a time-consuming and labour intensive process, prone to error. Furthermore, rather than simply using a black pencil, it might have advantageous to use markers of a significantly different colour to the tones of the human face in order to aid marker detection and tracking (by colour segmentation), or perhaps even using retro-reflective markers as in many commercial motion capture systems ~\cite{Vicon}.
 
-Although the markers were placed all over the face to capture full facial performance, we tried to ensure that specific markers were placed in positions on the face which exhibit large non-rigid deformation, such as around the eyes, around the mouth and along the eye-brows, in order capture the full expressiveness of the face. In a future implementation, it would be useful to track the rigid head motion by tracking the positions of a number points on the head of the actor, for example by making the actor wear a skull cap with markers. Another useful addition would be to somehow track the eyelids so we can capture subtle eye movements and blinks. Also, since we only track points on the outside of the mouth, we do not gather information about the lip movement, such as expressions involving pursing or funnelling of the lips, etc.
+Although the markers were placed all over the face to capture full facial performance, we tried to ensure that specific markers were placed in positions on the face which exhibit large non-rigid deformation, such as around the eyes, around the mouth and along the eye-brows, in order capture the full expressiveness of the face. In a future implementation, it would also be useful to track the rigid head motion by tracking the positions of a number points on the head of the actor, for example by having the actor wear a skull cap with markers. None of the marker positions we chose on the face are truly rigid - so this made removing rigid head movement more of a challenge later, see Section \ref{sec:stabilising_head_movement}. Another useful addition would be to somehow track the eyelids so we can capture subtle eye movements and blinks. Also, since we only track points on the outside of the mouth, we do not gather information about the lip movement, such as in expressions involving pursing or funnelling of the lips, etc.
 
 \begin{figure}[htbp!]
-\begin{minipage}[b]{0.47\textwidth}
+\begin{minipage}[b]{0.42\textwidth}
 \centering
 \includegraphics[width=\textwidth]{img/facemarkers}
 	\caption{ The configuration of markers used for tracking the facial performance of the actor.}
 	\label{fig:facemarkers}
 \end{minipage}
 \hfill
-\begin{minipage}[b]{0.5\textwidth}
+\begin{minipage}[b]{0.48\textwidth}
 \centering
 \includegraphics[width=\textwidth]{img/surreydata}
 	\caption{ Images from the Surrey Audio-Visual Expressed Emotion (SAVEE) Database ~\cite{Surrey}.}
@@ -46,9 +46,9 @@ Although the markers were placed all over the face to capture full facial perfor
 
 \section{Camera Calibration}
 
-Once we had obtained a video sequence of the actor's face, the next stage was to calibrate the stereo camera system in order to obtain accurate 3D coordinates of the markers on the face. 
+Once we had obtained a video sequence of the actor's facial performance, the next stage was to calibrate the stereo camera system in order to obtain accurate 3D coordinates of the markers on the face. 
 
-Camera calibration is name given to the process of recovering the camera projection matrix $\vect{P}$ from images of a controlled scene. We assume the pinhole camera model and under perspective projection the map between the three-dimensional world coordinates of a point $(X, Y, Z)^T$ and its two-dimensional image pixel coordinates $(u, v)^T$ is a linear mapping in homogeneous coordinates represented by the $3 \times 4$ projection matrix:
+Camera calibration is name given to the process of recovering the camera projection matrix $\vect{P}$ from images of a controlled scene. We assume the pinhole camera model and under perspective projection the map between the three-dimensional world coordinates of a point $(X, Y, Z)^T$ and its two-dimensional image pixel coordinates $(u, v)^T$ is a linear mapping in homogeneous coordinates represented by the $3 \times 4$ projection matrix \cite{Cipolla:2000}:
 
 \begin{equation}
 \label{projection}
@@ -71,7 +71,7 @@ Camera calibration is name given to the process of recovering the camera project
       Z \\
       1
     \end{array}
-    \!\right)
+    \!\right).
 \end{equation}
 
 To obtain an estimate of the camera projection matrices for both cameras, we use a checkerboard pattern of known dimensions held in a number of different positions and orientations throughout the scene, in view of both cameras simultaneously, as shown in Figure \ref{fig:checkerboard}. To perform the calibration, we made use of the Camera Calibration Toolbox for Matlab \cite{Calib} provided by Jean-Yves Bouguet, which automatically detects the grid corners in each image and solves for the intrinsic camera parameters (focal length, principle point, and distortion coefficients) and the extrinsic parameters (rigid rotation and translation). It was important to ensure that the checkboard remained within the frame of both cameras during the entire calibration process, and that the camera positions did not move between the performance capture session and the calibration procedure. 
@@ -79,13 +79,13 @@ To obtain an estimate of the camera projection matrices for both cameras, we use
 \begin{figure}[htbp!]
 \centering
 \includegraphics[width=0.9\textwidth]{img/calib2}
-	\caption{A checkerboard pattern was used to calibrate the pair of stereo cameras. The checkerboard had to be visible from both camera viewpoints simultaneously.}
+	\caption{A checkerboard pattern was used to calibrate the pair of stereo cameras. For stereo calibration the checkerboard must be visible from both camera viewpoints simultaneously.}
 	\label{fig:checkerboard}
 \end{figure}
 
 As a result of the stereo calibration, we obtain an estimate of the intrinsic matrices $\vect{K}$, $\vect{K}'$ and external parameters $\vect{R}$, $\vect{t}$ of the two cameras, from which we can compute the camera projection matrices $\vect{P}$ and $\vect{P}'$ for the left and right cameras respectively using the equation for perspective projection:
 
-\begin{equation*}
+\begin{equation}
 \label{qrdecomp}
 	\left(\!
     \begin{array}{c}
@@ -103,9 +103,9 @@ As a result of the stereo calibration, we obtain an estimate of the intrinsic ma
       1
     \end{array}
     \!\right) 		 
-\end{equation*}
+\end{equation}
 
-\begin{equation*}
+\begin{equation}
 \left(\!
     \begin{array}{c}
       su \\
@@ -131,11 +131,11 @@ As a result of the stereo calibration, we obtain an estimate of the intrinsic ma
       1
     \end{array}
     \!\right)
-\end{equation*}
+\end{equation}
 
 where the left camera is assumed to be centred at the origin and aligned with the world co-ordinate axes, i.e. its projection matrix is $\vect{P} = \vect{K} [\vect{I} | \vect{0}]$, and the right camera projection matrix is expressed as $\vect{P}' = \vect{K}' [\vect{R} | \vect{t}]$.
 
-The resulting extrinsic parameters, describing the rotation $\vect{R}$ and translation $\vect{t}$ between the two camera views, are visualised in Figure \ref{fig:calib}. The positions of the checkerboard used for calibration are also displayed.
+The resulting extrinsic parameters describing the rotation $\vect{R}$ and translation $\vect{t}$ between the two camera views are visualised in Figure \ref{fig:calib}, where the scale in mm. The positions of the checkerboard used for calibration are also displayed. We can see that the cameras are roughly 10cm apart and about 1m from the checkerboard pattern as expected.
 
 \begin{figure}[htbp!]
 \centering
@@ -144,13 +144,13 @@ The resulting extrinsic parameters, describing the rotation $\vect{R}$ and trans
 	\label{fig:calib}
 \end{figure}
 
-From the estimated projection matrices, we can compute an estimate of the fundamental matrix $\vect{F}$ relating the two camera views. The fundamental matrix encapsulates the intrinsic epipolar geometry algebraically and is defined by the following equation:
+From the estimated projection matrices, we can compute an estimate of the fundamental matrix $\vect{F}$ relating the two camera views. The fundamental matrix encapsulates the intrinsic epipolar geometry algebraically and is defined by the following equation \cite{Luong1996}:
 
-\begin{equation*}
+\begin{equation}
 \vect{u'}^T \vect{Fu} = 0
-\end{equation*}
+\end{equation}
 
-\begin{equation*}
+\begin{equation}
 (u' v' 1)
     \begin{bmatrix}
     f_{11} & f_{12} & f_{13} \\
@@ -164,7 +164,7 @@ From the estimated projection matrices, we can compute an estimate of the fundam
    	 1  
     \end{array}
     \!\right) = 0
-\end{equation*}
+\end{equation}
 
 where $\vect{u} = (u,v,1)^T$ and $\vect{u}'= (u',v',1)^T$ are the 2D pixel coordinates of the same 3D world point imaged in the left and right views respectively. The fundamental matrix $\vect{F}$ is a $3 \times 3$ matrix, so has 9 elements but only has 7 DoF. This is because it has arbitrary scale, leaving 8 DoF, and is of rank 2 and singular, i.e. $\mathrm{det} [\vect{F}] = 0$, leaving 7 DoF. Using the fundamental matrix relation, the equation of the epipolar line in the right image $\vect{l}'$ corresponding to the point $\vect{u}$ in the left image, on which the feature point must lie, is therefore given by the following expression
 
@@ -174,18 +174,18 @@ where $\vect{u} = (u,v,1)^T$ and $\vect{u}'= (u',v',1)^T$ are the 2D pixel coord
 
 Similarly, the epipolar line $\vect{l}$ in the left image is given by
 
-\begin{equation*}
+\begin{equation}
 \vect{l} = \vect{F}^T \vect{u}'
-\end{equation*} 
+\end{equation} 
 
 The left and right epipoles $\vect{e}$ and $\vect{e}'$ are defined as the point in each image which is common to all the epipolar lines and are given by the null spaces of $\vect{F}$ and $\vect{F}^T$ respectively
 
-\begin{equation*}
+\begin{equation}
 \vect{Fe} = \vect{0} \ \ \ \ \ \ \
 \vect{F}^T\vect{e}' = \vect{0}
-\end{equation*} 
+\end{equation} 
 
-With the epipolar geometry fully defined, we can then rectify the stereo images for every frame of the captured image sequence so that the eipolar lines are horizontal. This reduces the stereo matching problem to a 1D search problem, as the same 3D world point imaged in both cameras is constrained to lie on the same pixel row in each pair of images. To rectify each pair of stereo images we implemented a function in Matlab \texttt{StereoRectify.m}, based on the function \texttt{rectify\_stereo\_pair.m} provided in the Camera Calibration Toolbox for Matlab \cite{Calib} which rectifies each pair of calibration images. This works as follows: we first bring the two cameras into the same orientation by rotating them 'minimally', so as to bring the translation vector $\vect{t}$ in alignment with the positive $x$-axis $(1,0,0)^T$. Global rotations are applied to both cameras so that the resulting rigid motion between the cameras is just a translation and the rotation matrix becomes $\vect{R} = \vect{I}$. The vertical component of the estimated focal length $f_u$ must be the same in both images and we set the horizontal focal length $f_v$ to the same as the vertical, resulting in square pixels, and new principle points are chosen to be the average of the two principle points. New camera projection matrices are computed accordingly and we warp each image so that the epipolar lines are horizontal. A pair of rectified images for a frame of the captured image sequence is shown in Figure \ref{fig:epipolarlines}. Matching image points and their corresponding epipolar lines are plotted.
+With the epipolar geometry fully defined, we can then rectify the stereo images for every frame of the captured image sequence so that the eipolar lines are horizontal. This reduces the stereo matching problem to a 1D search problem, as the same 3D world point imaged in both cameras is constrained to lie on the same pixel row in each pair of images. To rectify each pair of stereo images we implemented a function in \Matlab called \texttt{StereoRectify.m}, based on the function \texttt{rectify\_stereo\_pair.m} provided in the Camera Calibration Toolbox for \Matlab \cite{Calib} which rectifies each pair of calibration images. This works as follows: we first bring the two cameras into the same orientation by rotating them `minimally', so as to bring the translation vector $\vect{t}$ in alignment with the positive $x$-axis $(1,0,0)^T$. Global rotations are applied to both cameras so that the resulting rigid motion between the cameras is just a translation and the rotation matrix becomes $\vect{R} = \vect{I}$. The vertical component of the estimated focal length $f_u$ must be the same in both images and we set the horizontal focal length $f_v$ to the same as the vertical, resulting in square pixels, and new principle points are chosen to be the average of the two principle points. New camera projection matrices are computed accordingly and we warp each image so that the epipolar lines are horizontal. A pair of rectified images for a frame of the captured image sequence is shown in Figure \ref{fig:epipolarlines}. Matching image points and their corresponding epipolar lines are plotted. We can see that all the epipolar lines are now horizontal and corresponding points lie on the same pixel row. Therefore, to find matching points in the images we can simply search along the row until a match is found. We apply this warping procedure to all image frames in the captured sequence, resulting in a new stereo-rectified image sequence.
 
 \begin{figure}[htbp!]
 \centering
@@ -196,15 +196,18 @@ With the epipolar geometry fully defined, we can then rectify the stereo images 
 
 \section{Initial Marker Detection}
 
-With the stereo camera system fully calibrated, the next task is to compute the 2D image positions of all the facial markers in each left and right stereo pair for all frames in the captured sequence. Before the markers can be tracked through the sequence, their positions need to be initialised in the first frame. We do this by semi-automatically detecting the facial markers in the left image of the first frame, and then compute the corresponding marker positions in the right image. The initial marker detection is achieved by detecting SIFT features in the left image. We employ the open source Matlab implementation VLFeat \cite{vedaldi08vlfeat} to do this. 
+With the stereo camera system fully calibrated, the next task is to compute the 2D image positions of all the facial markers in each left and right stereo pair for all frames in the captured sequence. Before the markers can be tracked through the sequence, their positions need to be initialised in the first frame. We do this semi-automatically, by detecting the facial markers in the left image of the first frame, and then computing the corresponding marker positions in the right image. The initial marker detection is achieved by detecting SIFT features in the left image. We employ the open source \Matlab implementation VLFeat \cite{vedaldi08vlfeat} to do this. 
 
-The marker detection process for the first frame of a given stereo image sequence is carried out as follows. First the user defines a region of interest in the left image around the face of the actor to be tracked, by drawing a contour in the image. We make use of the Matlab function \texttt{roipoly} for this, as shown in left image in Figure \ref{fig:detection}. Then, SIFT features are detected within the selected image region, choosing the appropriate SIFT parameters to pick out features of the correct scale; around 5 pixels in diameter - this may take a few tries to get right. We found that it was quite difficult to pick out just the marker features because the size of the markers varied a lot, and so to detect most of the markers we had to search for a wide range of scales of SIFT features. This can be seen in the middle image of Figure \ref{fig:detection}, where running the SIFT feature detection has picked out a lot of other unwanted points. However, we found that it was still faster and often more accurate to detect points this way and refine the detection after, rather than manually select all 97 points by hand.
+The marker detection process for the first frame of a given stereo image sequence is carried out as follows. First the user defines a region of interest in the left image around the face of the actor to be tracked, by drawing a contour in the image. We make use of the \Matlab function \texttt{roipoly} for this, as shown in left image in Figure \ref{fig:detection}. Then, SIFT features are detected within the selected image region, choosing the appropriate SIFT parameters to pick out features of the correct scale; around 5 pixels in diameter - this may take a few tries to get right. We found that it was quite difficult to pick out just the marker features because the size of the markers varied significantly, and so to detect the majority of the markers we had to search for a wide range of scales of SIFT features. This can be seen in the middle image of Figure \ref{fig:detection}, where running the SIFT feature detection has picked out a lot of other unwanted points, particularly around the eyes and mouth. However, we found that it was still faster and often more accurate to detect points this way using SIFT and then refine the detection after, rather than manually select all 97 points by hand. Once reasonable SIFT features have been detected, additional feature points can then be added manually, and also wrongly detected points can be removed, by interactively selecting certain points the user wishes to change. We implemented a piece of code to allow the user to simply click on marker points they want to remove or add. This gives the resulting initial marker positions in the left image as shown on the right in Figure \ref{fig:detection}. 
 
-Once reasonable SIFT features have been detected, additional feature points can then be added manually, and also wrongly detected points can be removed, by interactively selecting certain points the user wishes to change. This gives the resulting initial marker positions in the left image as shown on the right in Figure \ref{fig:detection}. 
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=\textwidth]{img/detection}
+	\caption{Facial markers are detected by first selecting a region of interest, detecting SIFT features, and then removing unwanted points or adding additional points. The final points are plotted in red on the right.}
+	\label{fig:detection}
+\end{figure}
 
-Once the user has successfully detected all 97 facial markers in the left image, the corresponding marker positions are found in the right image by searching along the corresponding epipolar lines; simply the same row of pixels in the right image since all the images have been stereo rectified beforehand. The matching marker positions in the right image are found by computing the normalised cross-correlation (NCC) between image patches, as given in Equation \ref{eq:NCC}. So that for each marker point $\vect{u}$ in the left image we take the surrounding square patch of $N$ pixels and compute the NCC with each $N$ pixel patch in the right image, for all pixels in the same row. $I_i^L$ is the intensity of pixel $i$ in an image patch in the left image, and similarly $I_i^R$ in the right image. $\mu^L$, $\mu^R$, $\sigma^L$, and $\sigma^R$ are the means and standard deviations of pixel intensities in image patches in the left and right images respectively. The pixel location in the right image that produces the maximum response is chosen as the matching marker position to the marker in the left image. Since the two views are similar, we also apply the constraints that corresponding marker positions must lie close to each other in the two images (within some threshold distance) and that the order of the markers must be maintained, i.e. if a marker is to the left of another in one image, it must be to the left of the corresponding marker in the other image. 
-
-This produces the result shown in Figure \ref{fig:matching}, where all markers in the left image are matched to corresponding markers in the right image. The markers are numbered from 1 to 97 to illustrate this. The ordering of the marker indices in the left image is arbitrary (simply numbered from left to right in the image), but the markers in the right image must adhere to this ordering and maintain the same order as they are tracked throughout the entire image sequence. 
+Once the user has successfully detected all 97 facial markers in the left image, the corresponding marker positions are found in the right image by searching along the corresponding epipolar lines; simply the same row of pixels in the right image since all the images have been stereo rectified beforehand. The matching marker positions in the right image are found by computing the normalised cross-correlation (NCC) between image patches, as given in Equation \ref{eq:NCC}. So that for each marker point $\vect{u}$ in the left image we take the surrounding square patch of $N$ pixels and compute the NCC with each $N$ pixel patch in the right image, for all pixels in the same row. $I_i^L$ is the intensity of pixel $i$ in an image patch in the left image, and similarly $I_i^R$ in the right image. $\mu^L$, $\mu^R$, $\sigma^L$, and $\sigma^R$ are the means and standard deviations of pixel intensities in image patches in the left and right images respectively. The pixel location in the right image that produces the maximum NCC response is chosen as the matching marker position to the marker in the left image. Since the two views are similar, we also apply the constraints that corresponding marker positions must lie close to each other in the two images (within some threshold distance) and that the order of the markers on the plane of the face must be maintained, i.e. if a marker is to the left of another in one image, it must also be to the left of the corresponding marker in the other image. 
 
 \begin{equation}
 \label{eq:NCC}
@@ -213,12 +216,7 @@ This produces the result shown in Figure \ref{fig:matching}, where all markers i
 \end{aligned}
 \end{equation}
 
-\begin{figure}[htbp!]
-\centering
-\includegraphics[width=\textwidth]{img/detection}
-	\caption{Facial markers are detected by first selecting a region of interest, detecting SIFT features, and then removing unwanted points or adding additional points.}
-	\label{fig:detection}
-\end{figure}
+This produces the result shown in Figure \ref{fig:matching}, where all markers in the left image are matched to corresponding markers in the right image. The markers are numbered from 1 to 97 to illustrate this. The ordering of the marker indices in the left image is arbitrary (simply numbered from left to right as they appear in the image), but the markers in the right image must adhere to this ordering and maintain the same order as they are tracked throughout the entire image sequence.  
 
 \begin{figure}[htbp!]
 \centering
@@ -233,21 +231,21 @@ With all 97 facial markers initialised in both stereo images for the first frame
 
 \subsection{Optical Flow}
 
-The first method we explored for tracking was to simply compute the optical flow for the image sequence, from one frame to the next, and to move the positions of all the markers along the direction of the flow. Optical flow is based on the assumption that the pixel intensity of the same imaged 3D point will be similar from one frame to the next, i.e.
+The first method we explored for tracking was to simply compute the global optical flow for the image sequence, from one frame to the next, and to move the positions of all the markers along the direction of the flow. Optical flow algorithms are commonly based on the assumption that the pixel intensity of the same imaged 3D point will be similar from one image frame to the next, i.e.
 
 \begin{equation}
 \label{eq:opticalflow}
 \begin{aligned}
-I(\vect{u}_i, t) = 
-I(\vect{u}_i + \vect{v}_i, t+1)
+I(\vect{u}, t) = 
+I(\vect{u} + \vect{v}, t+1)
 \end{aligned}
 \end{equation}
 
-We made use of two high-performing optical flow Matlab implementations to do this, namely C. Lui's optical flow code \cite{Lui:2011} and M. Black's implementation \cite{Black:2010}. However, we found that simply tracking the points in this way was not robust enough to coherently track markers on the face, particularly when the actor made fast facial movements such as opening and closing the mouth during speech. Even at 60fps, these fast facial movements resulted in slightly blurred image frames causing the point tracking to go awry, even after just a small number of frames.
+where $I(\vect{u}, t)$ is the intensity at pixel $\vect{u}$ in the image at time $t$, and $\vect{v}$ is the 2D flow or displacement vector, however this assumption rarely holds exactly. We made use of two high-performing optical flow Matlab implementations to do this, namely C. Lui's optical flow code \cite{Lui:2011} and M. Black's implementation \cite{Black:2010}. However, we found that simply tracking the points in this way was not robust enough to coherently track all the markers on the face, particularly when the actor made fast facial movements such as opening and closing the mouth during speech. Even when recording at 60fps, these fast facial movements resulted in slightly blurred image frames causing the point tracking to go awry, even after just a small number of frames. Furthermore these algorithms, although very sophisticated optical flow implementations, took far too long to compute for lengthy image sequences, so an alternative approach was required.
 
 \subsection{KLT Tracker}
 
-A more sophisticated method of tracking was then explored - the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. The KLT tracker employs a pyramidal image scale implementation to deal with a range of pixel displacements. We can define a residual function $\epsilon (\vect{v})$ to be:
+A more sophisticated method of tracking was then explored - the Kanade-Lucas-Tomasi (KLT) feature tracking algorithm \cite{Shi:1994}, which is implemented in Matlab \cite{KLTMatlab}. The KLT tracker solves for the flow iteratively and employs a pyramidal image scale implementation to deal with a range of pixel displacements. We can define a residual function $\epsilon (\vect{v})$ to be:
 
 \begin{equation}
 \label{eq:KLT}
@@ -271,11 +269,14 @@ We track the feature points from one frame to the next independently in both cam
 	\label{fig:tracking}
 \end{figure}
 
-We implemented a procedure in which if the KLT tracking starts to lose a point, the user can manually re-estimate the position of the point in the image. The tracking method we use is still not very robust, and it can be very difficult to obtain a good track for all 97 facial points over a large number of frames. One reason for this is because we are simply performing a global track of all points and not taking into account the local object information. For example, if we kept a running probabilistic model of the face points, the system would be able to handle occlusions and be more robust to tracking errors. One interesting approach is implemented by Li \textit{et al}. \cite{Li2013} which uses a mesh based object tracking method which would likely perform much better in this situation.
+We implemented a procedure in which if the KLT tracker starts to lose the tracking of a marker, the user can manually re-estimate the position of the marker in the image at that particular frame. The tracking then continues from that re-estimated point. The tracking method we use is still not very robust, and it can be quite difficult to obtain a good track for all 97 facial points over a large number of frames. One reason for this is because we are simply performing a global track of all points and not taking into account the local object information. For example, if we kept a running probabilistic model of the face points, the system would be able to handle occlusions and would be more robust to non-rigid movements and other sources of tracking error. One interesting approach is implemented by Li \textit{et al}. \cite{Li2013} that uses a mesh based object tracking method which would likely perform much better in this situation. They propose an underlying mesh which penalizes local movements and preserves smooth global ones. Constraints
+on the local deformations expressed in Laplacian coordinates
+encourage local regularity of the mesh whilst allowing
+global non-rigidity.
 
 \section{Sparse Facial Reconstruction}
 
-Once we have obtained the 2D image coordinates of the facial markers for every frame in a stereo image sequence, we then compute the sparse 3D reconstruction over the sequence. In one frame, given a pair of image correspondences $\vect{w} = (u,v,1)^T$ and $\vect{w}' = (u',v',1)^T$ of the same 3D point $\vect{X} = (X,Y,Z,1)^T$, we can write two equations using the projection matrices $\vect{P}$ and $\vect{P'}$:
+Once the tracking stage is complete and we have obtained the 2D image coordinates of the facial markers for every frame in a stereo image sequence, we then compute a sparse 3D reconstruction of the face over the sequence. In one frame, given a pair of image correspondences $\vect{u} = (u,v,1)^T$ and $\vect{u}' = (u',v',1)^T$, in the left and right views respectively, of the same 3D world point $\vect{X} = (X,Y,Z,1)^T$, we can write two equations using the projection matrices $\vect{P}$ and $\vect{P'}$:
 
 \begin{equation}
 \left(\!
@@ -310,15 +311,17 @@ Once we have obtained the 2D image coordinates of the facial markers for every f
     \end{array}
   	\!\right).
 \end{equation}
-For each pair of image points, two equations can be written:
 
-\begin{align*}
+For each image point in a pair stereo images we can write two equations:
+
+\begin{align}
 u &= \frac{p_{11}X + p_{12}Y + p_{13}Z + p_{14}}{p_{31}X + p_{32}Y + p_{33}Z + p_{34}} \ \  
 u' = \frac{p'_{11}X + p'_{12}Y + p'_{13}Z + p'_{14}}{p'_{31}X + p'_{32}Y + p'_{33}Z + p'_{34}}\\ 
 v &= \frac{p_{21}X + p_{22}Y + p_{23}Z + p_{24}}{p_{31}X + p_{32}Y + p_{33}Z + p_{34}} \ \ 
 v' = \frac{p'_{21}X + p'_{22}Y + p'_{23}Z + p'_{24}}{p'_{31}X + p'_{32}Y + p'_{33}Z + p'_{34}}
-\end{align*}
-Rearranging, these can be written in the form $\vect{AX} = 0$ as follows, where $\vect{p}_i$ denotes the $ith$ row of the projection matrix $\vect{P}$
+\end{align}
+
+Rearranging, these are expressed in the form $\vect{AX} = 0$ as follows, where $\vect{p}_i$ denotes the $i$th row of the projection matrix $\vect{P}$,
 
 \begin{equation}
 \begin{bmatrix}
@@ -336,7 +339,17 @@ Rearranging, these can be written in the form $\vect{AX} = 0$ as follows, where 
     \end{array}
   	\!\right) = 0.
 \end{equation}
-Two equations are acquired from each image point in the two views, giving a total of four equations with three unknowns - the problem is over-constrained. A linear least-squares solution can be found by performing Singular Value Decomposition on the matrix $\vect{A}$. The 3D coordinates of the point $\vect{X}$ are the singular vector corresponding to the smallest singular value of $\vect{A}$, i.e. the last column of the matrix $\vect{V}$, where $\vect{A} = \vect{UDV}^T$. This is implemented in Matlab in the function \texttt{Reconstruct.m}, which takes in the two camera projection matrices for a pair of stereo cameras and the matching 2D image points, and returns an array of corresponding 3D points.
+
+Since two equations are acquired from each image point in the two views, this gives a total of four equations with three unknowns - the problem is over-constrained. A linear least-squares solution can be found by performing Singular Value Decomposition on the matrix $\vect{A}$. The 3D coordinates of the point $\vect{X}$ are the singular vector corresponding to the smallest singular value of $\vect{A}$, i.e. the last column of the matrix $\vect{V}$, where $\vect{A} = \vect{UDV}^T$. This is implemented in Matlab in the function \texttt{Reconstruct.m}, which takes in the two camera projection matrices for the pair of stereo cameras obtained during the calibration procedure, and the matching 2D image points, returning an array of corresponding 3D points. Since the 2D marker positions have been forced to lie on corresponding epipolar lines, the epipolar cosntraint is satisfied and the camera rays that pass though each image point are constrained to intersect at a point in 3D space. 
+
+The resulting 3D reconstruction of the neutral facial expression is plotted in Figure \ref{fig:neutral3D}. The final face mesh is computed by performing a Delaunay triangulation \cite{Edelsbrunner2000} over the estimated vertices. This 3D reconstruction process is repeated for all frames in the recorded image sequence to produce a sparse 3D sequence of the actor's facial movements. A number of frames from the sequence are shown in Figure \ref{fig:faces}, along with their corresponding 3D reconstructions.
+
+\begin{figure}[htbp!]
+\centering
+\includegraphics[width=0.8\textwidth]{img/neutral3D}
+	\caption{A 3D reconstruction of the neutral facial expression.}
+	\label{fig:neutral3D}
+\end{figure}
 
 \begin{figure}[htbp!]
 \centering
@@ -348,7 +361,7 @@ Two equations are acquired from each image point in the two views, giving a tota
 \subsection{Stabilising Head Movement}
 \label{sec:stabilising_head_movement}
 
-It is important for the actor's head to remain still throughout the sequence so that the reconstructed facial expressions are expressed as true non-rigid deviations from the neutral facial expression. Proper stabilisation of the head is required to avoid artefacts in the resulting blendshape facial animation and retargeting process \cite{Beeler:2014}. If the rigid head movement is not removed, then the expression shapes will contain this 'baked-in' rigid motion, and any facial animation constructed from the expressions will also contain this unwanted rigid head motion. In industry, face-stabilisation is still usually performed manually; Weise \textit{et al}. \cite{Weise:2009} aim to remove the rigid motion component of multiple expressions using ICP registration and Vlasic \textit{et al}. \cite{Vlasic:2005} use Procrustes alignment.
+It is important for the actor's head to remain still throughout the sequence so that when solving for blendshapes (Section \ref{sec:Animation}), the reconstructed facial expressions are expressed as true non-rigid deviations from the neutral facial expression. Proper stabilisation of the head is required to avoid artefacts in the resulting blendshape facial animation and retargeting process \cite{Beeler:2014}. If the rigid head movement is not removed, then the expression shapes will contain this 'baked-in' rigid motion, and any facial animation constructed from the expressions will also contain this unwanted rigid head motion. In industry, face-stabilisation is still usually performed manually; Weise \textit{et al}. \cite{Weise:2009} aim to remove the rigid motion component of multiple expressions using ICP registration and Vlasic \textit{et al}. \cite{Vlasic:2005} use Procrustes alignment.
 
 In our implementation, we attempt to remove the majority of the actor's rigid head motion by performing a Procrustes analysis \cite{Gower:1975} using a number of approximately rigid points. At least four points are required for the Procrustes alignment. The rigid points were chosen to be the tops of the ears, the tip and bridge of the nose, and the centre point on the top of the forehead, as shown by the dots in Figure \ref{fig:procrustes}. However, none of these points are actually truly rigid, so this is just an approximation to the true stabilisation. In a future implementation, it would be better to actually track a few points known to be practically rigid, for example by placing markers on the top of the head. 
 
@@ -418,6 +431,7 @@ apply transformations\;
 The original ICP algorithm is limited to rigid transformations, i.e. rotation and translation, which have only $6$ degrees of freedom. However, in order to capture scaling, shearing and other more complicated transformation, an affine mapping should be used. Thus an extension of the ICP algorithm, called non-rigid ICP is used when additional degrees of freedom are present. Allen et al. proposed a non-rigid registration method that uses a numerically non-linear solver to find a smooth affine mapping~\cite{Allen:2003}. Additional constrained are imposed by manually matching some known marker locations in the two datasets. The method exhibits slow convergence and often leads to local minima; consequently, the authors use a multi-resolution approach where the optimisation is first performed on a low resolution mesh, and then optimised on the high resolution mesh. Amberg et al. combined the ICP algorithm with the method of Allen et al. to overcome the issues with convergence~\cite{Amberg:2007}.
 
 \subsection{Animation}
+\label{sec:Animation}
 The aim of this project is to used captured data of a face to animate a given model. We use the digital Emily model that comes with $68$ controllable blendshapes ranging from simple eyebrow movements to complicated lip corner pulls~\cite{Alexander:2009},~\cite{FaceWareRigsWeb}. Each blendshape has a weight $w_i$ associated with it, and $w_i \in [0,1]$. The model includes eyes and teeth. The aim is to find a combination of these blendshapes that produce a specified facial expression. In particular, we are interested in reproducing the captured sequence of expressions. 
 
 \subsubsection{Initial Approach}
