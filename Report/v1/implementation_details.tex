@@ -5,7 +5,7 @@ This chapter aims to provide some insight into the technicalities in our develop
 
 \section{\Matlab Processing}
 
-Once we had acquired motion capture data of the actor's performance, we used \Matlab for the majority of the post-processing work before rendering the final output animation in \Maya using our own C++ plugins. All the stereo geometry processing was done in \Matlab, namely calibration of the stereo camera system, estimating the projection matrices and epipolar geometry, rectifying the image sequences, detecting and tracking the face markers, and finally computing the sparse 3D reconstructions of the facial expressions in each frame. Results from the tracking process, such as the tracking of the pupil movements and rigid head motion estimation, was output as a text file and read into C++ so as to be applied to the Maya model using the \Maya pugin. The solve for blendshape weights was also carried out in \Matlab, and the final weights were exported as a text file which could then be read into C++. 
+Once we had acquired motion capture data of the actor's performance, we used \Matlab for the majority of the post-processing work before rendering the final output animation in \Maya using our own C++ plugins. All the stereo geometry processing was done in \Matlab, namely calibration of the stereo camera system, estimating the projection matrices and epipolar geometry, rectifying the image sequences, detecting and tracking the face markers, and finally computing the sparse 3D reconstructions of the facial expressions in each frame. Results from the tracking process, such as the tracking of the pupil movements and rigid head motion estimation, was output as a text file and read into C++ so as to be applied to the Emily model using the \Maya pugin. The solve for blendshape weights was also carried out in \Matlab, and the final weights were exported as a text file which could then be read into C++. 
 
 \section{\Maya Plugin}
 \label{sec:maya_plugin}
@@ -73,7 +73,7 @@ dgMod.commandToExecute(cmd);
 In order to make the animation more life-like, we decided to incorporate the removed rigid head rotation and translation back into the final animation.
 In order to achieve this, we saved the inverse rotation for each frame from the Procustes analysis that was performed in Section~\ref{sec:stabilising_head_movement} into a file with the same format as shown in Figure~\ref{fig:file_format}.
 We then read the data into \Maya using the plugin, and applied the transformation for each frame; for the translation we did an equivalent procedure with a translation file.
-Note that Matlab matrices are column-wise while \Maya matrices are row-wise, so we read them into Maya taking this into account.
+Note that Matlab matrices are column-wise while \Maya matrices are row-wise, so we read them into \Maya taking this into account.
 The matrix multiplication order also plays an important role here, as shown in Equation~\ref{eq:rotation_translation_inv}, where to achieve the correct resulting head pose, we need to undo the translation first and rotate the result.
 
 \begin{equation}
