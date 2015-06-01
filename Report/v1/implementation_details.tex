@@ -11,7 +11,7 @@ Once we had acquired motion capture data of the actor's performance, we used \Ma
 \label{sec:maya_plugin}
 
 We used blendshape rigs for \Maya that are provided free by \cite{FaceWareRigsWeb}. The first task was to reset the paths of the texture files for all the materials in the Hypershade window in \Maya.
-The next step was to write a plugin to load the weights from a text file exported from Matlab, and set keyframes for each of the blendshapes - to do this our plugin created a new \Maya command that could be easily executed. 
+The next step was to write a plugin to load the weights from a text file exported from \Matlab, and set keyframes for each of the blendshapes - to do this our plugin created a new \Maya command that could be easily executed. 
 The work flow for writing the code was to first perform the action in \Maya manually if possible, see which MEL commands were executed, then implement them in the C++ plugin, and if possible rewrite them as pure C++ code instead of MEL commands.
 Our code complies with \Maya's undo command policy, which means using the \emph{DagModifier} class or including extra code to undo the actions.
 Nevertheless, in the final stages of the implementation, it was faster to reload the scene than to undo the command.
@@ -73,7 +73,7 @@ dgMod.commandToExecute(cmd);
 In order to make the animation more life-like, we decided to incorporate the removed rigid head rotation and translation back into the final animation.
 In order to achieve this, we saved the inverse rotation for each frame from the Procustes analysis that was performed in Section~\ref{sec:stabilising_head_movement} into a file with the same format as shown in Figure~\ref{fig:file_format}.
 We then read the data into \Maya using the plugin, and applied the transformation for each frame; for the translation we did an equivalent procedure with a translation file.
-Note that Matlab matrices are column-wise while \Maya matrices are row-wise, so we read them into \Maya taking this into account.
+Note that \Matlab matrices are column-wise while \Maya matrices are row-wise, so we read them into \Maya taking this into account.
 The matrix multiplication order also plays an important role here, as shown in Equation~\ref{eq:rotation_translation_inv}, where to achieve the correct resulting head pose, we need to undo the translation first and rotate the result.
 
 \begin{equation}
